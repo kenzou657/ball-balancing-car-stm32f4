@@ -3,11 +3,11 @@
 void TIM8_SERVO_Init(u16 arr,u16 psc)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;           //IO
-	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure; //¶¨Ê±Æ÷
-	TIM_OCInitTypeDef  TIM_OCInitStructure;        //PWMÊä³ö
+	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure; //å®šæ—¶å™¨
+	TIM_OCInitTypeDef  TIM_OCInitStructure;        //PWMè¾“å‡º
 	
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM8,ENABLE);  	//TIM1Ê±ÖÓÊ¹ÄÜ    
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE); 	//Ê¹ÄÜPORTEÊ±ÖÓ	
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM8,ENABLE);  	//TIM1æ—¶é’Ÿä½¿èƒ½    
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE); 	//ä½¿èƒ½PORTEæ—¶é’Ÿ	
 		
 	GPIO_InitStructure.GPIO_Mode=GPIO_Mode_AF; 
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
@@ -19,45 +19,45 @@ void TIM8_SERVO_Init(u16 arr,u16 psc)
 	GPIO_PinAFConfig(GPIOC,GPIO_PinSource9,GPIO_AF_TIM8); 
 
 
-	/*** Initialize timer 1 || ³õÊ¼»¯¶¨Ê±Æ÷1 ***/
-	//Set the counter to automatically reload //Éè¶¨¼ÆÊıÆ÷×Ô¶¯ÖØ×°Öµ 
+	/*** Initialize timer 1 || åˆå§‹åŒ–å®šæ—¶å™¨1 ***/
+	//Set the counter to automatically reload //è®¾å®šè®¡æ•°å™¨è‡ªåŠ¨é‡è£…å€¼ 
 	TIM_TimeBaseStructure.TIM_Period = arr; 
-	//Pre-divider //Ô¤·ÖÆµÆ÷ 
+	//Pre-divider //é¢„åˆ†é¢‘å™¨ 
 	TIM_TimeBaseStructure.TIM_Prescaler = psc; 	
-	//Set the clock split: TDTS = Tck_tim //ÉèÖÃÊ±ÖÓ·Ö¸î:TDTS = Tck_tim
+	//Set the clock split: TDTS = Tck_tim //è®¾ç½®æ—¶é’Ÿåˆ†å‰²:TDTS = Tck_tim
 	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1; 
-	//TIM up count mode //TIMÏòÉÏ¼ÆÊıÄ£Ê½	
+	//TIM up count mode //TIMå‘ä¸Šè®¡æ•°æ¨¡å¼	
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up; 
 	//Initializes the timebase unit for TIMX based on the parameter specified in TIM_TimeBaseInitStruct
-	//¸ù¾İTIM_TimeBaseInitStructÖĞÖ¸¶¨µÄ²ÎÊı³õÊ¼»¯TIMxµÄÊ±¼ä»ùÊıµ¥Î»
+	//æ ¹æ®TIM_TimeBaseInitStructä¸­æŒ‡å®šçš„å‚æ•°åˆå§‹åŒ–TIMxçš„æ—¶é—´åŸºæ•°å•ä½
 	TIM_TimeBaseInit(TIM8, &TIM_TimeBaseStructure); 
 
 
-	//-----------¶æ»ú³õÊ¼»¯-----------//
+	//-----------èˆµæœºåˆå§‹åŒ–-----------//
 	//Select Timer mode :TIM Pulse Width Modulation mode 1
-  //Ñ¡Ôñ¶¨Ê±Æ÷Ä£Ê½:TIMÂö³å¿í¶Èµ÷ÖÆÄ£Ê½1
+  //é€‰æ‹©å®šæ—¶å™¨æ¨¡å¼:TIMè„‰å†²å®½åº¦è°ƒåˆ¶æ¨¡å¼1
  	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1; 
 	//Compare output enablement
-	//±È½ÏÊä³öÊ¹ÄÜ
+	//æ¯”è¾ƒè¾“å‡ºä½¿èƒ½
 	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable; 
 	//Set the pulse value of the capture comparison register to be loaded
-	//ÉèÖÃ´ı×°Èë²¶»ñ±È½Ï¼Ä´æÆ÷µÄÂö³åÖµ
+	//è®¾ç½®å¾…è£…å…¥æ•è·æ¯”è¾ƒå¯„å­˜å™¨çš„è„‰å†²å€¼
 	TIM_OCInitStructure.TIM_Pulse = 0; 
   //Output polarity :TIM output polarity is higher	
-  //Êä³ö¼«ĞÔ:TIMÊä³ö±È½Ï¼«ĞÔ¸ß	
+  //è¾“å‡ºææ€§:TIMè¾“å‡ºæ¯”è¾ƒææ€§é«˜	
 	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;   
 	TIM_OCInitStructure.TIM_OCIdleState = TIM_OCIdleState_Reset;   
 	
 	//Initialize the peripheral TIMX based on the parameter specified in TIM_OCINITSTRUCT
-  //¸ù¾İTIM_OCInitStructÖĞÖ¸¶¨µÄ²ÎÊı³õÊ¼»¯ÍâÉèTIMx	
+  //æ ¹æ®TIM_OCInitStructä¸­æŒ‡å®šçš„å‚æ•°åˆå§‹åŒ–å¤–è®¾TIMx	
 	TIM_OC4Init(TIM8, &TIM_OCInitStructure); 
 	//Channel preload enable
-	//Í¨µÀÔ¤×°ÔØÊ¹ÄÜ	 
+	//é€šé“é¢„è£…è½½ä½¿èƒ½	 
 	TIM_OC4PreloadConfig(TIM8, TIM_OCPreload_Enable);
-	//-----------¶æ»ú³õÊ¼»¯-----------//
+	//-----------èˆµæœºåˆå§‹åŒ–-----------//
 	TIM_ITConfig(TIM8, TIM_IT_CC4,	DISABLE);
 	TIM_CtrlPWMOutputs(TIM8,ENABLE); 	
-	//Enable timer //Ê¹ÄÜ¶¨Ê±Æ÷
+	//Enable timer //ä½¿èƒ½å®šæ—¶å™¨
 	TIM_Cmd(TIM8, ENABLE); 		 
 }
 

@@ -1,45 +1,45 @@
 #include "ICM20948.h"
 
 ICM20948_ST_SENSOR_DATA gstGyroOffset = {0,0,0};
-//imuÊı¾İ½á¹¹Ìå
+//imuæ•°æ®ç»“æ„ä½“
 IMU_DATA_t imu;
-//´ÅÁ¦¼ÆÊı¾İ
+//ç£åŠ›è®¡æ•°æ®
 short magnet[3];
 /**************************************************************************
 Function: Initialize TIM2 as the encoder interface mode
 Input   : Gx, Gy, Gz: raw readings (plus or minus) of the x,y, and z axes of the gyroscope
 Output  : 0: success, others: error code
-º¯Êı¹¦ÄÜ£º»ñµÃÍÓÂİÒÇÖµ(Ô­Ê¼Öµ)
-Èë¿Ú²ÎÊı£ºgx,gy,gz:ÍÓÂİÒÇx,y,zÖáµÄÔ­Ê¼¶ÁÊı(´øÕı¸º)
-·µ»Ø  Öµ£º0:³É¹¦, ÆäËû:´íÎó´úÂë
+å‡½æ•°åŠŸèƒ½ï¼šè·å¾—é™€èºä»ªå€¼(åŸå§‹å€¼)
+å…¥å£å‚æ•°ï¼šgx,gy,gz:é™€èºä»ªx,y,zè½´çš„åŸå§‹è¯»æ•°(å¸¦æ­£è´Ÿ)
+è¿”å›  å€¼ï¼š0:æˆåŠŸ, å…¶ä»–:é”™è¯¯ä»£ç 
 **************************************************************************/
 u8 ICM20948_Get_Gyroscope(void)
 {
 	static int onece=0;
     u8 res;
     invMSGyroRead(&imu.gyro.x, &imu.gyro.y, &imu.gyro.z);
-    if(SysVal.Time_count<CONTROL_DELAY) // 10 seconds before starting //¿ª»úÇ°10Ãë
+    if(SysVal.Time_count<CONTROL_DELAY) // 10 seconds before starting //å¼€æœºå‰10ç§’
     {
-		Led_Count=1; //LED high frequency flashing //LED¸ßÆµÉÁË¸
-		Flag_Stop=1; //The software fails to flag location 1 //Èí¼şÊ§ÄÜ±êÖ¾Î»ÖÃ1		
+		Led_Count=1; //LED high frequency flashing //LEDé«˜é¢‘é—ªçƒ
+		Flag_Stop=1; //The software fails to flag location 1 //è½¯ä»¶å¤±èƒ½æ ‡å¿—ä½ç½®1		
 
     }
-    else //10 seconds after starting //¿ª»ú10Ãëºó
+    else //10 seconds after starting //å¼€æœº10ç§’å
     {
 		if(onece==0)
 		{
-			Flag_Stop=0; //The software fails to flag location 0 //Èí¼şÊ§ÄÜ±êÖ¾Î»ÖÃ0
+			Flag_Stop=0; //The software fails to flag location 0 //è½¯ä»¶å¤±èƒ½æ ‡å¿—ä½ç½®0
 			onece=1;
 		}	
-		Led_Count=300; //The LED returns to normal flicker frequency //LED»Ö¸´Õı³£ÉÁË¸ÆµÂÊ
+		Led_Count=300; //The LED returns to normal flicker frequency //LEDæ¢å¤æ­£å¸¸é—ªçƒé¢‘ç‡
         //Save the raw data to update zero by clicking the user button
-        //±£´æÔ­Ê¼Êı¾İÓÃÓÚµ¥»÷ÓÃ»§°´¼ü¸üĞÂÁãµã
+        //ä¿å­˜åŸå§‹æ•°æ®ç”¨äºå•å‡»ç”¨æˆ·æŒ‰é”®æ›´æ–°é›¶ç‚¹
 		imu.Original_gyro.x = imu.gyro.x;
 		imu.Original_gyro.y = imu.gyro.y;
 		imu.Original_gyro.z = imu.gyro.z;
 
         //Removes zero drift data
-        //È¥³ıÁãµãÆ¯ÒÆµÄÊı¾İ
+        //å»é™¤é›¶ç‚¹æ¼‚ç§»çš„æ•°æ®
 		imu.gyro.x = imu.Original_gyro.x - imu.Deviation_gyro.x;
 		imu.gyro.y = imu.Original_gyro.y - imu.Deviation_gyro.y;
 		imu.gyro.z = imu.Original_gyro.z - imu.Deviation_gyro.z;
@@ -52,21 +52,21 @@ u8 ICM20948_Get_Gyroscope(void)
 u8 ICM20948_Get_Accel(void)
 {
     u8 res;
-    invMSAccelRead(&imu.accel.x, &imu.accel.y, &imu.accel.z); //µÃµ½¼ÓËÙ¶È´«¸ĞÆ÷Êı¾İ
-    if(SysVal.Time_count<CONTROL_DELAY) // 10 seconds before starting //¿ª»úÇ°10Ãë
+    invMSAccelRead(&imu.accel.x, &imu.accel.y, &imu.accel.z); //å¾—åˆ°åŠ é€Ÿåº¦ä¼ æ„Ÿå™¨æ•°æ®
+    if(SysVal.Time_count<CONTROL_DELAY) // 10 seconds before starting //å¼€æœºå‰10ç§’
     {
 		
     }
-    else //10 seconds after starting //¿ª»ú10Ãëºó
+    else //10 seconds after starting //å¼€æœº10ç§’å
     {
         //Save the raw data to update zero by clicking the user button
-        //±£´æÔ­Ê¼Êı¾İÓÃÓÚµ¥»÷ÓÃ»§°´¼ü¸üĞÂÁãµã
+        //ä¿å­˜åŸå§‹æ•°æ®ç”¨äºå•å‡»ç”¨æˆ·æŒ‰é”®æ›´æ–°é›¶ç‚¹
 		imu.Original_accel.x = imu.accel.x;
 		imu.Original_accel.y = imu.accel.y;
 		imu.Original_accel.z = imu.accel.z;
 
         //Removes zero drift data
-        //È¥³ıÁãµãÆ¯ÒÆµÄÊı¾İ
+        //å»é™¤é›¶ç‚¹æ¼‚ç§»çš„æ•°æ®
         imu.accel.x = imu.Original_accel.x - imu.Deviation_accel.x ;
         imu.accel.y = imu.Original_accel.y - imu.Deviation_accel.y ;
         imu.accel.z = imu.Original_accel.z - imu.Deviation_accel.z + 16384;
@@ -94,9 +94,9 @@ static bool invmsICM20948Check(void)
 
 void invMSInit(void)
 {
-    if(invmsICM20948Check())//¼ì²âÊÇ·ñÄÜÊ¶±ğµ½ICM20498Æ÷¼ş
+    if(invmsICM20948Check())//æ£€æµ‹æ˜¯å¦èƒ½è¯†åˆ«åˆ°ICM20498å™¨ä»¶
     {
-        invmsICM20948Init(); //ICM20498³õÊ¼»¯
+        invmsICM20948Init(); //ICM20498åˆå§‹åŒ–
     }
     return;
 }
@@ -131,7 +131,7 @@ static void invmsICM20948Init(void)
     return;
 }
 
-//½ÇËÙ¶È¶ÁÈ¡µÄµ×²ãÊµÏÖ
+//è§’é€Ÿåº¦è¯»å–çš„åº•å±‚å®ç°
 static void invmsICM20948GyroRead(int16_t* ps16X, int16_t* ps16Y, int16_t* ps16Z)
 {
     uint8_t u8Buf[6];
@@ -170,7 +170,7 @@ static void invmsICM20948GyroRead(int16_t* ps16X, int16_t* ps16Y, int16_t* ps16Z
     return;
 }
 
-//¼ÓËÙ¶È¶ÁÈ¡µÄµ×²ãÊµÏÖ
+//åŠ é€Ÿåº¦è¯»å–çš„åº•å±‚å®ç°
 static void invmsICM20948AccelRead(int16_t* ps16X, int16_t* ps16Y, int16_t* ps16Z)
 {
     uint8_t u8Buf[2];
@@ -209,7 +209,7 @@ static void invmsICM20948AccelRead(int16_t* ps16X, int16_t* ps16Y, int16_t* ps16
 
 }
 
-//´ÅÁ¦¼Æ¶ÁÈ¡µÄµ×²ãÊµÏÖ
+//ç£åŠ›è®¡è¯»å–çš„åº•å±‚å®ç°
 //static void invmsICM20948MagRead(int16_t* ps16X, int16_t* ps16Y, int16_t* ps16Z)
 //{
 //    uint8_t counter = 20;
@@ -374,21 +374,21 @@ static void invmsICM20948GyroOffset(void)
 }
 
 
-//¶ÁÈ¡ÈıÖá¼ÓËÙ¶È
+//è¯»å–ä¸‰è½´åŠ é€Ÿåº¦
 static void invMSAccelRead(int16_t* ps16AccelX, int16_t* ps16AccelY, int16_t* ps16AccelZ)
 {
     invmsICM20948AccelRead(ps16AccelX, ps16AccelY, ps16AccelZ);
     return;
 }
 
-//¶ÁÈ¡ÈıÖá½ÇËÙ¶È
+//è¯»å–ä¸‰è½´è§’é€Ÿåº¦
 static void invMSGyroRead(int16_t* ps16GyroX, int16_t* ps16GyroY, int16_t* ps16GyroZ)
 {
     invmsICM20948GyroRead(ps16GyroX, ps16GyroY, ps16GyroZ);
     return;
 }
 
-//¶ÁÈ¡´ÅÁ¦¼Æ.ÈôĞèÒªÊ¹ÓÃÖ±½ÓÈ¡Ïû×¢ÊÍ¼´¿É
+//è¯»å–ç£åŠ›è®¡.è‹¥éœ€è¦ä½¿ç”¨ç›´æ¥å–æ¶ˆæ³¨é‡Šå³å¯
 //static void invMSMagRead(int16_t* ps16MagnX, int16_t* ps16MagnY, int16_t* ps16MagnZ)
 //{
 //    invmsICM20948MagRead(ps16MagnX, ps16MagnY, ps16MagnZ);

@@ -1,26 +1,26 @@
 #include "usartx.h"
 
-PointDataProcessDef PointDataProcess[1200];//¸üĞÂ225¸öÊı¾İ
+PointDataProcessDef PointDataProcess[1200];//æ›´æ–°225ä¸ªæ•°æ®
 LiDARFrameTypeDef Pack_Data;
-PointDataProcessDef Dataprocess[1200];      //ÓÃÓÚĞ¡³µ±ÜÕÏ¡¢¸úËæ¡¢×ßÖ±Ïß¡¢ELEÀ×´ï±ÜÕÏµÄÀ×´ïÊı¾İ
+PointDataProcessDef Dataprocess[1200];      //ç”¨äºå°è½¦é¿éšœã€è·Ÿéšã€èµ°ç›´çº¿ã€ELEé›·è¾¾é¿éšœçš„é›·è¾¾æ•°æ®
 
-float Diff_Along_Distance_KP = -0.030f,Diff_Along_Distance_KD = -0.245f,Diff_Along_Distance_KI = -0.001f;	//²îËÙĞ¡³µ×ßÖ±Ïß¾àÀëµ÷ÕûPID²ÎÊı
-float Akm_Along_Distance_KP = -0.115f*1000,Akm_Along_Distance_KD = -1000.245f*1000,Akm_Along_Distance_KI = -0.001f*1000;	//°¢¿ËÂü×ßÖ±Ïß¾àÀëµ÷ÕûPID²ÎÊı
-float FourWheel_Along_Distance_KP = -0.115f*1000,FourWheel_Along_Distance_KD = -100.200f*1000,FourWheel_Along_Distance_KI = -0.001f*1000;	//ËÄÇı×ßÖ±Ïß¾àÀëµ÷ÕûPID²ÎÊı
-float Along_Distance_KP = 0.163f*1000,Along_Distance_KD = 0.123*1000,Along_Distance_KI = 0.001f*1000;	//ÂóÂÖºÍÈ«Ïò×ßÖ±Ïß¾àÀëµ÷ÕûPID²ÎÊı
+float Diff_Along_Distance_KP = -0.030f,Diff_Along_Distance_KD = -0.245f,Diff_Along_Distance_KI = -0.001f;	//å·®é€Ÿå°è½¦èµ°ç›´çº¿è·ç¦»è°ƒæ•´PIDå‚æ•°
+float Akm_Along_Distance_KP = -0.115f*1000,Akm_Along_Distance_KD = -1000.245f*1000,Akm_Along_Distance_KI = -0.001f*1000;	//é˜¿å…‹æ›¼èµ°ç›´çº¿è·ç¦»è°ƒæ•´PIDå‚æ•°
+float FourWheel_Along_Distance_KP = -0.115f*1000,FourWheel_Along_Distance_KD = -100.200f*1000,FourWheel_Along_Distance_KI = -0.001f*1000;	//å››é©±èµ°ç›´çº¿è·ç¦»è°ƒæ•´PIDå‚æ•°
+float Along_Distance_KP = 0.163f*1000,Along_Distance_KD = 0.123*1000,Along_Distance_KI = 0.001f*1000;	//éº¦è½®å’Œå…¨å‘èµ°ç›´çº¿è·ç¦»è°ƒæ•´PIDå‚æ•°
 
-float Distance_KP = -0.150f,Distance_KD = -0.052f,Distance_KI = -0.001;	//¸úËæ¾àÀëµ÷ÕûPID²ÎÊı
+float Distance_KP = -0.150f,Distance_KD = -0.052f,Distance_KI = -0.001;	//è·Ÿéšè·ç¦»è°ƒæ•´PIDå‚æ•°
 
-float Follow_KP = -2.566f,Follow_KD = -1.368f,Follow_KI = -0.001f;  //×ªÏòPID
+float Follow_KP = -2.566f,Follow_KD = -1.368f,Follow_KI = -0.001f;  //è½¬å‘PID
 float Follow_KP_Akm = -0.550f,Follow_KD_Akm = -0.121f,Follow_KI_Akm = -0.001f;
 
 /**************************************************************************
 Function: Serial port 1 initialization
 Input   : none
 Output  : none
-º¯Êı¹¦ÄÜ£º´®¿Ú1³õÊ¼»¯
-Èë¿Ú²ÎÊı£ºÎŞ
-·µ »Ø Öµ£ºÎŞ
+å‡½æ•°åŠŸèƒ½ï¼šä¸²å£1åˆå§‹åŒ–
+å…¥å£å‚æ•°ï¼šæ— 
+è¿” å› å€¼ï¼šæ— 
 **************************************************************************/
 void uart1_init(u32 bound)
 {  	 
@@ -28,50 +28,50 @@ void uart1_init(u32 bound)
 	USART_InitTypeDef USART_InitStructure;
 	NVIC_InitTypeDef NVIC_InitStructure;
 	
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);	 //Enable the gpio clock //Ê¹ÄÜGPIOÊ±ÖÓ
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE); //Enable the Usart clock //Ê¹ÄÜUSARTÊ±ÖÓ
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);	 //Enable the gpio clock //ä½¿èƒ½GPIOæ—¶é’Ÿ
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE); //Enable the Usart clock //ä½¿èƒ½USARTæ—¶é’Ÿ
 
 	GPIO_PinAFConfig(GPIOA,GPIO_PinSource9,GPIO_AF_USART1);	
 	GPIO_PinAFConfig(GPIOA,GPIO_PinSource10 ,GPIO_AF_USART1);	 
 	
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9|GPIO_Pin_10;
-	GPIO_InitStructure.GPIO_Mode=GPIO_Mode_AF;            //Êä³öÄ£Ê½
-	GPIO_InitStructure.GPIO_OType=GPIO_OType_PP;          //ÍÆÍìÊä³ö
-	GPIO_InitStructure.GPIO_Speed=GPIO_Speed_50MHz;       //¸ßËÙ50MHZ
-	GPIO_InitStructure.GPIO_PuPd=GPIO_PuPd_UP;            //ÉÏÀ­
-	GPIO_Init(GPIOA, &GPIO_InitStructure);  		          //³õÊ¼»¯
+	GPIO_InitStructure.GPIO_Mode=GPIO_Mode_AF;            //è¾“å‡ºæ¨¡å¼
+	GPIO_InitStructure.GPIO_OType=GPIO_OType_PP;          //æ¨æŒ½è¾“å‡º
+	GPIO_InitStructure.GPIO_Speed=GPIO_Speed_50MHz;       //é«˜é€Ÿ50MHZ
+	GPIO_InitStructure.GPIO_PuPd=GPIO_PuPd_UP;            //ä¸Šæ‹‰
+	GPIO_Init(GPIOA, &GPIO_InitStructure);  		          //åˆå§‹åŒ–
 	
-  //UsartNVIC configuration //UsartNVICÅäÖÃ
+  //UsartNVIC configuration //UsartNVICé…ç½®
 	NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
-	//Preempt priority //ÇÀÕ¼ÓÅÏÈ¼¶
+	//Preempt priority //æŠ¢å ä¼˜å…ˆçº§
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=1 ;
-	//Subpriority //×ÓÓÅÏÈ¼¶
+	//Subpriority //å­ä¼˜å…ˆçº§
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;		
-	//Enable the IRQ channel //IRQÍ¨µÀÊ¹ÄÜ
+	//Enable the IRQ channel //IRQé€šé“ä½¿èƒ½
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;	
   //Initialize the VIC register with the specified parameters 
-	//¸ù¾İÖ¸¶¨µÄ²ÎÊı³õÊ¼»¯VIC¼Ä´æÆ÷	
+	//æ ¹æ®æŒ‡å®šçš„å‚æ•°åˆå§‹åŒ–VICå¯„å­˜å™¨	
 	NVIC_Init(&NVIC_InitStructure);	
 	
-  //USART Initialization Settings ³õÊ¼»¯ÉèÖÃ
-	USART_InitStructure.USART_BaudRate = bound; //Port rate //´®¿Ú²¨ÌØÂÊ
-	USART_InitStructure.USART_WordLength = USART_WordLength_8b; //The word length is 8 bit data format //×Ö³¤Îª8Î»Êı¾İ¸ñÊ½
-	USART_InitStructure.USART_StopBits = USART_StopBits_1; //A stop bit //Ò»¸öÍ£Ö¹Î»
-	USART_InitStructure.USART_Parity = USART_Parity_No; //Prosaic parity bits //ÎŞÆæÅ¼Ğ£ÑéÎ»
-	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None; //No hardware data flow control //ÎŞÓ²¼şÊı¾İÁ÷¿ØÖÆ
-	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;	//Sending and receiving mode //ÊÕ·¢Ä£Ê½
-	USART_Init(USART1, &USART_InitStructure); //Initialize serial port 1 //³õÊ¼»¯´®¿Ú1
+  //USART Initialization Settings åˆå§‹åŒ–è®¾ç½®
+	USART_InitStructure.USART_BaudRate = bound; //Port rate //ä¸²å£æ³¢ç‰¹ç‡
+	USART_InitStructure.USART_WordLength = USART_WordLength_8b; //The word length is 8 bit data format //å­—é•¿ä¸º8ä½æ•°æ®æ ¼å¼
+	USART_InitStructure.USART_StopBits = USART_StopBits_1; //A stop bit //ä¸€ä¸ªåœæ­¢ä½
+	USART_InitStructure.USART_Parity = USART_Parity_No; //Prosaic parity bits //æ— å¥‡å¶æ ¡éªŒä½
+	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None; //No hardware data flow control //æ— ç¡¬ä»¶æ•°æ®æµæ§åˆ¶
+	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;	//Sending and receiving mode //æ”¶å‘æ¨¡å¼
+	USART_Init(USART1, &USART_InitStructure); //Initialize serial port 1 //åˆå§‹åŒ–ä¸²å£1
 	
-	USART_ITConfig(USART1, USART_IT_RXNE, ENABLE); //Open the serial port to accept interrupts //¿ªÆô´®¿Ú½ÓÊÜÖĞ¶Ï
-	USART_Cmd(USART1, ENABLE);                     //Enable serial port 1 //Ê¹ÄÜ´®¿Ú1
+	USART_ITConfig(USART1, USART_IT_RXNE, ENABLE); //Open the serial port to accept interrupts //å¼€å¯ä¸²å£æ¥å—ä¸­æ–­
+	USART_Cmd(USART1, ENABLE);                     //Enable serial port 1 //ä½¿èƒ½ä¸²å£1
 }
 /**************************************************************************
 Function: Serial port 2 initialization
 Input   : none
 Output  : none
-º¯Êı¹¦ÄÜ£º´®¿Ú2³õÊ¼»¯
-Èë¿Ú²ÎÊı£ºÎŞ
-·µ»Ø  Öµ£ºÎŞ
+å‡½æ•°åŠŸèƒ½ï¼šä¸²å£2åˆå§‹åŒ–
+å…¥å£å‚æ•°ï¼šæ— 
+è¿”å›  å€¼ï¼šæ— 
 **************************************************************************/
 void uart2_init(u32 bound)
 {  	 
@@ -79,50 +79,50 @@ void uart2_init(u32 bound)
 	USART_InitTypeDef USART_InitStructure;
 	NVIC_InitTypeDef NVIC_InitStructure;
 
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);	 //Enable the gpio clock  //Ê¹ÄÜGPIOÊ±ÖÓ
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE); //Enable the Usart clock //Ê¹ÄÜUSARTÊ±ÖÓ
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);	 //Enable the gpio clock  //ä½¿èƒ½GPIOæ—¶é’Ÿ
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE); //Enable the Usart clock //ä½¿èƒ½USARTæ—¶é’Ÿ
 	
 	GPIO_PinAFConfig(GPIOD,GPIO_PinSource5,GPIO_AF_USART2);	
 	GPIO_PinAFConfig(GPIOD,GPIO_PinSource6 ,GPIO_AF_USART2);	 
 	
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5|GPIO_Pin_6;
-	GPIO_InitStructure.GPIO_Mode=GPIO_Mode_AF;            //Êä³öÄ£Ê½
-	GPIO_InitStructure.GPIO_OType=GPIO_OType_PP;          //ÍÆÍìÊä³ö
-	GPIO_InitStructure.GPIO_Speed=GPIO_Speed_50MHz;       //¸ßËÙ50MHZ
-	GPIO_InitStructure.GPIO_PuPd=GPIO_PuPd_UP;            //ÉÏÀ­
-	GPIO_Init(GPIOD, &GPIO_InitStructure);  		          //³õÊ¼»¯
+	GPIO_InitStructure.GPIO_Mode=GPIO_Mode_AF;            //è¾“å‡ºæ¨¡å¼
+	GPIO_InitStructure.GPIO_OType=GPIO_OType_PP;          //æ¨æŒ½è¾“å‡º
+	GPIO_InitStructure.GPIO_Speed=GPIO_Speed_50MHz;       //é«˜é€Ÿ50MHZ
+	GPIO_InitStructure.GPIO_PuPd=GPIO_PuPd_UP;            //ä¸Šæ‹‰
+	GPIO_Init(GPIOD, &GPIO_InitStructure);  		          //åˆå§‹åŒ–
 	
-	//UsartNVIC configuration //UsartNVICÅäÖÃ
+	//UsartNVIC configuration //UsartNVICé…ç½®
 	NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
-	//Preempt priority //ÇÀÕ¼ÓÅÏÈ¼¶
+	//Preempt priority //æŠ¢å ä¼˜å…ˆçº§
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=1 ;
-	//Subpriority //×ÓÓÅÏÈ¼¶
+	//Subpriority //å­ä¼˜å…ˆçº§
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;	
-  //Enable the IRQ channel //IRQÍ¨µÀÊ¹ÄÜ	
+  //Enable the IRQ channel //IRQé€šé“ä½¿èƒ½	
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   //Initialize the VIC register with the specified parameters 
-	//¸ù¾İÖ¸¶¨µÄ²ÎÊı³õÊ¼»¯VIC¼Ä´æÆ÷		
+	//æ ¹æ®æŒ‡å®šçš„å‚æ•°åˆå§‹åŒ–VICå¯„å­˜å™¨		
 	NVIC_Init(&NVIC_InitStructure);	
 	
-	//USART Initialization Settings ³õÊ¼»¯ÉèÖÃ
-	USART_InitStructure.USART_BaudRate = bound; //Port rate //´®¿Ú²¨ÌØÂÊ
-	USART_InitStructure.USART_WordLength = USART_WordLength_8b; //The word length is 8 bit data format //×Ö³¤Îª8Î»Êı¾İ¸ñÊ½
-	USART_InitStructure.USART_StopBits = USART_StopBits_1; //A stop bit //Ò»¸öÍ£Ö¹
-	USART_InitStructure.USART_Parity = USART_Parity_No; //Prosaic parity bits //ÎŞÆæÅ¼Ğ£ÑéÎ»
-	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None; //No hardware data flow control //ÎŞÓ²¼şÊı¾İÁ÷¿ØÖÆ
-	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;	//Sending and receiving mode //ÊÕ·¢Ä£Ê½
-	USART_Init(USART2, &USART_InitStructure);      //Initialize serial port 2 //³õÊ¼»¯´®¿Ú2
+	//USART Initialization Settings åˆå§‹åŒ–è®¾ç½®
+	USART_InitStructure.USART_BaudRate = bound; //Port rate //ä¸²å£æ³¢ç‰¹ç‡
+	USART_InitStructure.USART_WordLength = USART_WordLength_8b; //The word length is 8 bit data format //å­—é•¿ä¸º8ä½æ•°æ®æ ¼å¼
+	USART_InitStructure.USART_StopBits = USART_StopBits_1; //A stop bit //ä¸€ä¸ªåœæ­¢
+	USART_InitStructure.USART_Parity = USART_Parity_No; //Prosaic parity bits //æ— å¥‡å¶æ ¡éªŒä½
+	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None; //No hardware data flow control //æ— ç¡¬ä»¶æ•°æ®æµæ§åˆ¶
+	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;	//Sending and receiving mode //æ”¶å‘æ¨¡å¼
+	USART_Init(USART2, &USART_InitStructure);      //Initialize serial port 2 //åˆå§‹åŒ–ä¸²å£2
 	
-	USART_ITConfig(USART2, USART_IT_RXNE, ENABLE); //Open the serial port to accept interrupts //¿ªÆô´®¿Ú½ÓÊÜÖĞ¶Ï
-	USART_Cmd(USART2, ENABLE);                     //Enable serial port 2 //Ê¹ÄÜ´®¿Ú2 
+	USART_ITConfig(USART2, USART_IT_RXNE, ENABLE); //Open the serial port to accept interrupts //å¼€å¯ä¸²å£æ¥å—ä¸­æ–­
+	USART_Cmd(USART2, ENABLE);                     //Enable serial port 2 //ä½¿èƒ½ä¸²å£2 
 }
 /**************************************************************************
 Function: Serial port 5 initialization
 Input   : none
 Output  : none
-º¯Êı¹¦ÄÜ£º´®¿Ú5³õÊ¼»¯
-Èë¿Ú²ÎÊı£ºÎŞ
-·µ»Ø  Öµ£ºÎŞ
+å‡½æ•°åŠŸèƒ½ï¼šä¸²å£5åˆå§‹åŒ–
+å…¥å£å‚æ•°ï¼šæ— 
+è¿”å›  å€¼ï¼šæ— 
 **************************************************************************/
 void uart5_init(u32 bound)
 {  	 
@@ -131,66 +131,66 @@ void uart5_init(u32 bound)
 	NVIC_InitTypeDef NVIC_InitStructure;
 	
 	//PC12 TX
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);	 //Enable the gpio clock  //Ê¹ÄÜGPIOÊ±ÖÓ
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);	 //Enable the gpio clock  //ä½¿èƒ½GPIOæ—¶é’Ÿ
 	//PD2 RX
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);	 //Enable the gpio clock  //Ê¹ÄÜGPIOÊ±ÖÓ
-  RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART5, ENABLE); //Enable the Usart clock //Ê¹ÄÜUSARTÊ±ÖÓ
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);	 //Enable the gpio clock  //ä½¿èƒ½GPIOæ—¶é’Ÿ
+  RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART5, ENABLE); //Enable the Usart clock //ä½¿èƒ½USARTæ—¶é’Ÿ
 
 	GPIO_PinAFConfig(GPIOC,GPIO_PinSource12,GPIO_AF_UART5);	
 	GPIO_PinAFConfig(GPIOD,GPIO_PinSource2 ,GPIO_AF_UART5);	 
 	
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;
-	GPIO_InitStructure.GPIO_Mode=GPIO_Mode_AF;            //Êä³öÄ£Ê½
-	GPIO_InitStructure.GPIO_OType=GPIO_OType_PP;          //ÍÆÍìÊä³ö
-	GPIO_InitStructure.GPIO_Speed=GPIO_Speed_50MHz;       //¸ßËÙ50MHZ
-	GPIO_InitStructure.GPIO_PuPd=GPIO_PuPd_UP;            //ÉÏÀ­
-	GPIO_Init(GPIOC, &GPIO_InitStructure);  		          //³õÊ¼»¯
+	GPIO_InitStructure.GPIO_Mode=GPIO_Mode_AF;            //è¾“å‡ºæ¨¡å¼
+	GPIO_InitStructure.GPIO_OType=GPIO_OType_PP;          //æ¨æŒ½è¾“å‡º
+	GPIO_InitStructure.GPIO_Speed=GPIO_Speed_50MHz;       //é«˜é€Ÿ50MHZ
+	GPIO_InitStructure.GPIO_PuPd=GPIO_PuPd_UP;            //ä¸Šæ‹‰
+	GPIO_Init(GPIOC, &GPIO_InitStructure);  		          //åˆå§‹åŒ–
 
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
-	GPIO_InitStructure.GPIO_Mode=GPIO_Mode_AF;            //Êä³öÄ£Ê½
-	GPIO_InitStructure.GPIO_OType=GPIO_OType_PP;          //ÍÆÍìÊä³ö
-	GPIO_InitStructure.GPIO_Speed=GPIO_Speed_50MHz;       //¸ßËÙ50MHZ
-	GPIO_InitStructure.GPIO_PuPd=GPIO_PuPd_UP;            //ÉÏÀ­
-	GPIO_Init(GPIOD, &GPIO_InitStructure);  		          //³õÊ¼»¯
+	GPIO_InitStructure.GPIO_Mode=GPIO_Mode_AF;            //è¾“å‡ºæ¨¡å¼
+	GPIO_InitStructure.GPIO_OType=GPIO_OType_PP;          //æ¨æŒ½è¾“å‡º
+	GPIO_InitStructure.GPIO_Speed=GPIO_Speed_50MHz;       //é«˜é€Ÿ50MHZ
+	GPIO_InitStructure.GPIO_PuPd=GPIO_PuPd_UP;            //ä¸Šæ‹‰
+	GPIO_Init(GPIOD, &GPIO_InitStructure);  		          //åˆå§‹åŒ–
 	
-  //UsartNVIC configuration //UsartNVICÅäÖÃ
+  //UsartNVIC configuration //UsartNVICé…ç½®
   NVIC_InitStructure.NVIC_IRQChannel = UART5_IRQn;
-	//Preempt priority //ÇÀÕ¼ÓÅÏÈ¼¶
+	//Preempt priority //æŠ¢å ä¼˜å…ˆçº§
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=2 ;
-	//Preempt priority //ÇÀÕ¼ÓÅÏÈ¼¶
+	//Preempt priority //æŠ¢å ä¼˜å…ˆçº§
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;		
-	//Enable the IRQ channel //IRQÍ¨µÀÊ¹ÄÜ	
+	//Enable the IRQ channel //IRQé€šé“ä½¿èƒ½	
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;	
   //Initialize the VIC register with the specified parameters 
-	//¸ù¾İÖ¸¶¨µÄ²ÎÊı³õÊ¼»¯VIC¼Ä´æÆ÷		
+	//æ ¹æ®æŒ‡å®šçš„å‚æ•°åˆå§‹åŒ–VICå¯„å­˜å™¨		
 	NVIC_Init(&NVIC_InitStructure);
 	
-  //USART Initialization Settings ³õÊ¼»¯ÉèÖÃ
-	USART_InitStructure.USART_BaudRate = bound; //Port rate //´®¿Ú²¨ÌØÂÊ
-	USART_InitStructure.USART_WordLength = USART_WordLength_8b; //The word length is 8 bit data format //×Ö³¤Îª8Î»Êı¾İ¸ñÊ½
-	USART_InitStructure.USART_StopBits = USART_StopBits_1; //A stop bit //Ò»¸öÍ£Ö¹
-	USART_InitStructure.USART_Parity = USART_Parity_No; //Prosaic parity bits //ÎŞÆæÅ¼Ğ£ÑéÎ»
-	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None; //No hardware data flow control //ÎŞÓ²¼şÊı¾İÁ÷¿ØÖÆ
-	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;	//Sending and receiving mode //ÊÕ·¢Ä£Ê½
-  USART_Init(UART5, &USART_InitStructure);      //Initialize serial port 5 //³õÊ¼»¯´®¿Ú5
-  USART_ITConfig(UART5, USART_IT_RXNE, ENABLE); //Open the serial port to accept interrupts //¿ªÆô´®¿Ú½ÓÊÜÖĞ¶Ï
-  USART_Cmd(UART5, ENABLE);                     //Enable serial port 5 //Ê¹ÄÜ´®¿Ú5
+  //USART Initialization Settings åˆå§‹åŒ–è®¾ç½®
+	USART_InitStructure.USART_BaudRate = bound; //Port rate //ä¸²å£æ³¢ç‰¹ç‡
+	USART_InitStructure.USART_WordLength = USART_WordLength_8b; //The word length is 8 bit data format //å­—é•¿ä¸º8ä½æ•°æ®æ ¼å¼
+	USART_InitStructure.USART_StopBits = USART_StopBits_1; //A stop bit //ä¸€ä¸ªåœæ­¢
+	USART_InitStructure.USART_Parity = USART_Parity_No; //Prosaic parity bits //æ— å¥‡å¶æ ¡éªŒä½
+	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None; //No hardware data flow control //æ— ç¡¬ä»¶æ•°æ®æµæ§åˆ¶
+	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;	//Sending and receiving mode //æ”¶å‘æ¨¡å¼
+  USART_Init(UART5, &USART_InitStructure);      //Initialize serial port 5 //åˆå§‹åŒ–ä¸²å£5
+  USART_ITConfig(UART5, USART_IT_RXNE, ENABLE); //Open the serial port to accept interrupts //å¼€å¯ä¸²å£æ¥å—ä¸­æ–­
+  USART_Cmd(UART5, ENABLE);                     //Enable serial port 5 //ä½¿èƒ½ä¸²å£5
 }
 /**************************************************************************
 Function: Serial port 1 receives interrupted
 Input   : none
 Output  : none
-º¯Êı¹¦ÄÜ£º´®¿Ú1½ÓÊÕÖĞ¶Ï
-Èë¿Ú²ÎÊı£ºÎŞ
-·µ »Ø Öµ£ºÎŞ
+å‡½æ•°åŠŸèƒ½ï¼šä¸²å£1æ¥æ”¶ä¸­æ–­
+å…¥å£å‚æ•°ï¼šæ— 
+è¿” å› å€¼ï¼šæ— 
 **************************************************************************/
 int USART1_IRQHandler(void)
 {	
-	if(USART_GetITStatus(USART1, USART_IT_RXNE) != RESET) //Check if data is received //ÅĞ¶ÏÊÇ·ñ½ÓÊÕµ½Êı¾İ
+	if(USART_GetITStatus(USART1, USART_IT_RXNE) != RESET) //Check if data is received //åˆ¤æ–­æ˜¯å¦æ¥æ”¶åˆ°æ•°æ®
 	{
 //		u8 Usart_Receive;		
 //		Usart_Receive = 
-		USART_ReceiveData(USART1); //Read the data //¶ÁÈ¡Êı¾İ	
+		USART_ReceiveData(USART1); //Read the data //è¯»å–æ•°æ®	
 	}
 	return 0;	
 }
@@ -198,36 +198,36 @@ int USART1_IRQHandler(void)
 Function: Refresh the OLED screen
 Input   : none
 Output  : none
-º¯Êı¹¦ÄÜ£º´®¿Ú2½ÓÊÕÖĞ¶Ï
-Èë¿Ú²ÎÊı£ºÎŞ
-·µ»Ø  Öµ£ºÎŞ
+å‡½æ•°åŠŸèƒ½ï¼šä¸²å£2æ¥æ”¶ä¸­æ–­
+å…¥å£å‚æ•°ï¼šæ— 
+è¿”å›  å€¼ï¼šæ— 
 **************************************************************************/
 int USART2_IRQHandler(void)
 {	
-	static int temp_count = 0;				//ÓÃÓÚ¼ÇÂ¼Ç°½øµÄÖ¸ÁîµÄ´ÎÊı£¬µÚÒ»´ÎÁ¬½ÓÀ¶ÑÀµÄÊ±ºòĞèÒªÓÃµ½
+	static int temp_count = 0;				//ç”¨äºè®°å½•å‰è¿›çš„æŒ‡ä»¤çš„æ¬¡æ•°ï¼Œç¬¬ä¸€æ¬¡è¿æ¥è“ç‰™çš„æ—¶å€™éœ€è¦ç”¨åˆ°
 	int Usart_Receive;
-	if(USART_GetITStatus(USART2, USART_IT_RXNE) != RESET) //Check if data is received //ÅĞ¶ÏÊÇ·ñ½ÓÊÕµ½Êı¾İ
+	if(USART_GetITStatus(USART2, USART_IT_RXNE) != RESET) //Check if data is received //åˆ¤æ–­æ˜¯å¦æ¥æ”¶åˆ°æ•°æ®
 	{	      
 		static u8 Flag_PID,i,j,Receive[50];
 		static float Data;
 				
-		Usart_Receive=USART2->DR; //Read the data //¶ÁÈ¡Êı¾İ
-		//×¥°ü·½·¨ºÍÊ¹ÓÃ
+		Usart_Receive=USART2->DR; //Read the data //è¯»å–æ•°æ®
+		//æŠ“åŒ…æ–¹æ³•å’Œä½¿ç”¨
 		if(AT_Command_Capture(Usart_Receive)) return 1;
 	  
 		if(Usart_Receive==0x4B) 
 			//Enter the APP steering control interface
-		  //½øÈëAPP×ªÏò¿ØÖÆ½çÃæ
+		  //è¿›å…¥APPè½¬å‘æ§åˆ¶ç•Œé¢
 			Turn_Flag=1;   
 	  else	if(Usart_Receive==0x49||Usart_Receive==0x4A) 
       // Enter the APP direction control interface		
-			//½øÈëAPP·½Ïò¿ØÖÆ½çÃæ	
+			//è¿›å…¥APPæ–¹å‘æ§åˆ¶ç•Œé¢	
 			Turn_Flag=0;	
 		
 		if(Turn_Flag==0) 
 		{
 			//App rocker control interface command
-			//APPÒ¡¸Ë¿ØÖÆ½çÃæÃüÁî
+			//APPæ‘‡æ†æ§åˆ¶ç•Œé¢å‘½ä»¤
 			if(Usart_Receive>=0x41&&Usart_Receive<=0x48)  
 			{	
 				Mode=APP_Control_Mode;
@@ -242,13 +242,13 @@ int USART2_IRQHandler(void)
 		else if(Turn_Flag==1)
 		{
 			//APP steering control interface command
-			//APP×ªÏò¿ØÖÆ½çÃæÃüÁî
-			if     (Usart_Receive==0x43) Flag_Left=0,Flag_Right=1; //Right rotation //ÓÒ×Ô×ª
-			else if(Usart_Receive==0x47) Flag_Left=1,Flag_Right=0; //Left rotation  //×ó×Ô×ª
+			//APPè½¬å‘æ§åˆ¶ç•Œé¢å‘½ä»¤
+			if     (Usart_Receive==0x43) Flag_Left=0,Flag_Right=1; //Right rotation //å³è‡ªè½¬
+			else if(Usart_Receive==0x47) Flag_Left=1,Flag_Right=0; //Left rotation  //å·¦è‡ªè½¬
 			else                         Flag_Left=0,Flag_Right=0;
 			if     (Usart_Receive==0x41||Usart_Receive==0x45) 
 			{
-				if((++temp_count) == 5)					//ĞèÒªÁ¬Ğø·¢ËÍ5´ÎÇ°½øµÄÖ¸Áî£¬ÉÏÀ­×ªÅÌÒ»¶ÎÊ±¼ä¿É¿ªÊ¼app¿ØÖÆ
+				if((++temp_count) == 5)					//éœ€è¦è¿ç»­å‘é€5æ¬¡å‰è¿›çš„æŒ‡ä»¤ï¼Œä¸Šæ‹‰è½¬ç›˜ä¸€æ®µæ—¶é—´å¯å¼€å§‹appæ§åˆ¶
 				{
 					temp_count = 0;
 					APP_ON_Flag = RC_ON;		
@@ -259,21 +259,21 @@ int USART2_IRQHandler(void)
 			}
 			else  Flag_Direction=0;
 		}
-		if(Usart_Receive==0x58)  RC_Velocity=RC_Velocity+100; //Accelerate the keys, +100mm/s //¼ÓËÙ°´¼ü£¬+100mm/s
-		if(Usart_Receive==0x59)  RC_Velocity=RC_Velocity-100; //Slow down buttons,   -100mm/s //¼õËÙ°´¼ü£¬-100mm/s
+		if(Usart_Receive==0x58)  RC_Velocity=RC_Velocity+100; //Accelerate the keys, +100mm/s //åŠ é€ŸæŒ‰é”®ï¼Œ+100mm/s
+		if(Usart_Receive==0x59)  RC_Velocity=RC_Velocity-100; //Slow down buttons,   -100mm/s //å‡é€ŸæŒ‰é”®ï¼Œ-100mm/s
 	  
 	if(Usart_Receive=='a')	RC_Lidar_Avoid_FLAG=!RC_Lidar_Avoid_FLAG;
 	 // The following is the communication with the APP debugging interface
-	 //ÒÔÏÂÊÇÓëAPPµ÷ÊÔ½çÃæÍ¨Ñ¶
-	 if(Usart_Receive==0x7B) Flag_PID=1;   //The start bit of the APP parameter instruction //APP²ÎÊıÖ¸ÁîÆğÊ¼Î»
-	 if(Usart_Receive==0x7D) Flag_PID=2;   //The APP parameter instruction stops the bit    //APP²ÎÊıÖ¸ÁîÍ£Ö¹Î»
+	 //ä»¥ä¸‹æ˜¯ä¸APPè°ƒè¯•ç•Œé¢é€šè®¯
+	 if(Usart_Receive==0x7B) Flag_PID=1;   //The start bit of the APP parameter instruction //APPå‚æ•°æŒ‡ä»¤èµ·å§‹ä½
+	 if(Usart_Receive==0x7D) Flag_PID=2;   //The APP parameter instruction stops the bit    //APPå‚æ•°æŒ‡ä»¤åœæ­¢ä½
 
-	 if(Flag_PID==1) //Collect data //²É¼¯Êı¾İ
+	 if(Flag_PID==1) //Collect data //é‡‡é›†æ•°æ®
 	 {
 		Receive[i]=Usart_Receive;
 		i++;
 	 }
-	 if(Flag_PID==2) //Analyze the data //·ÖÎöÊı¾İ
+	 if(Flag_PID==2) //Analyze the data //åˆ†ææ•°æ®
 	 {
 			if(Receive[3]==0x50) 	 PID_Send=1;
 			else  if(Receive[1]!=0x23) 
@@ -285,7 +285,7 @@ int USART2_IRQHandler(void)
 				
 				if(Mode == APP_Control_Mode)
 					{
-					switch(Receive[1])			//APPµç»úµ÷²Î
+					switch(Receive[1])			//APPç”µæœºè°ƒå‚
 					 {
 						 case 0x30:  RC_Velocity=Data;break;
 						 case 0x31:  Velocity_KP=Data;break;
@@ -298,7 +298,7 @@ int USART2_IRQHandler(void)
 						 case 0x38:  break; 				
 					 } 
 					}
-					else if(Mode == ELE_Line_Patrol_Mode)		//µç´ÅÑ²ÏßzÖáËÙ¶Èµ÷²Î
+					else if(Mode == ELE_Line_Patrol_Mode)		//ç”µç£å·¡çº¿zè½´é€Ÿåº¦è°ƒå‚
 					{
 					switch(Receive[1])
 					 {
@@ -313,7 +313,7 @@ int USART2_IRQHandler(void)
 						 case 0x38:  break; 				
 					 } 
 					}
-					else 	if(Mode == CCD_Line_Patrol_Mode)									//CCDÑ²ÏßzÖáËÙ¶Èµ÷²Î
+					else 	if(Mode == CCD_Line_Patrol_Mode)									//CCDå·¡çº¿zè½´é€Ÿåº¦è°ƒå‚
 					{
 					switch(Receive[1])
 					 {
@@ -360,12 +360,12 @@ int USART2_IRQHandler(void)
 					}
 				}		
       //Relevant flag position is cleared			
-      //Ïà¹Ø±êÖ¾Î»ÇåÁã			
+      //ç›¸å…³æ ‡å¿—ä½æ¸…é›¶			
 			Flag_PID=0;
 			i=0;
 			j=0;
 			Data=0;
-			memset(Receive, 0, sizeof(u8)*50); //Clear the array to zero//Êı×éÇåÁã
+			memset(Receive, 0, sizeof(u8)*50); //Clear the array to zero//æ•°ç»„æ¸…é›¶
 	 }
    if(RC_Velocity<0)   RC_Velocity=0; 
 	 if(RC_Velocity_CCD<0)   RC_Velocity_CCD=0;
@@ -378,34 +378,34 @@ int USART2_IRQHandler(void)
 Function: Serial port 5 receives interrupted
 Input   : none
 Output  : none
-º¯Êı¹¦ÄÜ£º´®¿Ú5½ÓÊÕÖĞ¶Ï
-Èë¿Ú²ÎÊı£ºÎŞ
-·µ»Ø  Öµ£ºÎŞ
+å‡½æ•°åŠŸèƒ½ï¼šä¸²å£5æ¥æ”¶ä¸­æ–­
+å…¥å£å‚æ•°ï¼šæ— 
+è¿”å›  å€¼ï¼šæ— 
 **************************************************************************/
 int UART5_IRQHandler(void)
 {	
-	static u8 state = 0;//×´Ì¬Î»	
-	static u8 crc_sum = 0;//Ğ£ÑéºÍ
-	static u8 cnt = 0;//ÓÃÓÚÒ»Ö¡16¸öµãµÄ¼ÆÊı
+	static u8 state = 0;//çŠ¶æ€ä½	
+	static u8 crc_sum = 0;//æ ¡éªŒå’Œ
+	static u8 cnt = 0;//ç”¨äºä¸€å¸§16ä¸ªç‚¹çš„è®¡æ•°
 	u8 temp_data;
 
-	if(USART_GetITStatus(UART5, USART_IT_RXNE) != RESET) //½ÓÊÕµ½Êı¾İ
+	if(USART_GetITStatus(UART5, USART_IT_RXNE) != RESET) //æ¥æ”¶åˆ°æ•°æ®
 	{	
 		//USART_ClearITPendingBit(UART5, USART_IT_RXNE);
 		temp_data=USART_ReceiveData(UART5);	
 		switch(state)
 		{
 			case 0:
-				if(temp_data == HEADER_0)//Í·¹Ì¶¨
+				if(temp_data == HEADER_0)//å¤´å›ºå®š
 				{
 					Pack_Data.header_0= temp_data;
 					state++;
-					//Ğ£Ñé
+					//æ ¡éªŒ
 					crc_sum += temp_data;
 				} else state = 0,crc_sum = 0;
 				break;
 			case 1:
-				if(temp_data == HEADER_1)//Í·¹Ì¶¨
+				if(temp_data == HEADER_1)//å¤´å›ºå®š
 				{
 					Pack_Data.header_1 = temp_data;
 					state++;
@@ -413,7 +413,7 @@ int UART5_IRQHandler(void)
 				} else state = 0,crc_sum = 0;
 				break;
 			case 2:
-				if(temp_data == Length_)//×Ö³¤¹Ì¶¨
+				if(temp_data == Length_)//å­—é•¿å›ºå®š
 				{
 					Pack_Data.ver_len = temp_data;
 					state++;
@@ -421,22 +421,22 @@ int UART5_IRQHandler(void)
 				} else state = 0,crc_sum = 0;
 				break;
 			case 3:
-				Pack_Data.speed_h = temp_data;//ËÙ¶È¸ß°ËÎ»
+				Pack_Data.speed_h = temp_data;//é€Ÿåº¦é«˜å…«ä½
 				state++;
 				crc_sum += temp_data;			
 				break;
 			case 4:
-				Pack_Data.speed_l = temp_data;//ËÙ¶ÈµÍ°ËÎ»
+				Pack_Data.speed_l = temp_data;//é€Ÿåº¦ä½å…«ä½
 				state++;
 				crc_sum += temp_data;
 				break;
 			case 5:
-				Pack_Data.start_angle_h = temp_data;//¿ªÊ¼½Ç¶È¸ß°ËÎ»
+				Pack_Data.start_angle_h = temp_data;//å¼€å§‹è§’åº¦é«˜å…«ä½
 				state++;
 				crc_sum += temp_data;
 				break;
 			case 6:
-				Pack_Data.start_angle_l = temp_data;//¿ªÊ¼½Ç¶ÈµÍ°ËÎ»
+				Pack_Data.start_angle_l = temp_data;//å¼€å§‹è§’åº¦ä½å…«ä½
 				state++;
 				crc_sum += temp_data;
 				break;
@@ -450,7 +450,7 @@ int UART5_IRQHandler(void)
 			case 67:case 70:case 73:case 76:
 			case 79:case 82:case 85:case 88:
 			case 91:case 94:case 97:case 100:
-				Pack_Data.point[cnt].distance_h = temp_data & 0x7f ;//16¸öµãµÄ¾àÀëÊı¾İ£¬¸ß×Ö½Ú
+				Pack_Data.point[cnt].distance_h = temp_data & 0x7f ;//16ä¸ªç‚¹çš„è·ç¦»æ•°æ®ï¼Œé«˜å­—èŠ‚
 				state++;
 				crc_sum += temp_data;
 				break;
@@ -464,7 +464,7 @@ int UART5_IRQHandler(void)
 			case 68:case 71:case 74:case 77:
 			case 80:case 83:case 86:case 89:
 			case 92:case 95:case 98:case 101:
-				Pack_Data.point[cnt].distance_l = temp_data;//16¸öµãµÄ¾àÀëÊı¾İ£¬µÍ×Ö½Ú
+				Pack_Data.point[cnt].distance_l = temp_data;//16ä¸ªç‚¹çš„è·ç¦»æ•°æ®ï¼Œä½å­—èŠ‚
 				state++;
 				crc_sum += temp_data;
 				break;
@@ -478,7 +478,7 @@ int UART5_IRQHandler(void)
 			case 69:case 72:case 75:case 78:
 			case 81:case 84:case 87:case 90:
 			case 93:case 96:case 99:case 102:
-				Pack_Data.point[cnt].Strong = temp_data;//16¸öµãµÄÇ¿¶ÈÊı¾İ
+				Pack_Data.point[cnt].Strong = temp_data;//16ä¸ªç‚¹çš„å¼ºåº¦æ•°æ®
 				state++;
 				crc_sum += temp_data;
 				cnt++;
@@ -489,28 +489,28 @@ int UART5_IRQHandler(void)
 				cnt++;
 				break;
 			case 105:
-				Pack_Data.end_angle_h = temp_data;//½áÊø½Ç¶ÈµÄ¸ß°ËÎ»
+				Pack_Data.end_angle_h = temp_data;//ç»“æŸè§’åº¦çš„é«˜å…«ä½
 				state++;
 				crc_sum += temp_data;			
 				break;
 			case 106:
-				Pack_Data.end_angle_l = temp_data;//½áÊø½Ç¶ÈµÄµÍ°ËÎ»
+				Pack_Data.end_angle_l = temp_data;//ç»“æŸè§’åº¦çš„ä½å…«ä½
 				state++;
 				crc_sum += temp_data;
 				break;
 			case 107:
-				Pack_Data.crc = temp_data;//Ğ£Ñé
+				Pack_Data.crc = temp_data;//æ ¡éªŒ
 				state = 0;
 				cnt = 0;
 				if(crc_sum == Pack_Data.crc)
 				{
-					data_process();//Êı¾İ´¦Àí£¬Ğ£ÑéÕıÈ·²»¶ÏË¢ĞÂ´æ´¢µÄÊı¾İ	
+					data_process();//æ•°æ®å¤„ç†ï¼Œæ ¡éªŒæ­£ç¡®ä¸æ–­åˆ·æ–°å­˜å‚¨çš„æ•°æ®	
 				}
 				else 
 				{
-					memset(&Pack_Data,0,sizeof(Pack_Data));//ÇåÁã
+					memset(&Pack_Data,0,sizeof(Pack_Data));//æ¸…é›¶
 				}
-				crc_sum = 0;//Ğ£ÑéºÍÇåÁã
+				crc_sum = 0;//æ ¡éªŒå’Œæ¸…é›¶
 				break;
 			default: break;
 		}
@@ -522,21 +522,21 @@ int UART5_IRQHandler(void)
 Function: data_process
 Input   : none
 Output  : none
-º¯Êı¹¦ÄÜ£ºÊı¾İ´¦Àíº¯Êı
-Èë¿Ú²ÎÊı£ºÎŞ
-·µ»Ø  Öµ£ºÎŞ
+å‡½æ•°åŠŸèƒ½ï¼šæ•°æ®å¤„ç†å‡½æ•°
+å…¥å£å‚æ•°ï¼šæ— 
+è¿”å›  å€¼ï¼šæ— 
 **************************************************************************/
-//Íê³ÉÒ»Ö¡½ÓÊÕºó½øĞĞ´¦Àí
+//å®Œæˆä¸€å¸§æ¥æ”¶åè¿›è¡Œå¤„ç†
 int data_cnt = 0;
-void data_process(void) //Êı¾İ´¦Àí
+void data_process(void) //æ•°æ®å¤„ç†
 {
 	int m;
-	u32 distance_sum[32]={0};//2¸öµãµÄ¾àÀëºÍµÄÊı×é
-	float start_angle = (((u16)Pack_Data.start_angle_h<<8)+Pack_Data.start_angle_l)/100.0;//¼ÆËã32¸öµãµÄ¿ªÊ¼½Ç¶È
-	float end_angle = (((u16)Pack_Data.end_angle_h<<8)+Pack_Data.end_angle_l)/100.0;//¼ÆËã32¸öµãµÄ½áÊø½Ç¶È
+	u32 distance_sum[32]={0};//2ä¸ªç‚¹çš„è·ç¦»å’Œçš„æ•°ç»„
+	float start_angle = (((u16)Pack_Data.start_angle_h<<8)+Pack_Data.start_angle_l)/100.0;//è®¡ç®—32ä¸ªç‚¹çš„å¼€å§‹è§’åº¦
+	float end_angle = (((u16)Pack_Data.end_angle_h<<8)+Pack_Data.end_angle_l)/100.0;//è®¡ç®—32ä¸ªç‚¹çš„ç»“æŸè§’åº¦
 	float area_angle[32]={0};
-	Lidar_Success_Receive_flag=1;Lidar_flag_count=0;//À×´ïÔÚÏß±êÖ¾Î»´¦Àí
-	if(start_angle>end_angle)//½áÊø½Ç¶ÈºÍ¿ªÊ¼½Ç¶È±»0¶È·Ö¸îµÄÇé¿ö
+	Lidar_Success_Receive_flag=1;Lidar_flag_count=0;//é›·è¾¾åœ¨çº¿æ ‡å¿—ä½å¤„ç†
+	if(start_angle>end_angle)//ç»“æŸè§’åº¦å’Œå¼€å§‹è§’åº¦è¢«0åº¦åˆ†å‰²çš„æƒ…å†µ
 		end_angle +=360;
 	
 	for(m=0;m<32;m++)
@@ -544,10 +544,10 @@ void data_process(void) //Êı¾İ´¦Àí
 		area_angle[m]=start_angle+(end_angle-start_angle)/32*m;
 		if(area_angle[m]>360)  area_angle[m] -=360;
 		
-		distance_sum[m] +=((u16)Pack_Data.point[m].distance_h<<8)+Pack_Data.point[m].distance_l;//Êı¾İ¸ßµÍ8Î»ºÏ²¢
+		distance_sum[m] +=((u16)Pack_Data.point[m].distance_h<<8)+Pack_Data.point[m].distance_l;//æ•°æ®é«˜ä½8ä½åˆå¹¶
 
 		Dataprocess[data_cnt].angle=area_angle[m];
-		Dataprocess[data_cnt++].distance=distance_sum[m];  //Ò»Ö¡Êı¾İÎª32¸öµã
+		Dataprocess[data_cnt++].distance=distance_sum[m];  //ä¸€å¸§æ•°æ®ä¸º32ä¸ªç‚¹
 		if(data_cnt == 1152) data_cnt = 0;
 	}
 	
@@ -558,9 +558,9 @@ void data_process(void) //Êı¾İ´¦Àí
 Function: After the top 8 and low 8 figures are integrated into a short type data, the unit reduction is converted
 Input   : 8 bits high, 8 bits low
 Output  : The target velocity of the robot on the X/Y/Z axis
-º¯Êı¹¦ÄÜ£º½«ÉÏÎ»»ú·¢¹ıÀ´Ä¿±êÇ°½øËÙ¶ÈVx¡¢Ä¿±ê½ÇËÙ¶ÈVz£¬×ª»»Îª°¢¿ËÂüĞ¡³µµÄÓÒÇ°ÂÖ×ª½Ç
-Èë¿Ú²ÎÊı£ºÄ¿±êÇ°½øËÙ¶ÈVx¡¢Ä¿±ê½ÇËÙ¶ÈVz£¬µ¥Î»£ºm/s£¬rad/s
-·µ»Ø  Öµ£º°¢¿ËÂüĞ¡³µµÄÓÒÇ°ÂÖ×ª½Ç£¬µ¥Î»£ºrad
+å‡½æ•°åŠŸèƒ½ï¼šå°†ä¸Šä½æœºå‘è¿‡æ¥ç›®æ ‡å‰è¿›é€Ÿåº¦Vxã€ç›®æ ‡è§’é€Ÿåº¦Vzï¼Œè½¬æ¢ä¸ºé˜¿å…‹æ›¼å°è½¦çš„å³å‰è½®è½¬è§’
+å…¥å£å‚æ•°ï¼šç›®æ ‡å‰è¿›é€Ÿåº¦Vxã€ç›®æ ‡è§’é€Ÿåº¦Vzï¼Œå•ä½ï¼šm/sï¼Œrad/s
+è¿”å›  å€¼ï¼šé˜¿å…‹æ›¼å°è½¦çš„å³å‰è½®è½¬è§’ï¼Œå•ä½ï¼šrad
 **************************************************************************/
 float Vz_to_Akm_Angle(float Vx, float Vz)
 {
@@ -570,19 +570,19 @@ float Vz_to_Akm_Angle(float Vx, float Vz)
 	//Ackermann car needs to set minimum turning radius
 	//If the target speed requires a turn radius less than the minimum turn radius,
 	//This will greatly improve the friction force of the car, which will seriously affect the control effect
-	//°¢¿ËÂüĞ¡³µĞèÒªÉèÖÃ×îĞ¡×ªÍä°ë¾¶
-	//Èç¹ûÄ¿±êËÙ¶ÈÒªÇóµÄ×ªÍä°ë¾¶Ğ¡ÓÚ×îĞ¡×ªÍä°ë¾¶£¬
-	//»áµ¼ÖÂĞ¡³µÔË¶¯Ä¦²ÁÁ¦´ó´óÌá¸ß£¬ÑÏÖØÓ°Ïì¿ØÖÆĞ§¹û
+	//é˜¿å…‹æ›¼å°è½¦éœ€è¦è®¾ç½®æœ€å°è½¬å¼¯åŠå¾„
+	//å¦‚æœç›®æ ‡é€Ÿåº¦è¦æ±‚çš„è½¬å¼¯åŠå¾„å°äºæœ€å°è½¬å¼¯åŠå¾„ï¼Œ
+	//ä¼šå¯¼è‡´å°è½¦è¿åŠ¨æ‘©æ“¦åŠ›å¤§å¤§æé«˜ï¼Œä¸¥é‡å½±å“æ§åˆ¶æ•ˆæœ
 	Min_Turn_Radius=MINI_AKM_MIN_TURN_RADIUS;
 	
 	if(Vz!=0 && Vx!=0)
 	{
 		//If the target speed requires a turn radius less than the minimum turn radius
-		//Èç¹ûÄ¿±êËÙ¶ÈÒªÇóµÄ×ªÍä°ë¾¶Ğ¡ÓÚ×îĞ¡×ªÍä°ë¾¶
+		//å¦‚æœç›®æ ‡é€Ÿåº¦è¦æ±‚çš„è½¬å¼¯åŠå¾„å°äºæœ€å°è½¬å¼¯åŠå¾„
 		if(float_abs(Vx/Vz)<=Min_Turn_Radius)
 		{
 			//Reduce the target angular velocity and increase the turning radius to the minimum turning radius in conjunction with the forward speed
-			//½µµÍÄ¿±ê½ÇËÙ¶È£¬ÅäºÏÇ°½øËÙ¶È£¬Ìá¸ß×ªÍä°ë¾¶µ½×îĞ¡×ªÍä°ë¾¶
+			//é™ä½ç›®æ ‡è§’é€Ÿåº¦ï¼Œé…åˆå‰è¿›é€Ÿåº¦ï¼Œæé«˜è½¬å¼¯åŠå¾„åˆ°æœ€å°è½¬å¼¯åŠå¾„
 			if(Vz>0)
 				Vz= float_abs(Vx)/(Min_Turn_Radius);
 			else	
@@ -603,29 +603,29 @@ float Vz_to_Akm_Angle(float Vx, float Vz)
 Function: After the top 8 and low 8 figures are integrated into a short type data, the unit reduction is converted
 Input   : 8 bits high, 8 bits low
 Output  : The target velocity of the robot on the X/Y/Z axis
-º¯Êı¹¦ÄÜ£º½«ÉÏÎ»»ú·¢¹ıÀ´µÄ¸ß8Î»ºÍµÍ8Î»Êı¾İÕûºÏ³ÉÒ»¸öshortĞÍÊı¾İºó£¬ÔÙ×öµ¥Î»»¹Ô­»»Ëã
-Èë¿Ú²ÎÊı£º¸ß8Î»£¬µÍ8Î»
-·µ»Ø  Öµ£º»úÆ÷ÈËX/Y/ZÖáµÄÄ¿±êËÙ¶È
+å‡½æ•°åŠŸèƒ½ï¼šå°†ä¸Šä½æœºå‘è¿‡æ¥çš„é«˜8ä½å’Œä½8ä½æ•°æ®æ•´åˆæˆä¸€ä¸ªshortå‹æ•°æ®åï¼Œå†åšå•ä½è¿˜åŸæ¢ç®—
+å…¥å£å‚æ•°ï¼šé«˜8ä½ï¼Œä½8ä½
+è¿”å›  å€¼ï¼šæœºå™¨äººX/Y/Zè½´çš„ç›®æ ‡é€Ÿåº¦
 **************************************************************************/
 float XYZ_Target_Speed_transition(u8 High,u8 Low)
 {
 	//Data conversion intermediate variable
-	//Êı¾İ×ª»»µÄÖĞ¼ä±äÁ¿
+	//æ•°æ®è½¬æ¢çš„ä¸­é—´å˜é‡
 	short transition; 
 	
-	//½«¸ß8Î»ºÍµÍ8Î»ÕûºÏ³ÉÒ»¸ö16Î»µÄshortĞÍÊı¾İ
+	//å°†é«˜8ä½å’Œä½8ä½æ•´åˆæˆä¸€ä¸ª16ä½çš„shortå‹æ•°æ®
 	//The high 8 and low 8 bits are integrated into a 16-bit short data
 	transition=((High<<8)+Low); 
 	return 
-		transition/1000+(transition%1000)*0.001; //Unit conversion, mm/s->m/s //µ¥Î»×ª»», mm/s->m/s						
+		transition/1000+(transition%1000)*0.001; //Unit conversion, mm/s->m/s //å•ä½è½¬æ¢, mm/s->m/s						
 }
 /**************************************************************************
 Function: Serial port 1 sends data
 Input   : The data to send
 Output  : none
-º¯Êı¹¦ÄÜ£º´®¿Ú1·¢ËÍÊı¾İ
-Èë¿Ú²ÎÊı£ºÒª·¢ËÍµÄÊı¾İ
-·µ»Ø  Öµ£ºÎŞ
+å‡½æ•°åŠŸèƒ½ï¼šä¸²å£1å‘é€æ•°æ®
+å…¥å£å‚æ•°ï¼šè¦å‘é€çš„æ•°æ®
+è¿”å›  å€¼ï¼šæ— 
 **************************************************************************/
 void usart1_send(u8 data)
 {
@@ -636,9 +636,9 @@ void usart1_send(u8 data)
 Function: Serial port 2 sends data
 Input   : The data to send
 Output  : none
-º¯Êı¹¦ÄÜ£º´®¿Ú2·¢ËÍÊı¾İ
-Èë¿Ú²ÎÊı£ºÒª·¢ËÍµÄÊı¾İ
-·µ»Ø  Öµ£ºÎŞ
+å‡½æ•°åŠŸèƒ½ï¼šä¸²å£2å‘é€æ•°æ®
+å…¥å£å‚æ•°ï¼šè¦å‘é€çš„æ•°æ®
+è¿”å›  å€¼ï¼šæ— 
 **************************************************************************/
 void usart2_send(u8 data)
 {
@@ -650,9 +650,9 @@ void usart2_send(u8 data)
 Function: Serial port 5 sends data
 Input   : The data to send
 Output  : none
-º¯Êı¹¦ÄÜ£º´®¿Ú5·¢ËÍÊı¾İ
-Èë¿Ú²ÎÊı£ºÒª·¢ËÍµÄÊı¾İ
-·µ»Ø  Öµ£ºÎŞ
+å‡½æ•°åŠŸèƒ½ï¼šä¸²å£5å‘é€æ•°æ®
+å…¥å£å‚æ•°ï¼šè¦å‘é€çš„æ•°æ®
+è¿”å›  å€¼ï¼šæ— 
 **************************************************************************/
 void usart5_send(u8 data)
 {
@@ -663,16 +663,16 @@ void usart5_send(u8 data)
 Function: Calculates the check bits of data to be sent/received
 Input   : Count_Number: The first few digits of a check; Mode: 0-Verify the received data, 1-Validate the sent data
 Output  : Check result
-º¯Êı¹¦ÄÜ£º¼ÆËãÒª·¢ËÍ/½ÓÊÕµÄÊı¾İĞ£Ñé½á¹û
-Èë¿Ú²ÎÊı£ºCount_Number£ºĞ£ÑéµÄÇ°¼¸Î»Êı£»Mode£º0-¶Ô½ÓÊÕÊı¾İ½øĞĞĞ£Ñé£¬1-¶Ô·¢ËÍÊı¾İ½øĞĞĞ£Ñé
-·µ»Ø  Öµ£ºĞ£Ñé½á¹û
+å‡½æ•°åŠŸèƒ½ï¼šè®¡ç®—è¦å‘é€/æ¥æ”¶çš„æ•°æ®æ ¡éªŒç»“æœ
+å…¥å£å‚æ•°ï¼šCount_Numberï¼šæ ¡éªŒçš„å‰å‡ ä½æ•°ï¼›Modeï¼š0-å¯¹æ¥æ”¶æ•°æ®è¿›è¡Œæ ¡éªŒï¼Œ1-å¯¹å‘é€æ•°æ®è¿›è¡Œæ ¡éªŒ
+è¿”å›  å€¼ï¼šæ ¡éªŒç»“æœ
 **************************************************************************/
 //u8 Check_Sum(unsigned char Count_Number,unsigned char Mode)
 //{
 //	unsigned char check_sum=0,k;
 //	
 //	//Validate the data to be sent
-//	//¶ÔÒª·¢ËÍµÄÊı¾İ½øĞĞĞ£Ñé
+//	//å¯¹è¦å‘é€çš„æ•°æ®è¿›è¡Œæ ¡éªŒ
 //	if(Mode==1)
 //	for(k=0;k<Count_Number;k++)
 //	{
@@ -680,7 +680,7 @@ Output  : Check result
 //	}
 //	
 //	//Verify the data received
-//	//¶Ô½ÓÊÕµ½µÄÊı¾İ½øĞĞĞ£Ñé
+//	//å¯¹æ¥æ”¶åˆ°çš„æ•°æ®è¿›è¡Œæ ¡éªŒ
 //	if(Mode==0)
 //	for(k=0;k<Count_Number;k++)
 //	{
@@ -690,79 +690,79 @@ Output  : Check result
 //}
 
 
-//À¶ÑÀATÖ¸Áî×¥°ü£¬·ÀÖ¹Ö¸Áî¸ÉÈÅµ½»úÆ÷ÈËÕı³£µÄÀ¶ÑÀÍ¨ĞÅ
+//è“ç‰™ATæŒ‡ä»¤æŠ“åŒ…ï¼Œé˜²æ­¢æŒ‡ä»¤å¹²æ‰°åˆ°æœºå™¨äººæ­£å¸¸çš„è“ç‰™é€šä¿¡
 u8 AT_Command_Capture(u8 uart_recv)
 {
 	/*
-	À¶ÑÀÁ´½ÓÊ±·¢ËÍµÄ×Ö·û£¬00:11:22:33:44:55ÎªÀ¶ÑÀµÄMACµØÖ·
+	è“ç‰™é“¾æ¥æ—¶å‘é€çš„å­—ç¬¦ï¼Œ00:11:22:33:44:55ä¸ºè“ç‰™çš„MACåœ°å€
 	+CONNECTING<<00:11:22:33:44:55\r\n
 	+CONNECTED\r\n
-	¹²44¸ö×Ö·û
+	å…±44ä¸ªå­—ç¬¦
 	
-	À¶ÑÀ¶Ï¿ªÊ±·¢ËÍµÄ×Ö·û
+	è“ç‰™æ–­å¼€æ—¶å‘é€çš„å­—ç¬¦
 	+DISC:SUCCESS\r\n
 	+READY\r\n
 	+PAIRABLE\r\n
-	¹²34¸ö×Ö·û
+	å…±34ä¸ªå­—ç¬¦
 	\r -> 0x0D
 	\n -> 0x0A
 	*/
 	
-	static u8 pointer = 0; //À¶ÑÀ½ÓÊÜÊ±Ö¸Õë¼ÇÂ¼Æ÷
-	static u8 bt_line = 0; //±íÊ¾ÏÖÔÚÔÚµÚ¼¸ĞĞ
+	static u8 pointer = 0; //è“ç‰™æ¥å—æ—¶æŒ‡é’ˆè®°å½•å™¨
+	static u8 bt_line = 0; //è¡¨ç¤ºç°åœ¨åœ¨ç¬¬å‡ è¡Œ
 	static u8 disconnect = 0;
 	static u8 connect = 0;
 	
-	//¶Ï¿ªÁ¬½Ó
+	//æ–­å¼€è¿æ¥
 	static char* BlueTooth_Disconnect[3]={"+DISC:SUCCESS\r\n","+READY\r\n","+PAIRABLE\r\n"};
 	
-	//¿ªÊ¼Á¬½Ó
+	//å¼€å§‹è¿æ¥
 	static char* BlueTooth_Connect[2]={"+CONNECTING<<00:00:00:00:00:00\r\n","+CONNECTED\r\n"};
 
 
-	//ÌØÊâ±êÊ¶·û£¬¿ªÊ¼¾¯Ìè(Ê¹ÓÃÊ±Òª-1)
+	//ç‰¹æ®Šæ ‡è¯†ç¬¦ï¼Œå¼€å§‹è­¦æƒ•(ä½¿ç”¨æ—¶è¦-1)
 	if(uart_recv=='+') 
 	{
-		bt_line++,pointer=0; //ÊÕµ½¡®+¡¯£¬±íÊ¾ÇĞ»»ÁËĞĞÊı	
+		bt_line++,pointer=0; //æ”¶åˆ°â€˜+â€™ï¼Œè¡¨ç¤ºåˆ‡æ¢äº†è¡Œæ•°	
 		disconnect++,connect++;
-		return 1;//×¥°ü£¬½ûÖ¹¿ØÖÆ
+		return 1;//æŠ“åŒ…ï¼Œç¦æ­¢æ§åˆ¶
 	}
 
 	if(bt_line!=0) 
 	{	
 		pointer++;
 
-		//¿ªÊ¼×·×ÙÊı¾İÊÇ·ñ·ûºÏ¶Ï¿ªµÄÌØÕ÷£¬·ûºÏÊ±È«²¿ÆÁ±Î£¬²»·ûºÏÊ±È¡ÏûÆÁ±Î
+		//å¼€å§‹è¿½è¸ªæ•°æ®æ˜¯å¦ç¬¦åˆæ–­å¼€çš„ç‰¹å¾ï¼Œç¬¦åˆæ—¶å…¨éƒ¨å±è”½ï¼Œä¸ç¬¦åˆæ—¶å–æ¶ˆå±è”½
 		if(uart_recv == BlueTooth_Disconnect[bt_line-1][pointer])
 		{
 			disconnect++;
 			if(disconnect==34) disconnect=0,connect=0,bt_line=0,pointer=0;
-			return 1;//×¥°ü£¬½ûÖ¹¿ØÖÆ
+			return 1;//æŠ“åŒ…ï¼Œç¦æ­¢æ§åˆ¶
 		}			
 
-		//×·×ÙÁ¬½ÓÌØÕ÷ (bt_line==1&&connect>=13)Çø¶ÎÊÇÀ¶ÑÀMACµØÖ·£¬Ã¿Ò»¸öÀ¶ÑÀMACµØÖ·¶¼²»ÏàÍ¬£¬ËùÒÔÖ±½ÓÆÁ±Î¹ıÈ¥
+		//è¿½è¸ªè¿æ¥ç‰¹å¾ (bt_line==1&&connect>=13)åŒºæ®µæ˜¯è“ç‰™MACåœ°å€ï¼Œæ¯ä¸€ä¸ªè“ç‰™MACåœ°å€éƒ½ä¸ç›¸åŒï¼Œæ‰€ä»¥ç›´æ¥å±è”½è¿‡å»
 		else if(uart_recv == BlueTooth_Connect[bt_line-1][pointer] || (bt_line==1&&connect>=13) )
 		{		
 			connect++;
 			if(connect==44) connect=0,disconnect=0,bt_line=0,pointer=0;		
-			return 1;//×¥°ü£¬½ûÖ¹¿ØÖÆ
+			return 1;//æŠ“åŒ…ï¼Œç¦æ­¢æ§åˆ¶
 		}	
 
-		//ÔÚ×¥°üÆÚ¼äÊÕµ½ÆäËûÃüÁî£¬Í£Ö¹×¥°ü
+		//åœ¨æŠ“åŒ…æœŸé—´æ”¶åˆ°å…¶ä»–å‘½ä»¤ï¼Œåœæ­¢æŠ“åŒ…
 		else
 		{
 			disconnect = 0;
 			connect = 0;
 			bt_line = 0;		
 			pointer = 0;
-			return 0;//·Ç½ûÖ¹Êı¾İ£¬¿ÉÒÔ¿ØÖÆ
+			return 0;//éç¦æ­¢æ•°æ®ï¼Œå¯ä»¥æ§åˆ¶
 		}			
 	}
 	
-	return 0;//·Ç½ûÖ¹Êı¾İ£¬¿ÉÒÔ¿ØÖÆ
+	return 0;//éç¦æ­¢æ•°æ®ï¼Œå¯ä»¥æ§åˆ¶
 }
 
-//Èí¸´Î»½øBootLoaderÇøÓò
+//è½¯å¤ä½è¿›BootLoaderåŒºåŸŸ
 void _System_Reset_(u8 uart_recv)
 {
 	static u8 res_buf[5];
@@ -778,10 +778,10 @@ void _System_Reset_(u8 uart_recv)
 	if(res_count==5)
 	{
 		res_count = 0;
-		//½ÓÊÜµ½ÉÏÎ»»úÇëÇóµÄ¸´Î»×Ö·û¡°reset¡±£¬Ö´ĞĞÈí¼ş¸´Î»
+		//æ¥å—åˆ°ä¸Šä½æœºè¯·æ±‚çš„å¤ä½å­—ç¬¦â€œresetâ€ï¼Œæ‰§è¡Œè½¯ä»¶å¤ä½
 		if( res_buf[0]=='r'&&res_buf[1]=='e'&&res_buf[2]=='s'&&res_buf[3]=='e'&&res_buf[4]=='t' )
 		{
-			NVIC_SystemReset();//½øĞĞÈí¼ş¸´Î»£¬¸´Î»ºóÖ´ĞĞ BootLoader ³ÌĞò
+			NVIC_SystemReset();//è¿›è¡Œè½¯ä»¶å¤ä½ï¼Œå¤ä½åæ‰§è¡Œ BootLoader ç¨‹åº
 		}
 	}
 }

@@ -4,26 +4,26 @@
 #include "system.h"
 
 
-#define Follow_Distance 1600  //¸úËæ¾àÀë
-#define Keep_Follow_Distance 500  //¸úËæ±£³Ö¾àÀë
+#define Follow_Distance 1600  //è·Ÿéšè·ç¦»
+#define Keep_Follow_Distance 500  //è·Ÿéšä¿æŒè·ç¦»
 
 
-#define Avoid_Min_Distance 250  //±ÜÕÏ×îĞ¡¾àÀë
-#define Avoid_Distance 450     //±ÜÕÏ¾àÀë
-#define forward_velocity 0.3  //Move_XËÙ¶È
+#define Avoid_Min_Distance 250  //é¿éšœæœ€å°è·ç¦»
+#define Avoid_Distance 450     //é¿éšœè·ç¦»
+#define forward_velocity 0.3  //Move_Xé€Ÿåº¦
 
-#define corner_velocity 0.5    //Move_YËÙ¶È
-#define other_corner_velocity 1.5    //Move_YËÙ¶È
+#define corner_velocity 0.5    //Move_Yé€Ÿåº¦
+#define other_corner_velocity 1.5    //Move_Yé€Ÿåº¦
 
-#define amplitude_limiting 0.6   //ËÙ¶ÈÏŞ·ù
+#define amplitude_limiting 0.6   //é€Ÿåº¦é™å¹…
 
-#define limit_distance 100   //ÏŞÖÆ×ßÖ±ÏßÄ£Ê½ÏÂÀ×´ïÌ½²â¾àÀë
+#define limit_distance 100   //é™åˆ¶èµ°ç›´çº¿æ¨¡å¼ä¸‹é›·è¾¾æ¢æµ‹è·ç¦»
 
-#define BALANCE_TASK_PRIO		4     //Task priority //ÈÎÎñÓÅÏÈ¼¶
-#define BALANCE_STK_SIZE 		512   //Task stack size //ÈÎÎñ¶ÑÕ»´óĞ¡
+#define BALANCE_TASK_PRIO		4     //Task priority //ä»»åŠ¡ä¼˜å…ˆçº§
+#define BALANCE_STK_SIZE 		512   //Task stack size //ä»»åŠ¡å †æ ˆå¤§å°
 
 //Parameter of kinematics analysis of omnidirectional trolley
-//È«ÏòÂÖĞ¡³µÔË¶¯Ñ§·ÖÎö²ÎÊı
+//å…¨å‘è½®å°è½¦è¿åŠ¨å­¦åˆ†æå‚æ•°
 #define X_PARAMETER    (sqrt(3)/2.f)               
 #define Y_PARAMETER    (0.5f)    
 #define L_PARAMETER    (1.0f)
@@ -31,15 +31,15 @@
 
 
 
-#define RC_Avoid_ON     1	//¿ªÆôÒ£¿Ø±ÜÕÏ
+#define RC_Avoid_ON     1	//å¼€å¯é¥æ§é¿éšœ
 #define RC_Avoid_OFF    0
 
-#define Lidar_Detect_ON						1				//µç´ÅÑ²ÏßÊÇ·ñ¿ªÆôÀ×´ï¼ì²âÕÏ°­Îï
+#define Lidar_Detect_ON						1				//ç”µç£å·¡çº¿æ˜¯å¦å¼€å¯é›·è¾¾æ£€æµ‹éšœç¢ç‰©
 #define Lidar_Detect_OFF					0
 #define Barrier_Detected						1
 #define No_Barrier								0
 
-//Ğ¡³µ¸÷Ä£Ê½¶¨Òå
+//å°è½¦å„æ¨¡å¼å®šä¹‰
 #define PS2_Control_Mode					1
 #define APP_Control_Mode          0
 #define Lidar_Avoid_Mode					2
@@ -48,20 +48,20 @@
 #define CCD_Line_Patrol_Mode			5
 #define Lidar_Along_Mode				  4	
 
-//Ö¸Ê¾Ò£¿Ø¿ØÖÆµÄ¿ª¹Ø
+//æŒ‡ç¤ºé¥æ§æ§åˆ¶çš„å¼€å…³
 #define RC_ON								1	
 #define RC_OFF								0
-//Ò£¿Ø¿ØÖÆÇ°ºóËÙ¶È×î´óÖµ
+//é¥æ§æ§åˆ¶å‰åé€Ÿåº¦æœ€å¤§å€¼
 #define MAX_RC_Velocity						1.230f
-//Ò£¿Ø¿ØÖÆ×ªÏòËÙ¶È×î´óÖµ
+//é¥æ§æ§åˆ¶è½¬å‘é€Ÿåº¦æœ€å¤§å€¼
 #define	MAX_RC_Turn_Bias					2.27f
-//Ò£¿Ø¿ØÖÆÇ°ºóËÙ¶È×îĞ¡Öµ
+//é¥æ§æ§åˆ¶å‰åé€Ÿåº¦æœ€å°å€¼
 #define MINI_RC_Velocity					0.1f
-//Ò£¿Ø¿ØÖÆ×ªÏòËÙ¶È×îĞ¡Öµ
+//é¥æ§æ§åˆ¶è½¬å‘é€Ÿåº¦æœ€å°å€¼
 #define	MINI_RC_Turn_Velocity				0.2f
-//Ç°½ø¼Ó¼õËÙ·ù¶ÈÖµ£¬Ã¿´ÎÒ£¿Ø¼Ó¼õµÄ²½½øÖµ
+//å‰è¿›åŠ å‡é€Ÿå¹…åº¦å€¼ï¼Œæ¯æ¬¡é¥æ§åŠ å‡çš„æ­¥è¿›å€¼
 #define X_Step								0.08f
-//×ªÍä¼Ó¼õËÙ·ù¶ÈÖµ
+//è½¬å¼¯åŠ å‡é€Ÿå¹…åº¦å€¼
 #define Z_Step								0.2f
 
 extern uint8_t Lidar_Detect;

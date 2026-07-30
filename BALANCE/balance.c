@@ -1,29 +1,29 @@
 #include "balance.h"
 
-//int Time_count=0; //Time variable //¼ÆÊ±±äÁ¿ 
+//int Time_count=0; //Time variable //è®¡æ—¶å˜é‡ 
 
-u8 Lidar_Detect = Lidar_Detect_ON;			//µç´ÅÑ²ÏßÄ£Ê½À×´ï¼ì²âÕÏ°­Îï£¬Ä¬ÈÏ¿ªÆô
-int RC_Lidar_Avoid_FLAG = RC_Avoid_OFF;			//Ò£¿ØÄ£Ê½À×´ï±ÜÕÏ£¬Ä¬ÈÏ¹Ø±Õ
+u8 Lidar_Detect = Lidar_Detect_ON;			//ç”µç£å·¡çº¿æ¨¡å¼é›·è¾¾æ£€æµ‹éšœç¢ç‰©ï¼Œé»˜è®¤å¼€å¯
+int RC_Lidar_Avoid_FLAG = RC_Avoid_OFF;			//é¥æ§æ¨¡å¼é›·è¾¾é¿éšœï¼Œé»˜è®¤å…³é—­
 u8 Mode;
 float RC_Velocity_CCD=350,RC_Velocity_ELE=350; 
-float PS2_Velocity=350,PS2_Turn_Velocity;			//Ò£¿Ø¿ØÖÆµÄËÙ¶È
-Encoder OriginalEncoder; //Encoder raw data //±àÂëÆ÷Ô­Ê¼Êı¾İ    
-u8 Lidar_Success_Receive_flag=0,Lidar_flag_count=0;//À×´ïÔÚÏß±êÖ¾Î»£¬À×´ïµôÏß¼ÆÊıÆ÷
+float PS2_Velocity=350,PS2_Turn_Velocity;			//é¥æ§æ§åˆ¶çš„é€Ÿåº¦
+Encoder OriginalEncoder; //Encoder raw data //ç¼–ç å™¨åŸå§‹æ•°æ®    
+u8 Lidar_Success_Receive_flag=0,Lidar_flag_count=0;//é›·è¾¾åœ¨çº¿æ ‡å¿—ä½ï¼Œé›·è¾¾æ‰çº¿è®¡æ•°å™¨
 
 // Robot mode is wrong to detect flag bits
-//»úÆ÷ÈËÄ£Ê½ÊÇ·ñ³ö´í¼ì²â±êÖ¾Î»
+//æœºå™¨äººæ¨¡å¼æ˜¯å¦å‡ºé”™æ£€æµ‹æ ‡å¿—ä½
 int robot_mode_check_flag=0; 
 
 short test_num;
 u8 command_lost_count=0;//
 
-Encoder OriginalEncoder; //Encoder raw data //±àÂëÆ÷Ô­Ê¼Êı¾İ     
+Encoder OriginalEncoder; //Encoder raw data //ç¼–ç å™¨åŸå§‹æ•°æ®     
 
-//========== PWMÇå³ıÊ¹ÓÃ±äÁ¿ ==========//
-u8 start_check_flag = 0;//±ê¼ÇÊÇ·ñĞèÒªÇå¿ÕPWM
+//========== PWMæ¸…é™¤ä½¿ç”¨å˜é‡ ==========//
+u8 start_check_flag = 0;//æ ‡è®°æ˜¯å¦éœ€è¦æ¸…ç©ºPWM
 u8 wait_clear_times = 0;
-u8 start_clear = 0;     //±ê¼Ç¿ªÊ¼Çå³ıPWM
-u8 clear_done_once = 0; //Çå³ıÍê³É±êÖ¾Î»
+u8 start_clear = 0;     //æ ‡è®°å¼€å§‹æ¸…é™¤PWM
+u8 clear_done_once = 0; //æ¸…é™¤å®Œæˆæ ‡å¿—ä½
 u16 clear_again_times = 0;
 float debug_show_diff = 0;
 //void auto_pwm_clear(void);
@@ -35,42 +35,42 @@ volatile u8 clear_state = 0x00;
 Function: The inverse kinematics solution is used to calculate the target speed of each wheel according to the target speed of three axes
 Input   : X and Y, Z axis direction of the target movement speed
 Output  : none
-º¯Êı¹¦ÄÜ£ºÔË¶¯Ñ§Äæ½â£¬¸ù¾İÈıÖáÄ¿±êËÙ¶È¼ÆËã¸÷³µÂÖÄ¿±ê×ªËÙ
-Èë¿Ú²ÎÊı£ºXºÍY¡¢ZÖá·½ÏòµÄÄ¿±êÔË¶¯ËÙ¶È
-·µ»Ø  Öµ£ºÎŞ
+å‡½æ•°åŠŸèƒ½ï¼šè¿åŠ¨å­¦é€†è§£ï¼Œæ ¹æ®ä¸‰è½´ç›®æ ‡é€Ÿåº¦è®¡ç®—å„è½¦è½®ç›®æ ‡è½¬é€Ÿ
+å…¥å£å‚æ•°ï¼šXå’ŒYã€Zè½´æ–¹å‘çš„ç›®æ ‡è¿åŠ¨é€Ÿåº¦
+è¿”å›  å€¼ï¼šæ— 
 **************************************************************************/
 void Drive_Motor(float Vx,float Vy,float Vz)
 {
-		float amplitude=3.5; //Wheel target speed limit //³µÂÖÄ¿±êËÙ¶ÈÏŞ·ù
+		float amplitude=3.5; //Wheel target speed limit //è½¦è½®ç›®æ ‡é€Ÿåº¦é™å¹…
 	
 	  //Speed smoothing is enabled when moving the omnidirectional trolley
-	  //È«ÏòÒÆ¶¯Ğ¡³µ²Å¿ªÆôËÙ¶ÈÆ½»¬´¦Àí
-	if((Mode == PS2_Control_Mode||Mode == APP_Control_Mode)&&RC_Lidar_Avoid_FLAG&&Lidar_Success_Receive_flag)//appÒÔ¼°ps2¿ØÖÆÏÂ£¬ÅĞ¶ÏÊÇ·ñ¿ªÆôÒ£¿Ø±ÜÕÏ
+	  //å…¨å‘ç§»åŠ¨å°è½¦æ‰å¼€å¯é€Ÿåº¦å¹³æ»‘å¤„ç†
+	if((Mode == PS2_Control_Mode||Mode == APP_Control_Mode)&&RC_Lidar_Avoid_FLAG&&Lidar_Success_Receive_flag)//appä»¥åŠps2æ§åˆ¶ä¸‹ï¼Œåˆ¤æ–­æ˜¯å¦å¼€å¯é¥æ§é¿éšœ
 	{
 		RC_Lidar_Aviod(&Vx,&Vy,&Vz);
 	}
 	  if(Car_Mode==Mec_Car||Car_Mode==Omni_Car)
 		{
-			Smooth_control(Vx,Vy,Vz); //Smoothing the input speed //¶ÔÊäÈëËÙ¶È½øĞĞÆ½»¬´¦Àí
+			Smooth_control(Vx,Vy,Vz); //Smoothing the input speed //å¯¹è¾“å…¥é€Ÿåº¦è¿›è¡Œå¹³æ»‘å¤„ç†
   
       //Get the smoothed data 
-			//»ñÈ¡Æ½»¬´¦ÀíºóµÄÊı¾İ			
+			//è·å–å¹³æ»‘å¤„ç†åçš„æ•°æ®			
 			Vx=smooth_control.VX;     
 			Vy=smooth_control.VY;
 			Vz=smooth_control.VZ;
 		}
 		
 		//Mecanum wheel car
-	  //Âó¿ËÄÉÄ·ÂÖĞ¡³µ
+	  //éº¦å…‹çº³å§†è½®å°è½¦
 	  if (Car_Mode==Mec_Car) 
     {
-			//Inverse kinematics //ÔË¶¯Ñ§Äæ½â
+			//Inverse kinematics //è¿åŠ¨å­¦é€†è§£
 			MOTOR_A.Target   = +Vy+Vx-Vz*(Axle_spacing+Wheel_spacing);
 			MOTOR_B.Target   = -Vy+Vx-Vz*(Axle_spacing+Wheel_spacing);
 			MOTOR_C.Target   = +Vy+Vx+Vz*(Axle_spacing+Wheel_spacing);
 			MOTOR_D.Target   = -Vy+Vx+Vz*(Axle_spacing+Wheel_spacing);
 		
-			//Wheel (motor) target speed limit //³µÂÖ(µç»ú)Ä¿±êËÙ¶ÈÏŞ·ù
+			//Wheel (motor) target speed limit //è½¦è½®(ç”µæœº)ç›®æ ‡é€Ÿåº¦é™å¹…
 			MOTOR_A.Target=target_limit_float(MOTOR_A.Target,-amplitude,amplitude); 
 			MOTOR_B.Target=target_limit_float(MOTOR_B.Target,-amplitude,amplitude); 
 			MOTOR_C.Target=target_limit_float(MOTOR_C.Target,-amplitude,amplitude); 
@@ -78,38 +78,38 @@ void Drive_Motor(float Vx,float Vy,float Vz)
 		} 
 		
 		//Omni car
-		//È«ÏòÂÖĞ¡³µ
+		//å…¨å‘è½®å°è½¦
 		else if (Car_Mode==Omni_Car) 
 		{
-			//Inverse kinematics //ÔË¶¯Ñ§Äæ½â
+			//Inverse kinematics //è¿åŠ¨å­¦é€†è§£
 			MOTOR_A.Target   =   Vy + Omni_turn_radiaus*Vz;
 			MOTOR_B.Target   =  -X_PARAMETER*Vx - Y_PARAMETER*Vy + Omni_turn_radiaus*Vz;
 			MOTOR_C.Target   =  +X_PARAMETER*Vx - Y_PARAMETER*Vy + Omni_turn_radiaus*Vz;
 		
-			//Wheel (motor) target speed limit //³µÂÖ(µç»ú)Ä¿±êËÙ¶ÈÏŞ·ù
+			//Wheel (motor) target speed limit //è½¦è½®(ç”µæœº)ç›®æ ‡é€Ÿåº¦é™å¹…
 			MOTOR_A.Target=target_limit_float(MOTOR_A.Target,-amplitude,amplitude); 
 			MOTOR_B.Target=target_limit_float(MOTOR_B.Target,-amplitude,amplitude); 
 			MOTOR_C.Target=target_limit_float(MOTOR_C.Target,-amplitude,amplitude); 
-			MOTOR_D.Target=0;	//Out of use //Ã»ÓĞÊ¹ÓÃµ½
+			MOTOR_D.Target=0;	//Out of use //æ²¡æœ‰ä½¿ç”¨åˆ°
 		}
 		
 		//Ackermann structure car
-		//°¢¿ËÂüĞ¡³µ
+		//é˜¿å…‹æ›¼å°è½¦
 		else if (Car_Mode==Akm_Car) 
 		{
-			//Ackerman car specific related variables //°¢¿ËÂüĞ¡³µ×¨ÓÃÏà¹Ø±äÁ¿
+			//Ackerman car specific related variables //é˜¿å…‹æ›¼å°è½¦ä¸“ç”¨ç›¸å…³å˜é‡
 			float R, Ratio=636.56, AngleR, Angle_Servo;
 			
 			// For Ackerman small car, Vz represents the front wheel steering Angle
-			//¶ÔÓÚ°¢¿ËÂüĞ¡³µVz´ú±íÓÒÇ°ÂÖ×ªÏò½Ç¶È
+			//å¯¹äºé˜¿å…‹æ›¼å°è½¦Vzä»£è¡¨å³å‰è½®è½¬å‘è§’åº¦
 			AngleR=Vz;
 			R=Axle_spacing/tan(AngleR)-0.5f*Wheel_spacing;
 			
 			// Front wheel steering Angle limit (front wheel steering Angle controlled by steering engine), unit: rad
-			//Ç°ÂÖ×ªÏò½Ç¶ÈÏŞ·ù(¶æ»ú¿ØÖÆÇ°ÂÖ×ªÏò½Ç¶È)£¬µ¥Î»£ºrad
+			//å‰è½®è½¬å‘è§’åº¦é™å¹…(èˆµæœºæ§åˆ¶å‰è½®è½¬å‘è§’åº¦)ï¼Œå•ä½ï¼šrad
 			AngleR=target_limit_float(AngleR,-0.49f,0.32f);
 			
-			//Inverse kinematics //ÔË¶¯Ñ§Äæ½â
+			//Inverse kinematics //è¿åŠ¨å­¦é€†è§£
 			if(AngleR!=0)
 			{
 				MOTOR_A.Target = Vx*(R-0.5f*Wheel_spacing)/R;
@@ -121,46 +121,46 @@ void Drive_Motor(float Vx,float Vy,float Vz)
 				MOTOR_B.Target = Vx;
 			}
 			// The PWM value of the servo controls the steering Angle of the front wheel
-			//¶æ»úPWMÖµ£¬¶æ»ú¿ØÖÆÇ°ÂÖ×ªÏò½Ç¶È
+			//èˆµæœºPWMå€¼ï¼Œèˆµæœºæ§åˆ¶å‰è½®è½¬å‘è§’åº¦
 			//Angle_Servo    =  -0.628f*pow(AngleR, 3) + 1.269f*pow(AngleR, 2) - 1.772f*AngleR + 1.573f;
 			Angle_Servo    =  -0.628f*pow(AngleR, 3) + 1.269f*pow(AngleR, 2) - 1.772f*AngleR + 1.755f;
 			Servo=SERVO_INIT + (Angle_Servo - 1.755f)*Ratio;
 
 			
-			//Wheel (motor) target speed limit //³µÂÖ(µç»ú)Ä¿±êËÙ¶ÈÏŞ·ù
+			//Wheel (motor) target speed limit //è½¦è½®(ç”µæœº)ç›®æ ‡é€Ÿåº¦é™å¹…
 			MOTOR_A.Target=target_limit_float(MOTOR_A.Target,-amplitude,amplitude); 
 			MOTOR_B.Target=target_limit_float(MOTOR_B.Target,-amplitude,amplitude); 
-			MOTOR_C.Target=0; //Out of use //Ã»ÓĞÊ¹ÓÃµ½
-			MOTOR_D.Target=0; //Out of use //Ã»ÓĞÊ¹ÓÃµ½
-			Servo=target_limit_int(Servo,800,2200);	//Servo PWM value limit //¶æ»úPWMÖµÏŞ·ù
+			MOTOR_C.Target=0; //Out of use //æ²¡æœ‰ä½¿ç”¨åˆ°
+			MOTOR_D.Target=0; //Out of use //æ²¡æœ‰ä½¿ç”¨åˆ°
+			Servo=target_limit_int(Servo,800,2200);	//Servo PWM value limit //èˆµæœºPWMå€¼é™å¹…
 			}
 		
 		//Differential car
-		//²îËÙĞ¡³µ
+		//å·®é€Ÿå°è½¦
 		else if (Car_Mode==Diff_Car) 
 		{
-			//Inverse kinematics //ÔË¶¯Ñ§Äæ½â
-			MOTOR_A.Target  = Vx - Vz * Wheel_spacing / 2.0f; //¼ÆËã³ö×óÂÖµÄÄ¿±êËÙ¶È
-		  MOTOR_B.Target =  Vx + Vz * Wheel_spacing / 2.0f; //¼ÆËã³öÓÒÂÖµÄÄ¿±êËÙ¶È
-			//Wheel (motor) target speed limit //³µÂÖ(µç»ú)Ä¿±êËÙ¶ÈÏŞ·ù
+			//Inverse kinematics //è¿åŠ¨å­¦é€†è§£
+			MOTOR_A.Target  = Vx - Vz * Wheel_spacing / 2.0f; //è®¡ç®—å‡ºå·¦è½®çš„ç›®æ ‡é€Ÿåº¦
+		  MOTOR_B.Target =  Vx + Vz * Wheel_spacing / 2.0f; //è®¡ç®—å‡ºå³è½®çš„ç›®æ ‡é€Ÿåº¦
+			//Wheel (motor) target speed limit //è½¦è½®(ç”µæœº)ç›®æ ‡é€Ÿåº¦é™å¹…
 		  MOTOR_A.Target=target_limit_float( MOTOR_A.Target,-amplitude,amplitude); 
 	    MOTOR_B.Target=target_limit_float( MOTOR_B.Target,-amplitude,amplitude); 
-			MOTOR_C.Target=0; //Out of use //Ã»ÓĞÊ¹ÓÃµ½
-			MOTOR_D.Target=0; //Out of use //Ã»ÓĞÊ¹ÓÃµ½
+			MOTOR_C.Target=0; //Out of use //æ²¡æœ‰ä½¿ç”¨åˆ°
+			MOTOR_D.Target=0; //Out of use //æ²¡æœ‰ä½¿ç”¨åˆ°
 			
 		}
 		
 		//FourWheel car
-		//ËÄÇı³µ
+		//å››é©±è½¦
 		else if(Car_Mode==FourWheel_Car) 
 		{	
-			//Inverse kinematics //ÔË¶¯Ñ§Äæ½â
-			MOTOR_A.Target  = Vx - Vz * (Wheel_spacing +  Axle_spacing) / 2.0f; //¼ÆËã³ö×óÂÖµÄÄ¿±êËÙ¶È
-			MOTOR_B.Target  = Vx - Vz * (Wheel_spacing +  Axle_spacing) / 2.0f; //¼ÆËã³ö×óÂÖµÄÄ¿±êËÙ¶È
-			MOTOR_C.Target  = Vx + Vz * (Wheel_spacing +  Axle_spacing) / 2.0f; //¼ÆËã³öÓÒÂÖµÄÄ¿±êËÙ¶È
-			MOTOR_D.Target  = Vx + Vz * (Wheel_spacing +  Axle_spacing) / 2.0f; //¼ÆËã³öÓÒÂÖµÄÄ¿±êËÙ¶È
+			//Inverse kinematics //è¿åŠ¨å­¦é€†è§£
+			MOTOR_A.Target  = Vx - Vz * (Wheel_spacing +  Axle_spacing) / 2.0f; //è®¡ç®—å‡ºå·¦è½®çš„ç›®æ ‡é€Ÿåº¦
+			MOTOR_B.Target  = Vx - Vz * (Wheel_spacing +  Axle_spacing) / 2.0f; //è®¡ç®—å‡ºå·¦è½®çš„ç›®æ ‡é€Ÿåº¦
+			MOTOR_C.Target  = Vx + Vz * (Wheel_spacing +  Axle_spacing) / 2.0f; //è®¡ç®—å‡ºå³è½®çš„ç›®æ ‡é€Ÿåº¦
+			MOTOR_D.Target  = Vx + Vz * (Wheel_spacing +  Axle_spacing) / 2.0f; //è®¡ç®—å‡ºå³è½®çš„ç›®æ ‡é€Ÿåº¦
 					
-			//Wheel (motor) target speed limit //³µÂÖ(µç»ú)Ä¿±êËÙ¶ÈÏŞ·ù
+			//Wheel (motor) target speed limit //è½¦è½®(ç”µæœº)ç›®æ ‡é€Ÿåº¦é™å¹…
 			MOTOR_A.Target=target_limit_float( MOTOR_A.Target,-amplitude,amplitude); 
 			MOTOR_B.Target=target_limit_float( MOTOR_B.Target,-amplitude,amplitude); 
 			MOTOR_C.Target=target_limit_float( MOTOR_C.Target,-amplitude,amplitude); 
@@ -168,78 +168,78 @@ void Drive_Motor(float Vx,float Vy,float Vz)
 		}
 		
 		//Tank Car
-		//ÂÄ´ø³µ
+		//å±¥å¸¦è½¦
 		else if (Car_Mode==Tank_Car) 
 		{
-			//Inverse kinematics //ÔË¶¯Ñ§Äæ½â
-			MOTOR_A.Target  = Vx - Vz * (Wheel_spacing) / 2.0f;    //¼ÆËã³ö×óÂÖµÄÄ¿±êËÙ¶È
-		  MOTOR_B.Target =  Vx + Vz * (Wheel_spacing) / 2.0f;    //¼ÆËã³öÓÒÂÖµÄÄ¿±êËÙ¶È
+			//Inverse kinematics //è¿åŠ¨å­¦é€†è§£
+			MOTOR_A.Target  = Vx - Vz * (Wheel_spacing) / 2.0f;    //è®¡ç®—å‡ºå·¦è½®çš„ç›®æ ‡é€Ÿåº¦
+		  MOTOR_B.Target =  Vx + Vz * (Wheel_spacing) / 2.0f;    //è®¡ç®—å‡ºå³è½®çš„ç›®æ ‡é€Ÿåº¦
 			
-			//Wheel (motor) target speed limit //³µÂÖ(µç»ú)Ä¿±êËÙ¶ÈÏŞ·ù
+			//Wheel (motor) target speed limit //è½¦è½®(ç”µæœº)ç›®æ ‡é€Ÿåº¦é™å¹…
 		  MOTOR_A.Target=target_limit_float( MOTOR_A.Target,-amplitude,amplitude); 
 	    MOTOR_B.Target=target_limit_float( MOTOR_B.Target,-amplitude,amplitude); 
-			MOTOR_C.Target=0; //Out of use //Ã»ÓĞÊ¹ÓÃµ½
-			MOTOR_D.Target=0; //Out of use //Ã»ÓĞÊ¹ÓÃµ½
+			MOTOR_C.Target=0; //Out of use //æ²¡æœ‰ä½¿ç”¨åˆ°
+			MOTOR_D.Target=0; //Out of use //æ²¡æœ‰ä½¿ç”¨åˆ°
 		}
 }
 /**************************************************************************
 Function: FreerTOS task, core motion control task
 Input   : none
 Output  : none
-º¯Êı¹¦ÄÜ£ºFreeRTOSÈÎÎñ£¬ºËĞÄÔË¶¯¿ØÖÆÈÎÎñ
-Èë¿Ú²ÎÊı£ºÎŞ
-·µ»Ø  Öµ£ºÎŞ
+å‡½æ•°åŠŸèƒ½ï¼šFreeRTOSä»»åŠ¡ï¼Œæ ¸å¿ƒè¿åŠ¨æ§åˆ¶ä»»åŠ¡
+å…¥å£å‚æ•°ï¼šæ— 
+è¿”å›  å€¼ï¼šæ— 
 **************************************************************************/
 void Balance_task(void *pvParameters)
 { 
-//	static u8 Count_CCD = 0;								//µ÷½ÚCCD¿ØÖÆÆµÂÊ
+//	static u8 Count_CCD = 0;								//è°ƒèŠ‚CCDæ§åˆ¶é¢‘ç‡
 	static u8 last_mode = 0;
 	u32 lastWakeTime = getSysTickCnt();
 
 	while(1)
 	{	
 		// This task runs at a frequency of 100Hz (10ms control once)
-		//´ËÈÎÎñÒÔ100HzµÄÆµÂÊÔËĞĞ£¨10ms¿ØÖÆÒ»´Î£©
+		//æ­¤ä»»åŠ¡ä»¥100Hzçš„é¢‘ç‡è¿è¡Œï¼ˆ10msæ§åˆ¶ä¸€æ¬¡ï¼‰
 		vTaskDelayUntil(&lastWakeTime, F2T(RATE_100_HZ)); 
 		//Time count is no longer needed after 30 seconds
-		//Ê±¼ä¼ÆÊı£¬30Ãëºó²»ÔÙĞèÒª
+		//æ—¶é—´è®¡æ•°ï¼Œ30ç§’åä¸å†éœ€è¦
 		if(SysVal.Time_count<3000)SysVal.Time_count++;
 		//Get the encoder data, that is, the real time wheel speed, 
 		//and convert to transposition international units
-		//»ñÈ¡±àÂëÆ÷Êı¾İ£¬¼´³µÂÖÊµÊ±ËÙ¶È£¬²¢×ª»»Î»¹ú¼Êµ¥Î»
+		//è·å–ç¼–ç å™¨æ•°æ®ï¼Œå³è½¦è½®å®æ—¶é€Ÿåº¦ï¼Œå¹¶è½¬æ¢ä½å›½é™…å•ä½
 		Get_Velocity_Form_Encoder();   
 
-		if(++Lidar_flag_count==10) Lidar_Success_Receive_flag=0,Lidar_flag_count=0,RC_Lidar_Avoid_FLAG=RC_Avoid_OFF; //100msÇåÁãÀ×´ï½ÓÊÕµ½Êı¾İ±êÖ¾Î»
+		if(++Lidar_flag_count==10) Lidar_Success_Receive_flag=0,Lidar_flag_count=0,RC_Lidar_Avoid_FLAG=RC_Avoid_OFF; //100msæ¸…é›¶é›·è¾¾æ¥æ”¶åˆ°æ•°æ®æ ‡å¿—ä½
 		switch(click_N_Double(50))
 		{
-			case 1:    //µ¥»÷ÓÃÀ´ÇĞ»»Ä£Ê½
+			case 1:    //å•å‡»ç”¨æ¥åˆ‡æ¢æ¨¡å¼
 				Mode+=1;
-				if(Mode == ELE_Line_Patrol_Mode)			//Ñ¡Ôñµç´ÅÑ²Ïß¿ØÖÆÄ£Ê½
+				if(Mode == ELE_Line_Patrol_Mode)			//é€‰æ‹©ç”µç£å·¡çº¿æ§åˆ¶æ¨¡å¼
 				{
-						ele_Init();							//³õÊ¼»¯ELE
+						ele_Init();							//åˆå§‹åŒ–ELE
 				}
-				else if(Mode == CCD_Line_Patrol_Mode)			//Ñ¡Ôñµç´ÅÑ²Ïß¿ØÖÆÄ£Ê½
+				else if(Mode == CCD_Line_Patrol_Mode)			//é€‰æ‹©ç”µç£å·¡çº¿æ§åˆ¶æ¨¡å¼
 				{
-						ccd_Init();							//³õÊ¼»¯ELE
+						ccd_Init();							//åˆå§‹åŒ–ELE
 				}
 				if(Mode>6)						Mode = 0;
 				 break;
-			case 2:    //µç´ÅÑ²Ïß×´Ì¬Ê±£¬Ë«»÷¿ÉÒÔ´ò¿ª/¹Ø±ÕÀ×´ï¼ì²âÕÏ°­Îï£¬Ä¬ÈÏ´ò¿ª
-				if(Mode == ELE_Line_Patrol_Mode)			//µç´ÅÑ²Ïß¿ØÖÆÄ£Ê½ÏÂ
+			case 2:    //ç”µç£å·¡çº¿çŠ¶æ€æ—¶ï¼ŒåŒå‡»å¯ä»¥æ‰“å¼€/å…³é—­é›·è¾¾æ£€æµ‹éšœç¢ç‰©ï¼Œé»˜è®¤æ‰“å¼€
+				if(Mode == ELE_Line_Patrol_Mode)			//ç”µç£å·¡çº¿æ§åˆ¶æ¨¡å¼ä¸‹
 				{
 					Lidar_Detect = !Lidar_Detect;
 					if(Lidar_Detect == Lidar_Detect_OFF)
-						memset(Dataprocess,0, sizeof(PointDataProcessDef)*225);		//ÓÃÓÚÀ×´ï¼ì²âÕÏ°­ÎïµÄÊı×éÇåÁã
+						memset(Dataprocess,0, sizeof(PointDataProcessDef)*225);		//ç”¨äºé›·è¾¾æ£€æµ‹éšœç¢ç‰©çš„æ•°ç»„æ¸…é›¶
 				}
 				else if(Mode == APP_Control_Mode||Mode ==PS2_Control_Mode){
 					RC_Lidar_Avoid_FLAG=!RC_Lidar_Avoid_FLAG;
 					if(RC_Lidar_Avoid_FLAG == RC_Avoid_OFF)
-						memset(Dataprocess,0, sizeof(PointDataProcessDef)*225);		//ÓÃÓÚÀ×´ï¼ì²âÕÏ°­ÎïµÄÊı×éÇåÁã
+						memset(Dataprocess,0, sizeof(PointDataProcessDef)*225);		//ç”¨äºé›·è¾¾æ£€æµ‹éšœç¢ç‰©çš„æ•°ç»„æ¸…é›¶
 				}
 				break;				 
 		}
 		
-		if(last_mode != Mode)  //ÇĞ»»Ä£Ê½Ê±ÆÁÄ»ÇåÁã
+		if(last_mode != Mode)  //åˆ‡æ¢æ¨¡å¼æ—¶å±å¹•æ¸…é›¶
 		{
 			last_mode++;
 			OLED_Clear();
@@ -252,11 +252,11 @@ void Balance_task(void *pvParameters)
 				
 		if(Mode != ELE_Line_Patrol_Mode)
 			Buzzer_Alarm(0);
-		if(Mode == APP_Control_Mode)          Get_RC();             //Handle the APP remote commands //´¦ÀíAPPÒ£¿ØÃüÁî
-		else if(Mode == PS2_Control_Mode)     PS2_Control();        //Handle PS2 controller commands //´¦ÀíPS2ÊÖ±ú¿ØÖÆÃüÁî
-		else if(Mode == Lidar_Avoid_Mode)     Lidar_Avoid();        //Avoid Mode //±ÜÕÏÄ£Ê½
-		else if(Mode == Lidar_Follow_Mode)    Lidar_Follow();       //Follow Mode //¸úËæÄ£Ê½
-		else if(Mode == Lidar_Along_Mode)     Lidar_along_wall();   //Along Mode //×ßÖ±ÏßÄ£Ê½
+		if(Mode == APP_Control_Mode)          Get_RC();             //Handle the APP remote commands //å¤„ç†APPé¥æ§å‘½ä»¤
+		else if(Mode == PS2_Control_Mode)     PS2_Control();        //Handle PS2 controller commands //å¤„ç†PS2æ‰‹æŸ„æ§åˆ¶å‘½ä»¤
+		else if(Mode == Lidar_Avoid_Mode)     Lidar_Avoid();        //Avoid Mode //é¿éšœæ¨¡å¼
+		else if(Mode == Lidar_Follow_Mode)    Lidar_Follow();       //Follow Mode //è·Ÿéšæ¨¡å¼
+		else if(Mode == Lidar_Along_Mode)     Lidar_along_wall();   //Along Mode //èµ°ç›´çº¿æ¨¡å¼
 		else if(Mode == CCD_Line_Patrol_Mode) Get_RC_CCD();	
 		else													
 		{
@@ -264,31 +264,31 @@ void Balance_task(void *pvParameters)
 		}					
 		//If there is no abnormity in the battery voltage, and the enable switch is in the ON position,
 		//and the software failure flag is 0
-		//Èç¹ûµç³ØµçÑ¹²»´æÔÚÒì³££¬¶øÇÒÊ¹ÄÜ¿ª¹ØÔÚONµµÎ»£¬¶øÇÒÈí¼şÊ§ÄÜ±êÖ¾Î»Îª0
+		//å¦‚æœç”µæ± ç”µå‹ä¸å­˜åœ¨å¼‚å¸¸ï¼Œè€Œä¸”ä½¿èƒ½å¼€å…³åœ¨ONæ¡£ä½ï¼Œè€Œä¸”è½¯ä»¶å¤±èƒ½æ ‡å¿—ä½ä¸º0
 		if(Turn_Off(Voltage)==0) 
 		 { 			
 			 //Speed closed-loop control to calculate the PWM value of each motor, 
 			 //PWM represents the actual wheel speed					 
-			 //ËÙ¶È±Õ»·¿ØÖÆ¼ÆËã¸÷µç»úPWMÖµ£¬PWM´ú±í³µÂÖÊµ¼Ê×ªËÙ
+			 //é€Ÿåº¦é—­ç¯æ§åˆ¶è®¡ç®—å„ç”µæœºPWMå€¼ï¼ŒPWMä»£è¡¨è½¦è½®å®é™…è½¬é€Ÿ
 			 MOTOR_A.Motor_Pwm=Incremental_PI_A(MOTOR_A.Encoder, MOTOR_A.Target);
 			 MOTOR_B.Motor_Pwm=Incremental_PI_B(MOTOR_B.Encoder, MOTOR_B.Target);
 			 MOTOR_C.Motor_Pwm=Incremental_PI_C(MOTOR_C.Encoder, MOTOR_C.Target);
 			 MOTOR_D.Motor_Pwm=Incremental_PI_D(MOTOR_D.Encoder, MOTOR_D.Target);
 			 Limit_Pwm(16500) ;
 			 //Set different PWM control polarity according to different car models
-			 //¸ù¾İ²»Í¬Ğ¡³µĞÍºÅÉèÖÃ²»Í¬µÄPWM¿ØÖÆ¼«ĞÔ
+			 //æ ¹æ®ä¸åŒå°è½¦å‹å·è®¾ç½®ä¸åŒçš„PWMæ§åˆ¶ææ€§
 			 switch(Car_Mode)
 			 {
-					case Mec_Car:       Set_Pwm(-MOTOR_A.Motor_Pwm,  -MOTOR_B.Motor_Pwm, MOTOR_C.Motor_Pwm, MOTOR_D.Motor_Pwm, 0    ); break; //Mecanum wheel car       //Âó¿ËÄÉÄ·ÂÖĞ¡³µ
-					case Omni_Car:      Set_Pwm( MOTOR_A.Motor_Pwm,  MOTOR_B.Motor_Pwm,  MOTOR_C.Motor_Pwm, MOTOR_D.Motor_Pwm, 0    ); break; //Omni car                //È«ÏòÂÖĞ¡³µ
-					case Akm_Car:       Set_Pwm(-MOTOR_A.Motor_Pwm,  MOTOR_B.Motor_Pwm,  MOTOR_C.Motor_Pwm, MOTOR_D.Motor_Pwm, Servo); break; //Ackermann structure car //°¢¿ËÂüĞ¡³µ
-					case Diff_Car:      Set_Pwm(-MOTOR_A.Motor_Pwm,  MOTOR_B.Motor_Pwm,  MOTOR_C.Motor_Pwm, MOTOR_D.Motor_Pwm, 0    ); break; //Differential car        //Á½ÂÖ²îËÙĞ¡³µ
-					case FourWheel_Car: Set_Pwm(-MOTOR_A.Motor_Pwm, -MOTOR_B.Motor_Pwm,  MOTOR_C.Motor_Pwm, MOTOR_D.Motor_Pwm, 0    ); break; //FourWheel car           //ËÄÇı³µ 
-					case Tank_Car:      Set_Pwm(-MOTOR_A.Motor_Pwm,  MOTOR_B.Motor_Pwm,  MOTOR_C.Motor_Pwm, MOTOR_D.Motor_Pwm, 0    ); break; //Tank Car                //ÂÄ´ø³µ
+					case Mec_Car:       Set_Pwm(-MOTOR_A.Motor_Pwm,  -MOTOR_B.Motor_Pwm, MOTOR_C.Motor_Pwm, MOTOR_D.Motor_Pwm, 0    ); break; //Mecanum wheel car       //éº¦å…‹çº³å§†è½®å°è½¦
+					case Omni_Car:      Set_Pwm( MOTOR_A.Motor_Pwm,  MOTOR_B.Motor_Pwm,  MOTOR_C.Motor_Pwm, MOTOR_D.Motor_Pwm, 0    ); break; //Omni car                //å…¨å‘è½®å°è½¦
+					case Akm_Car:       Set_Pwm(-MOTOR_A.Motor_Pwm,  MOTOR_B.Motor_Pwm,  MOTOR_C.Motor_Pwm, MOTOR_D.Motor_Pwm, Servo); break; //Ackermann structure car //é˜¿å…‹æ›¼å°è½¦
+					case Diff_Car:      Set_Pwm(-MOTOR_A.Motor_Pwm,  MOTOR_B.Motor_Pwm,  MOTOR_C.Motor_Pwm, MOTOR_D.Motor_Pwm, 0    ); break; //Differential car        //ä¸¤è½®å·®é€Ÿå°è½¦
+					case FourWheel_Car: Set_Pwm(-MOTOR_A.Motor_Pwm, -MOTOR_B.Motor_Pwm,  MOTOR_C.Motor_Pwm, MOTOR_D.Motor_Pwm, 0    ); break; //FourWheel car           //å››é©±è½¦ 
+					case Tank_Car:      Set_Pwm(-MOTOR_A.Motor_Pwm,  MOTOR_B.Motor_Pwm,  MOTOR_C.Motor_Pwm, MOTOR_D.Motor_Pwm, 0    ); break; //Tank Car                //å±¥å¸¦è½¦
 			 }
 		 }
 		 //If Turn_Off(Voltage) returns to 1, the car is not allowed to move, and the PWM value is set to 0
-		 //Èç¹ûTurn_Off(Voltage)·µ»ØÖµÎª1£¬²»ÔÊĞí¿ØÖÆĞ¡³µ½øĞĞÔË¶¯£¬PWMÖµÉèÖÃÎª0
+		 //å¦‚æœTurn_Off(Voltage)è¿”å›å€¼ä¸º1ï¼Œä¸å…è®¸æ§åˆ¶å°è½¦è¿›è¡Œè¿åŠ¨ï¼ŒPWMå€¼è®¾ç½®ä¸º0
 		 else	Set_Pwm(0,0,0,0,0); 
 			 	
 	}  
@@ -297,35 +297,35 @@ void Balance_task(void *pvParameters)
 Function: Assign a value to the PWM register to control wheel speed and direction
 Input   : PWM
 Output  : none
-º¯Êı¹¦ÄÜ£º¸³Öµ¸øPWM¼Ä´æÆ÷£¬¿ØÖÆ³µÂÖ×ªËÙÓë·½Ïò
-Èë¿Ú²ÎÊı£ºPWM
-·µ»Ø  Öµ£ºÎŞ
+å‡½æ•°åŠŸèƒ½ï¼šèµ‹å€¼ç»™PWMå¯„å­˜å™¨ï¼Œæ§åˆ¶è½¦è½®è½¬é€Ÿä¸æ–¹å‘
+å…¥å£å‚æ•°ï¼šPWM
+è¿”å›  å€¼ï¼šæ— 
 **************************************************************************/
 void Set_Pwm(int motor_a,int motor_b,int motor_c,int motor_d,int servo)
 {
 	//Forward and reverse control of motor
-	//µç»úÕı·´×ª¿ØÖÆ
+	//ç”µæœºæ­£åè½¬æ§åˆ¶
 	if(motor_a<0)			PWMA2=16799,PWMA1=16799+motor_a;
 	else 	            PWMA1=16799,PWMA2=16799-motor_a;
 	
 	//Forward and reverse control of motor
-	//µç»úÕı·´×ª¿ØÖÆ	
+	//ç”µæœºæ­£åè½¬æ§åˆ¶	
 	if(motor_b<0)			PWMB1=16799,PWMB2=16799+motor_b;
 	else 	            PWMB2=16799,PWMB1=16799-motor_b;
 //  PWMB1=10000,PWMB2=5000;
 
 	//Forward and reverse control of motor
-	//µç»úÕı·´×ª¿ØÖÆ	
+	//ç”µæœºæ­£åè½¬æ§åˆ¶	
 	if(motor_c<0)			PWMC2=16799,PWMC1=16799+motor_c;
 	else 	            PWMC1=16799,PWMC2=16799-motor_c;
 	
 	//Forward and reverse control of motor
-	//µç»úÕı·´×ª¿ØÖÆ
+	//ç”µæœºæ­£åè½¬æ§åˆ¶
 	if(motor_d<0)			PWMD1=16799,PWMD2=16799+motor_d;
 	else 	            	PWMD2=16799,PWMD1=16799-motor_d;
 	
 	//Servo control
-	//¶æ»ú¿ØÖÆ
+	//èˆµæœºæ§åˆ¶
 	Servo_PWM =servo;
 }
 
@@ -333,9 +333,9 @@ void Set_Pwm(int motor_a,int motor_b,int motor_c,int motor_d,int servo)
 Function: Limit PWM value
 Input   : Value
 Output  : none
-º¯Êı¹¦ÄÜ£ºÏŞÖÆPWMÖµ 
-Èë¿Ú²ÎÊı£º·ùÖµ
-·µ»Ø  Öµ£ºÎŞ
+å‡½æ•°åŠŸèƒ½ï¼šé™åˆ¶PWMå€¼ 
+å…¥å£å‚æ•°ï¼šå¹…å€¼
+è¿”å›  å€¼ï¼šæ— 
 **************************************************************************/
 void Limit_Pwm(int amplitude)
 {	
@@ -348,9 +348,9 @@ void Limit_Pwm(int amplitude)
 Function: Limiting function
 Input   : Value
 Output  : none
-º¯Êı¹¦ÄÜ£ºÏŞ·ùº¯Êı
-Èë¿Ú²ÎÊı£º·ùÖµ
-·µ»Ø  Öµ£ºÎŞ
+å‡½æ•°åŠŸèƒ½ï¼šé™å¹…å‡½æ•°
+å…¥å£å‚æ•°ï¼šå¹…å€¼
+è¿”å›  å€¼ï¼šæ— 
 **************************************************************************/
 float target_limit_float(float insert,float low,float high)
 {
@@ -374,9 +374,9 @@ int target_limit_int(int insert,int low,int high)
 Function: Check the battery voltage, enable switch status, software failure flag status
 Input   : Voltage
 Output  : Whether control is allowed, 1: not allowed, 0 allowed
-º¯Êı¹¦ÄÜ£º¼ì²éµç³ØµçÑ¹¡¢Ê¹ÄÜ¿ª¹Ø×´Ì¬¡¢Èí¼şÊ§ÄÜ±êÖ¾Î»×´Ì¬
-Èë¿Ú²ÎÊı£ºµçÑ¹
-·µ»Ø  Öµ£ºÊÇ·ñÔÊĞí¿ØÖÆ£¬1£º²»ÔÊĞí£¬0ÔÊĞí
+å‡½æ•°åŠŸèƒ½ï¼šæ£€æŸ¥ç”µæ± ç”µå‹ã€ä½¿èƒ½å¼€å…³çŠ¶æ€ã€è½¯ä»¶å¤±èƒ½æ ‡å¿—ä½çŠ¶æ€
+å…¥å£å‚æ•°ï¼šç”µå‹
+è¿”å›  å€¼ï¼šæ˜¯å¦å…è®¸æ§åˆ¶ï¼Œ1ï¼šä¸å…è®¸ï¼Œ0å…è®¸
 **************************************************************************/
 u8 Turn_Off( int voltage)
 {
@@ -397,9 +397,9 @@ u8 Turn_Off( int voltage)
 Function: Calculate absolute value
 Input   : long int
 Output  : unsigned int
-º¯Êı¹¦ÄÜ£ºÇó¾ø¶ÔÖµ
-Èë¿Ú²ÎÊı£ºlong int
-·µ»Ø  Öµ£ºunsigned int
+å‡½æ•°åŠŸèƒ½ï¼šæ±‚ç»å¯¹å€¼
+å…¥å£å‚æ•°ï¼šlong int
+è¿”å›  å€¼ï¼šunsigned int
 **************************************************************************/
 u32 myabs(long int a)
 { 		   
@@ -413,78 +413,78 @@ Function: Incremental PI controller
 Input   : Encoder measured value (actual speed), target speed
 Output  : Motor PWM
 According to the incremental discrete PID formula
-pwm+=Kp[e£¨k£©-e(k-1)]+Ki*e(k)+Kd[e(k)-2e(k-1)+e(k-2)]
+pwm+=Kp[eï¼ˆkï¼‰-e(k-1)]+Ki*e(k)+Kd[e(k)-2e(k-1)+e(k-2)]
 e(k) represents the current deviation
 e(k-1) is the last deviation and so on
 PWM stands for incremental output
 In our speed control closed loop system, only PI control is used
-pwm+=Kp[e£¨k£©-e(k-1)]+Ki*e(k)
+pwm+=Kp[eï¼ˆkï¼‰-e(k-1)]+Ki*e(k)
 
-º¯Êı¹¦ÄÜ£ºÔöÁ¿Ê½PI¿ØÖÆÆ÷
-Èë¿Ú²ÎÊı£º±àÂëÆ÷²âÁ¿Öµ(Êµ¼ÊËÙ¶È)£¬Ä¿±êËÙ¶È
-·µ»Ø  Öµ£ºµç»úPWM
-¸ù¾İÔöÁ¿Ê½ÀëÉ¢PID¹«Ê½ 
-pwm+=Kp[e£¨k£©-e(k-1)]+Ki*e(k)+Kd[e(k)-2e(k-1)+e(k-2)]
-e(k)´ú±í±¾´ÎÆ«²î 
-e(k-1)´ú±íÉÏÒ»´ÎµÄÆ«²î  ÒÔ´ËÀàÍÆ 
-pwm´ú±íÔöÁ¿Êä³ö
-ÔÚÎÒÃÇµÄËÙ¶È¿ØÖÆ±Õ»·ÏµÍ³ÀïÃæ£¬Ö»Ê¹ÓÃPI¿ØÖÆ
-pwm+=Kp[e£¨k£©-e(k-1)]+Ki*e(k)
+å‡½æ•°åŠŸèƒ½ï¼šå¢é‡å¼PIæ§åˆ¶å™¨
+å…¥å£å‚æ•°ï¼šç¼–ç å™¨æµ‹é‡å€¼(å®é™…é€Ÿåº¦)ï¼Œç›®æ ‡é€Ÿåº¦
+è¿”å›  å€¼ï¼šç”µæœºPWM
+æ ¹æ®å¢é‡å¼ç¦»æ•£PIDå…¬å¼ 
+pwm+=Kp[eï¼ˆkï¼‰-e(k-1)]+Ki*e(k)+Kd[e(k)-2e(k-1)+e(k-2)]
+e(k)ä»£è¡¨æœ¬æ¬¡åå·® 
+e(k-1)ä»£è¡¨ä¸Šä¸€æ¬¡çš„åå·®  ä»¥æ­¤ç±»æ¨ 
+pwmä»£è¡¨å¢é‡è¾“å‡º
+åœ¨æˆ‘ä»¬çš„é€Ÿåº¦æ§åˆ¶é—­ç¯ç³»ç»Ÿé‡Œé¢ï¼Œåªä½¿ç”¨PIæ§åˆ¶
+pwm+=Kp[eï¼ˆkï¼‰-e(k-1)]+Ki*e(k)
 **************************************************************************/
 int Incremental_PI_A (float Encoder,float Target)
 { 	
 	 static float Bias,Pwm,Last_bias;
-	 Bias=Target-Encoder; //Calculate the deviation //¼ÆËãÆ«²î
+	 Bias=Target-Encoder; //Calculate the deviation //è®¡ç®—åå·®
 	 Pwm+=Velocity_KP*(Bias-Last_bias)+Velocity_KI*Bias; 
 	 if(Pwm>16800)Pwm=16800;
 	 if(Pwm<-16800)Pwm=-16800;
-	 Last_bias=Bias; //Save the last deviation //±£´æÉÏÒ»´ÎÆ«²î 
+	 Last_bias=Bias; //Save the last deviation //ä¿å­˜ä¸Šä¸€æ¬¡åå·® 
 	 return Pwm;    
 }
 int Incremental_PI_B (float Encoder,float Target)
 {  
 	 static float Bias,Pwm,Last_bias;
-	 Bias=Target-Encoder; //Calculate the deviation //¼ÆËãÆ«²î
+	 Bias=Target-Encoder; //Calculate the deviation //è®¡ç®—åå·®
 	 Pwm+=Velocity_KP*(Bias-Last_bias)+Velocity_KI*Bias;  
 	 if(Pwm>16800)Pwm=16800;
 	 if(Pwm<-16800)Pwm=-16800;
-	 Last_bias=Bias; //Save the last deviation //±£´æÉÏÒ»´ÎÆ«²î 
+	 Last_bias=Bias; //Save the last deviation //ä¿å­˜ä¸Šä¸€æ¬¡åå·® 
 	 return Pwm;
 }
 int Incremental_PI_C (float Encoder,float Target)
 {  
 	 static float Bias,Pwm,Last_bias;
-	 Bias=Target-Encoder; //Calculate the deviation //¼ÆËãÆ«²î
+	 Bias=Target-Encoder; //Calculate the deviation //è®¡ç®—åå·®
 	 Pwm+=Velocity_KP*(Bias-Last_bias)+Velocity_KI*Bias; 
 	 if(Pwm>16800)Pwm=16800;
 	 if(Pwm<-16800)Pwm=-16800;
-	 Last_bias=Bias; //Save the last deviation //±£´æÉÏÒ»´ÎÆ«²î 
+	 Last_bias=Bias; //Save the last deviation //ä¿å­˜ä¸Šä¸€æ¬¡åå·® 
 	 return Pwm; 
 }
 int Incremental_PI_D (float Encoder,float Target)
 {  
 	 static float Bias,Pwm,Last_bias;
-	 Bias=Target-Encoder; //Calculate the deviation //¼ÆËãÆ«²î
+	 Bias=Target-Encoder; //Calculate the deviation //è®¡ç®—åå·®
 	 Pwm+=Velocity_KP*(Bias-Last_bias)+Velocity_KI*Bias;  
 	 if(Pwm>16800)Pwm=16800;
 	 if(Pwm<-16800)Pwm=-16800;
-	 Last_bias=Bias; //Save the last deviation //±£´æÉÏÒ»´ÎÆ«²î 
+	 Last_bias=Bias; //Save the last deviation //ä¿å­˜ä¸Šä¸€æ¬¡åå·® 
 	 return Pwm; 
 }
 /**************************************************************************
 Function: Processes the command sent by APP through usart 2
 Input   : none
 Output  : none
-º¯Êı¹¦ÄÜ£º¶ÔAPPÍ¨¹ı´®¿Ú2·¢ËÍ¹ıÀ´µÄÃüÁî½øĞĞ´¦Àí
-Èë¿Ú²ÎÊı£ºÎŞ
-·µ»Ø  Öµ£ºÎŞ
+å‡½æ•°åŠŸèƒ½ï¼šå¯¹APPé€šè¿‡ä¸²å£2å‘é€è¿‡æ¥çš„å‘½ä»¤è¿›è¡Œå¤„ç†
+å…¥å£å‚æ•°ï¼šæ— 
+è¿”å›  å€¼ï¼šæ— 
 **************************************************************************/
 void Get_RC(void)
 {
 	u8 Flag_Move=1;
-	if(Car_Mode==Mec_Car||Car_Mode==Omni_Car) //The omnidirectional wheel moving trolley can move laterally //È«ÏòÂÖÔË¶¯Ğ¡³µ¿ÉÒÔ½øĞĞºáÏòÒÆ¶¯
+	if(Car_Mode==Mec_Car||Car_Mode==Omni_Car) //The omnidirectional wheel moving trolley can move laterally //å…¨å‘è½®è¿åŠ¨å°è½¦å¯ä»¥è¿›è¡Œæ¨ªå‘ç§»åŠ¨
 	{
-	 switch(Flag_Direction)  //Handle direction control commands //´¦Àí·½Ïò¿ØÖÆÃüÁî
+	 switch(Flag_Direction)  //Handle direction control commands //å¤„ç†æ–¹å‘æ§åˆ¶å‘½ä»¤
 	 { 
 			case 1:      Move_X=RC_Velocity;  	 Move_Y=0;             Flag_Move=1;    break;
 			case 2:      Move_X=RC_Velocity;  	 Move_Y=-RC_Velocity;  Flag_Move=1; 	 break;
@@ -499,15 +499,15 @@ void Get_RC(void)
 	 if(Flag_Move==0)		
 	 {	
 		 //If no direction control instruction is available, check the steering control status
-		 //Èç¹ûÎŞ·½Ïò¿ØÖÆÖ¸Áî£¬¼ì²é×ªÏò¿ØÖÆ×´Ì¬
-		 if     (Flag_Left ==1)  Move_Z= PI/2*(RC_Velocity/500); //left rotation  //×ó×Ô×ª  
-		 else if(Flag_Right==1)  Move_Z=-PI/2*(RC_Velocity/500); //right rotation //ÓÒ×Ô×ª
-		 else 		               Move_Z=0;                       //stop           //Í£Ö¹
+		 //å¦‚æœæ— æ–¹å‘æ§åˆ¶æŒ‡ä»¤ï¼Œæ£€æŸ¥è½¬å‘æ§åˆ¶çŠ¶æ€
+		 if     (Flag_Left ==1)  Move_Z= PI/2*(RC_Velocity/500); //left rotation  //å·¦è‡ªè½¬  
+		 else if(Flag_Right==1)  Move_Z=-PI/2*(RC_Velocity/500); //right rotation //å³è‡ªè½¬
+		 else 		               Move_Z=0;                       //stop           //åœæ­¢
 	 }
 	}	
-	else //Non-omnidirectional moving trolley //·ÇÈ«ÏòÒÆ¶¯Ğ¡³µ
+	else //Non-omnidirectional moving trolley //éå…¨å‘ç§»åŠ¨å°è½¦
 	{
-	 switch(Flag_Direction) //Handle direction control commands //´¦Àí·½Ïò¿ØÖÆÃüÁî
+	 switch(Flag_Direction) //Handle direction control commands //å¤„ç†æ–¹å‘æ§åˆ¶å‘½ä»¤
 	 { 
 			case 1:     Move_X=+RC_Velocity;  	 Move_Z=0;         break;
 			case 2:      Move_X=+RC_Velocity;  	 Move_Z=-PI/2;   	 break;
@@ -519,29 +519,29 @@ void Get_RC(void)
 			case 8:      Move_X=+RC_Velocity; 	 Move_Z=+PI/2;     break; 
 			default:     Move_X=0;               Move_Z=0;         break;
 	 }
-	 if     (Flag_Left ==1)  Move_Z= PI/2; //left rotation  //×ó×Ô×ª 
-	 else if(Flag_Right==1)  Move_Z=-PI/2; //right rotation //ÓÒ×Ô×ª	
+	 if     (Flag_Left ==1)  Move_Z= PI/2; //left rotation  //å·¦è‡ªè½¬ 
+	 else if(Flag_Right==1)  Move_Z=-PI/2; //right rotation //å³è‡ªè½¬	
 	}
 	
-	//Z-axis data conversion //ZÖáÊı¾İ×ª»¯
+	//Z-axis data conversion //Zè½´æ•°æ®è½¬åŒ–
 	if(Car_Mode==Akm_Car)
 	{
 		//Ackermann structure car is converted to the front wheel steering Angle system target value, and kinematics analysis is pearformed
-		//°¢¿ËÂü½á¹¹Ğ¡³µ×ª»»ÎªÇ°ÂÖ×ªÏò½Ç¶È
+		//é˜¿å…‹æ›¼ç»“æ„å°è½¦è½¬æ¢ä¸ºå‰è½®è½¬å‘è§’åº¦
 		Move_Z=Move_Z*2/9; 
 	}
 	else if(Car_Mode==Diff_Car||Car_Mode==Tank_Car||Car_Mode==FourWheel_Car)
 	{
-	  if(Move_X<0) Move_Z=-Move_Z; //The differential control principle series requires this treatment //²îËÙ¿ØÖÆÔ­ÀíÏµÁĞĞèÒª´Ë´¦Àí
+	  if(Move_X<0) Move_Z=-Move_Z; //The differential control principle series requires this treatment //å·®é€Ÿæ§åˆ¶åŸç†ç³»åˆ—éœ€è¦æ­¤å¤„ç†
 		Move_Z=Move_Z*RC_Velocity/500;
 	}		
 	
 	//Unit conversion, mm/s -> m/s
-  //µ¥Î»×ª»»£¬mm/s -> m/s	
+  //å•ä½è½¬æ¢ï¼Œmm/s -> m/s	
 	Move_X=Move_X/1000;       Move_Y=Move_Y/1000;         Move_Z=Move_Z;
 	
 	//Control target value is obtained and kinematics analysis is performed
-	//µÃµ½¿ØÖÆÄ¿±êÖµ£¬½øĞĞÔË¶¯Ñ§·ÖÎö
+	//å¾—åˆ°æ§åˆ¶ç›®æ ‡å€¼ï¼Œè¿›è¡Œè¿åŠ¨å­¦åˆ†æ
 	Drive_Motor(Move_X,Move_Y,Move_Z);
 }
 
@@ -549,25 +549,25 @@ void Get_RC(void)
 Function: Handle PS2 controller control commands
 Input   : none
 Output  : none
-º¯Êı¹¦ÄÜ£º¶ÔPS2ÊÖ±ú¿ØÖÆÃüÁî½øĞĞ´¦Àí
-Èë¿Ú²ÎÊı£ºÎŞ
-·µ»Ø  Öµ£ºÎŞ
+å‡½æ•°åŠŸèƒ½ï¼šå¯¹PS2æ‰‹æŸ„æ§åˆ¶å‘½ä»¤è¿›è¡Œå¤„ç†
+å…¥å£å‚æ•°ï¼šæ— 
+è¿”å›  å€¼ï¼šæ— 
 **************************************************************************/
 void PS2_Control(void)
 {
    	int LX,LY,RY;
-		int Threshold=20; //Threshold to ignore small movements of the joystick //ãĞÖµ£¬ºöÂÔÒ¡¸ËĞ¡·ù¶È¶¯×÷
+		int Threshold=20; //Threshold to ignore small movements of the joystick //é˜ˆå€¼ï¼Œå¿½ç•¥æ‘‡æ†å°å¹…åº¦åŠ¨ä½œ
 	static u8 acc_dec_filter = 0;		
 	
 	if(PS2_ON_Flag==1)
 	{
 	  //128 is the median.The definition of X and Y in the PS2 coordinate system is different from that in the ROS coordinate system
-	  //128ÎªÖĞÖµ¡£PS2×ø±êÏµÓëROS×ø±êÏµ¶ÔX¡¢YµÄ¶¨Òå²»Ò»Ñù
+	  //128ä¸ºä¸­å€¼ã€‚PS2åæ ‡ç³»ä¸ROSåæ ‡ç³»å¯¹Xã€Yçš„å®šä¹‰ä¸ä¸€æ ·
 		LY=-(PS2_LX-128);  
 		LX=-(PS2_LY-128); 
 		RY=-(PS2_RX-128); 
 		
-	  //Ignore small movements of the joystick //ºöÂÔÒ¡¸ËĞ¡·ù¶È¶¯×÷
+	  //Ignore small movements of the joystick //å¿½ç•¥æ‘‡æ†å°å¹…åº¦åŠ¨ä½œ
 		if(LX>-Threshold&&LX<Threshold)LX=0; 
 		if(LY>-Threshold&&LY<Threshold)LY=0; 
 		if(RY>-Threshold&&RY<Threshold)RY=0; 
@@ -575,18 +575,18 @@ void PS2_Control(void)
 	if(++acc_dec_filter==15)
 	{
 		acc_dec_filter=0;
-	  if (PS2_KEY==11)	    RC_Velocity+=5;  //To accelerate//¼ÓËÙ
-	  else if(PS2_KEY==9)	RC_Velocity-=5;  //To slow down //¼õËÙ	
+	  if (PS2_KEY==11)	    RC_Velocity+=5;  //To accelerate//åŠ é€Ÿ
+	  else if(PS2_KEY==9)	RC_Velocity-=5;  //To slow down //å‡é€Ÿ	
 	}
 		if(RC_Velocity<0)   RC_Velocity=0;
 	
 	  //Handle PS2 controller control commands
-	  //¶ÔPS2ÊÖ±ú¿ØÖÆÃüÁî½øĞĞ´¦Àí
+	  //å¯¹PS2æ‰‹æŸ„æ§åˆ¶å‘½ä»¤è¿›è¡Œå¤„ç†
 		Move_X=LX*RC_Velocity/128; 
 		Move_Y=LY*RC_Velocity/128; 
 		Move_Z=RY*(PI/2)/128;      
 	
-	  //Z-axis data conversion //ZÖáÊı¾İ×ª»¯
+	  //Z-axis data conversion //Zè½´æ•°æ®è½¬åŒ–
 	  if(Car_Mode==Mec_Car||Car_Mode==Omni_Car)
 		{
 			Move_Z=Move_Z*RC_Velocity/500;
@@ -594,91 +594,91 @@ void PS2_Control(void)
 		else if(Car_Mode==Akm_Car)
 		{
 			//Ackermann structure car is converted to the front wheel steering Angle system target value, and kinematics analysis is pearformed
-		  //°¢¿ËÂü½á¹¹Ğ¡³µ×ª»»ÎªÇ°ÂÖ×ªÏò½Ç¶È
+		  //é˜¿å…‹æ›¼ç»“æ„å°è½¦è½¬æ¢ä¸ºå‰è½®è½¬å‘è§’åº¦
 			Move_Z=Move_Z*2/9;
 		}
 		else if(Car_Mode==Diff_Car||Car_Mode==Tank_Car||Car_Mode==FourWheel_Car)
 		{
-			if(Move_X<0) Move_Z=-Move_Z; //The differential control principle series requires this treatment //²îËÙ¿ØÖÆÔ­ÀíÏµÁĞĞèÒª´Ë´¦Àí
+			if(Move_X<0) Move_Z=-Move_Z; //The differential control principle series requires this treatment //å·®é€Ÿæ§åˆ¶åŸç†ç³»åˆ—éœ€è¦æ­¤å¤„ç†
 			Move_Z=Move_Z*RC_Velocity/500;
 		}	
 		 
 	  //Unit conversion, mm/s -> m/s
-    //µ¥Î»×ª»»£¬mm/s -> m/s	
+    //å•ä½è½¬æ¢ï¼Œmm/s -> m/s	
 		Move_X=Move_X/1000;        
 		Move_Y=Move_Y/1000;    
 		Move_Z=Move_Z;
 	}
 		//Control target value is obtained and kinematics analysis is performed
-	  //µÃµ½¿ØÖÆÄ¿±êÖµ£¬½øĞĞÔË¶¯Ñ§·ÖÎö
+	  //å¾—åˆ°æ§åˆ¶ç›®æ ‡å€¼ï¼Œè¿›è¡Œè¿åŠ¨å­¦åˆ†æ
 		Drive_Motor(Move_X,Move_Y,Move_Z);		 			
 } 
 /**************************************************************************
-º¯Êı¹¦ÄÜ£ºCCDÑ²Ïß£¬²É¼¯3¸öµç¸ĞµÄÊı¾İ²¢ÌáÈ¡ÖĞÏß 
-Èë¿Ú²ÎÊı£ºÎŞ
-·µ»Ø  Öµ£ºÎŞ
+å‡½æ•°åŠŸèƒ½ï¼šCCDå·¡çº¿ï¼Œé‡‡é›†3ä¸ªç”µæ„Ÿçš„æ•°æ®å¹¶æå–ä¸­çº¿ 
+å…¥å£å‚æ•°ï¼šæ— 
+è¿”å›  å€¼ï¼šæ— 
 **************************************************************************/
 void  Get_RC_CCD(void)
 {
 	static float Bias,Last_Bias;
 	float move_z=0;
 									
-			Move_X=RC_Velocity_CCD;													//CCDÑ²ÏßÄ£Ê½ÏßËÙ¶È
-			Bias=CCD_Median-64;  //ÌáÈ¡Æ«²î£¬64ÎªÑ²ÏßµÄÖĞĞÄµã
+			Move_X=RC_Velocity_CCD;													//CCDå·¡çº¿æ¨¡å¼çº¿é€Ÿåº¦
+			Bias=CCD_Median-64;  //æå–åå·®ï¼Œ64ä¸ºå·¡çº¿çš„ä¸­å¿ƒç‚¹
 	    if(Car_Mode == Omni_Car)
-			  move_z=-Bias*Omni_Car_CCD_KP*0.1f-(Bias-Last_Bias)*Omni_Car_CCD_KI*0.1f; //PD¿ØÖÆ£¬Ô­Àí¾ÍÊÇÊ¹µÃĞ¡³µ±£³Ö¿¿½üÑ²ÏßµÄÖĞĞÄµã
+			  move_z=-Bias*Omni_Car_CCD_KP*0.1f-(Bias-Last_Bias)*Omni_Car_CCD_KI*0.1f; //PDæ§åˆ¶ï¼ŒåŸç†å°±æ˜¯ä½¿å¾—å°è½¦ä¿æŒé è¿‘å·¡çº¿çš„ä¸­å¿ƒç‚¹
 			else if(Car_Mode == Tank_Car)
 				move_z=-Bias*Tank_Car_CCD_KP*0.1f-(Bias-Last_Bias)*Tank_Car_CCD_KI*0.1f;
 			else
 				move_z=-Bias*CCD_KP*0.1f-(Bias-Last_Bias)*CCD_KI*0.1f;
-			Last_Bias=Bias;   //±£´æÉÏÒ»´ÎµÄÆ«²î
+			Last_Bias=Bias;   //ä¿å­˜ä¸Šä¸€æ¬¡çš„åå·®
 			
 			if(Car_Mode==Mec_Car)															
 			{
-				Move_Z=move_z*RC_Velocity_CCD/50000;							//²îËÙ¿ØÖÆÔ­ÀíĞèÒª¾­¹ı´Ë´¦´¦Àí
+				Move_Z=move_z*RC_Velocity_CCD/50000;							//å·®é€Ÿæ§åˆ¶åŸç†éœ€è¦ç»è¿‡æ­¤å¤„å¤„ç†
 			}
 
 			else if(Car_Mode==Omni_Car)											
 			{
-				Move_Z=move_z*RC_Velocity_CCD/21000;							//²îËÙ¿ØÖÆÔ­ÀíĞèÒª¾­¹ı´Ë´¦´¦Àí
+				Move_Z=move_z*RC_Velocity_CCD/21000;							//å·®é€Ÿæ§åˆ¶åŸç†éœ€è¦ç»è¿‡æ­¤å¤„å¤„ç†
 			}
 			
 			else if(Car_Mode==Akm_Car)												
 			{
-				Move_Z=move_z/450;																//²îËÙ¿ØÖÆÔ­ÀíĞèÒª¾­¹ı´Ë´¦´¦Àí
+				Move_Z=move_z/450;																//å·®é€Ÿæ§åˆ¶åŸç†éœ€è¦ç»è¿‡æ­¤å¤„å¤„ç†
 			}
 			
 			else if(Car_Mode==Diff_Car)		
 			{	
 				if(Move_X<0) move_z=-move_z;	
-				Move_Z=move_z*RC_Velocity_CCD/67000;					//²îËÙ¿ØÖÆÔ­ÀíĞèÒª¾­¹ı´Ë´¦´¦Àí	
+				Move_Z=move_z*RC_Velocity_CCD/67000;					//å·®é€Ÿæ§åˆ¶åŸç†éœ€è¦ç»è¿‡æ­¤å¤„å¤„ç†	
 			}
 			else if(Car_Mode==Tank_Car)		
 			{	
 				if(Move_X<0) move_z=-move_z;	
-				Move_Z=move_z*RC_Velocity_CCD/50000;					//²îËÙ¿ØÖÆÔ­ÀíĞèÒª¾­¹ı´Ë´¦´¦Àí	
+				Move_Z=move_z*RC_Velocity_CCD/50000;					//å·®é€Ÿæ§åˆ¶åŸç†éœ€è¦ç»è¿‡æ­¤å¤„å¤„ç†	
 			}
 			else if(Car_Mode==FourWheel_Car)									
 			{
 				if(Move_X<0) move_z=-move_z;	
-				Move_Z=move_z*RC_Velocity_CCD/20100;					//²îËÙ¿ØÖÆÔ­ÀíĞèÒª¾­¹ı´Ë´¦´¦Àí
+				Move_Z=move_z*RC_Velocity_CCD/20100;					//å·®é€Ÿæ§åˆ¶åŸç†éœ€è¦ç»è¿‡æ­¤å¤„å¤„ç†
 			}			
 		
-			//Z-axis data conversion //ZÖáÊı¾İ×ª»¯	
+			//Z-axis data conversion //Zè½´æ•°æ®è½¬åŒ–	
 			//Unit conversion, mm/s -> m/s
-			//µ¥Î»×ª»»£¬mm/s -> m/s
+			//å•ä½è½¬æ¢ï¼Œmm/s -> m/s
 			Move_X=Move_X/1000;
 			Move_Z=Move_Z;
 			Move_Y=0;
 			//Control target value is obtained and kinematics analysis is performed
-			//µÃµ½¿ØÖÆÄ¿±êÖµ£¬½øĞĞÔË¶¯Ñ§·ÖÎö
+			//å¾—åˆ°æ§åˆ¶ç›®æ ‡å€¼ï¼Œè¿›è¡Œè¿åŠ¨å­¦åˆ†æ
 			Drive_Motor(Move_X,Move_Y,Move_Z);
 }
 
 /**************************************************************************
-º¯Êı¹¦ÄÜ£ºµç´ÅÑ²Ïß£¬²É¼¯3¸öµç¸ĞµÄÊı¾İ²¢ÌáÈ¡ÖĞÏß 
-Èë¿Ú²ÎÊı£ºÎŞ
-·µ»Ø  Öµ£ºÎŞ
+å‡½æ•°åŠŸèƒ½ï¼šç”µç£å·¡çº¿ï¼Œé‡‡é›†3ä¸ªç”µæ„Ÿçš„æ•°æ®å¹¶æå–ä¸­çº¿ 
+å…¥å£å‚æ•°ï¼šæ— 
+è¿”å›  å€¼ï¼šæ— 
 **************************************************************************/
 void  Get_RC_ELE(void)
 {
@@ -687,8 +687,8 @@ void  Get_RC_ELE(void)
 	
 	if(Detect_Barrier() == No_Barrier)
 	{
-			Move_X=RC_Velocity_ELE;				//µç´ÅÑ²ÏßÄ£Ê½µÄËÙ¶È
-			Bias=100-Sensor;  //ÌáÈ¡Æ«²î	
+			Move_X=RC_Velocity_ELE;				//ç”µç£å·¡çº¿æ¨¡å¼çš„é€Ÿåº¦
+			Bias=100-Sensor;  //æå–åå·®	
       if(Car_Mode == Omni_Car)		
 			  move_z=-Bias* Omni_Car_ELE_KP*0.08f-(Bias-Last_Bias)* Omni_Car_ELE_KI*0.05f; 
 			else if(Car_Mode == Tank_Car)
@@ -700,60 +700,60 @@ void  Get_RC_ELE(void)
 
 			if(Car_Mode==Mec_Car)															
 			{		
-				Move_Z=move_z*RC_Velocity_ELE/50000;					//²îËÙ¿ØÖÆÔ­ÀíĞèÒª¾­¹ı´Ë´¦´¦Àí
+				Move_Z=move_z*RC_Velocity_ELE/50000;					//å·®é€Ÿæ§åˆ¶åŸç†éœ€è¦ç»è¿‡æ­¤å¤„å¤„ç†
 			}
 			
 			else if(Car_Mode==Omni_Car)											
 			{
-				Move_Z=move_z*RC_Velocity_ELE/10800;					//²îËÙ¿ØÖÆÔ­ÀíĞèÒª¾­¹ı´Ë´¦´¦Àí
+				Move_Z=move_z*RC_Velocity_ELE/10800;					//å·®é€Ÿæ§åˆ¶åŸç†éœ€è¦ç»è¿‡æ­¤å¤„å¤„ç†
 			}
 			
 			else if(Car_Mode==Diff_Car)		
 			{
 				if(Move_X<0) move_z=-move_z;			
-				Move_Z=move_z*RC_Velocity_ELE/45000;					//²îËÙ¿ØÖÆÔ­ÀíĞèÒª¾­¹ı´Ë´¦´¦Àí
+				Move_Z=move_z*RC_Velocity_ELE/45000;					//å·®é€Ÿæ§åˆ¶åŸç†éœ€è¦ç»è¿‡æ­¤å¤„å¤„ç†
 			}
 			
 			else if(Car_Mode==Tank_Car)		
 			{
 				if(Move_X<0) move_z=-move_z;			
-				Move_Z=move_z*RC_Velocity_ELE/28000;					//²îËÙ¿ØÖÆÔ­ÀíĞèÒª¾­¹ı´Ë´¦´¦Àí
+				Move_Z=move_z*RC_Velocity_ELE/28000;					//å·®é€Ÿæ§åˆ¶åŸç†éœ€è¦ç»è¿‡æ­¤å¤„å¤„ç†
 			}
 			else if(Car_Mode==FourWheel_Car)									
 			{
 				if(Move_X<0) move_z=-move_z;
-				Move_Z=move_z*RC_Velocity_ELE/20100;					//²îËÙ¿ØÖÆÔ­ÀíĞèÒª¾­¹ı´Ë´¦´¦Àí
+				Move_Z=move_z*RC_Velocity_ELE/20100;					//å·®é€Ÿæ§åˆ¶åŸç†éœ€è¦ç»è¿‡æ­¤å¤„å¤„ç†
 			}
 			
 			else if(Car_Mode==Akm_Car)											
 			{
-				Move_Z=move_z/450;														//²îËÙ¿ØÖÆÔ­ÀíĞèÒª¾­¹ı´Ë´¦´¦Àí
+				Move_Z=move_z/450;														//å·®é€Ÿæ§åˆ¶åŸç†éœ€è¦ç»è¿‡æ­¤å¤„å¤„ç†
 			}
 		}
 	
-	else									//ÓĞÕÏ°­Îï
+	else									//æœ‰éšœç¢ç‰©
 	{
-		Buzzer_Alarm(100);				//µ±µç»úÊ¹ÄÜµÄÊ±ºò£¬ÓĞÕÏ°­ÎïÔò·äÃùÆ÷±¨¾¯
+		Buzzer_Alarm(100);				//å½“ç”µæœºä½¿èƒ½çš„æ—¶å€™ï¼Œæœ‰éšœç¢ç‰©åˆ™èœ‚é¸£å™¨æŠ¥è­¦
 		Move_X = 0;
 		Move_Z = 0;
 	}
 
-			//Z-axis data conversion //ZÖáÊı¾İ×ª»¯	
+			//Z-axis data conversion //Zè½´æ•°æ®è½¬åŒ–	
 			//Unit conversion, mm/s -> m/s
-			//µ¥Î»×ª»»£¬mm/s -> m/s
+			//å•ä½è½¬æ¢ï¼Œmm/s -> m/s
 			Move_X=Move_X/1000;
 			Move_Z=Move_Z;
 	
 			//Control target value is obtained and kinematics analysis is performed
-			//µÃµ½¿ØÖÆÄ¿±êÖµ£¬½øĞĞÔË¶¯Ñ§·ÖÎö
+			//å¾—åˆ°æ§åˆ¶ç›®æ ‡å€¼ï¼Œè¿›è¡Œè¿åŠ¨å­¦åˆ†æ
 	    Move_Y=0;
 			Drive_Motor(Move_X,Move_Y,Move_Z);
 }
 
 /**************************************************************************
-º¯Êı¹¦ÄÜ£º¼ì²âÇ°·½ÊÇ·ñÓĞÕÏ°­Îï
-Èë¿Ú²ÎÊı£ºÎŞ
-·µ»Ø  Öµ£ºÎŞ
+å‡½æ•°åŠŸèƒ½ï¼šæ£€æµ‹å‰æ–¹æ˜¯å¦æœ‰éšœç¢ç‰©
+å…¥å£å‚æ•°ï¼šæ— 
+è¿”å›  å€¼ï¼šæ— 
 **************************************************************************/
 u8 Detect_Barrier(void)
 {
@@ -762,15 +762,15 @@ u8 Detect_Barrier(void)
 	
 	if(Lidar_Detect == Lidar_Detect_ON)
 	{
-		for(i=0;i<1152;i++)	//¼ì²âÊÇ·ñÓĞÕÏ°­Îï 
+		for(i=0;i<1152;i++)	//æ£€æµ‹æ˜¯å¦æœ‰éšœç¢ç‰© 
 		{
 			if((Dataprocess[i].angle>300)||(Dataprocess[i].angle<60))
 			{
-				if(0<Dataprocess[i].distance&&Dataprocess[i].distance<700)//700mmÄÚÊÇ·ñÓĞÕÏ°­Îï
+				if(0<Dataprocess[i].distance&&Dataprocess[i].distance<700)//700mmå†…æ˜¯å¦æœ‰éšœç¢ç‰©
 					point_count++;
 		  }
 	}
-		if(point_count > 0)//ÓĞÕÏ°­Îï
+		if(point_count > 0)//æœ‰éšœç¢ç‰©
 			return Barrier_Detected;
 		else
 			return No_Barrier;
@@ -780,38 +780,38 @@ u8 Detect_Barrier(void)
 }
 
 /**************************************************************************
-º¯Êı¹¦ÄÜ£ºĞ¡³µ±ÜÕÏÄ£Ê½
-Èë¿Ú²ÎÊı£ºÎŞ
-·µ»Ø  Öµ£ºÎŞ
+å‡½æ•°åŠŸèƒ½ï¼šå°è½¦é¿éšœæ¨¡å¼
+å…¥å£å‚æ•°ï¼šæ— 
+è¿”å›  å€¼ï¼šæ— 
 **************************************************************************/
 void Lidar_Avoid(void)
 {
 	int i = 0; 
-	u8 calculation_angle_cnt = 0;	//ÓÃÓÚÅĞ¶Ï225¸öµãÖĞĞèÒª×ö±ÜÕÏµÄµã
-	float angle_sum = 0;			//´ÖÂÔ¼ÆËãÕÏ°­ÎïÎ»ÓÚ×ó»òÕßÓÒ
-	u8 distance_count = 0;			//¾àÀëĞ¡ÓÚÄ³ÖµµÄ¼ÆÊı
-	for(i=0;i<1152;i++)				//±éÀú120¶È·¶Î§ÄÚµÄ¾àÀëÊı¾İ£¬¹²120¸öµã×óÓÒµÄÊı¾İ
+	u8 calculation_angle_cnt = 0;	//ç”¨äºåˆ¤æ–­225ä¸ªç‚¹ä¸­éœ€è¦åšé¿éšœçš„ç‚¹
+	float angle_sum = 0;			//ç²—ç•¥è®¡ç®—éšœç¢ç‰©ä½äºå·¦æˆ–è€…å³
+	u8 distance_count = 0;			//è·ç¦»å°äºæŸå€¼çš„è®¡æ•°
+	for(i=0;i<1152;i++)				//éå†120åº¦èŒƒå›´å†…çš„è·ç¦»æ•°æ®ï¼Œå…±120ä¸ªç‚¹å·¦å³çš„æ•°æ®
 	{
-		if((Dataprocess[i].angle>300)||(Dataprocess[i].angle<60))  //±ÜÕÏ½Ç¶ÈÔÚ300-60Ö®¼ä
+		if((Dataprocess[i].angle>300)||(Dataprocess[i].angle<60))  //é¿éšœè§’åº¦åœ¨300-60ä¹‹é—´
 		{
-			if((0<Dataprocess[i].distance)&&(Dataprocess[i].distance<Avoid_Distance))	//¾àÀëĞ¡ÓÚ450mmĞèÒª±ÜÕÏ,Ö»ĞèÒª120¶È·¶Î§ÄÚµã
+			if((0<Dataprocess[i].distance)&&(Dataprocess[i].distance<Avoid_Distance))	//è·ç¦»å°äº450mméœ€è¦é¿éšœ,åªéœ€è¦120åº¦èŒƒå›´å†…ç‚¹
 			{
-				calculation_angle_cnt++;						 			//¼ÆËã¾àÀëĞ¡ÓÚ±ÜÕÏ¾àÀëµÄµã¸öÊı
+				calculation_angle_cnt++;						 			//è®¡ç®—è·ç¦»å°äºé¿éšœè·ç¦»çš„ç‚¹ä¸ªæ•°
 				if(Dataprocess[i].angle<60)		
 					angle_sum += Dataprocess[i].angle;
 				else if(Dataprocess[i].angle>300)
-					angle_sum += (Dataprocess[i].angle-360);	//300¶Èµ½60¶È×ª»¯Îª-60¶Èµ½60¶È
-				if(Dataprocess[i].distance<Avoid_Min_Distance)				//¼ÇÂ¼Ğ¡ÓÚ200mmµÄµãµÄ¼ÆÊı
+					angle_sum += (Dataprocess[i].angle-360);	//300åº¦åˆ°60åº¦è½¬åŒ–ä¸º-60åº¦åˆ°60åº¦
+				if(Dataprocess[i].distance<Avoid_Min_Distance)				//è®°å½•å°äº200mmçš„ç‚¹çš„è®¡æ•°
 					distance_count++;
 			}
 	  }
 	}
 	Move_X = forward_velocity;
-  if(calculation_angle_cnt == 0)//²»ĞèÒª±ÜÕÏ
+  if(calculation_angle_cnt == 0)//ä¸éœ€è¦é¿éšœ
 	 {
 		Move_Z = 0;
 	 }
-	else                          //µ±¾àÀëĞ¡ÓÚ200mm£¬Ğ¡³µÍùºóÍË
+	else                          //å½“è·ç¦»å°äº200mmï¼Œå°è½¦å¾€åé€€
 	{
 		if(distance_count>8)
 		{
@@ -821,11 +821,11 @@ void Lidar_Avoid(void)
 		else
 		{
 			Move_X = 0;
-			if(angle_sum > 0)//ÕÏ°­ÎïÆ«ÓÒ
+			if(angle_sum > 0)//éšœç¢ç‰©åå³
 			{
-				if(Car_Mode == Mec_Car)  //ÂóÂÖ×ªÍäĞèÒª°ÑÇ°½øËÙ¶È½µµÍ
+				if(Car_Mode == Mec_Car)  //éº¦è½®è½¬å¼¯éœ€è¦æŠŠå‰è¿›é€Ÿåº¦é™ä½
 					Move_X = 0;
-				else                     //ÆäËû³µĞÍ±£³ÖÔ­ÓĞ³µËÙ
+				else                     //å…¶ä»–è½¦å‹ä¿æŒåŸæœ‰è½¦é€Ÿ
 				  Move_X = forward_velocity;
 				
 				if(Car_Mode == Akm_Car)
@@ -833,9 +833,9 @@ void Lidar_Avoid(void)
 				else if(Car_Mode == Omni_Car)
 					Move_Z=corner_velocity;
 				else
-				  Move_Z=other_corner_velocity;//×ó×ª
+				  Move_Z=other_corner_velocity;//å·¦è½¬
 			}
-			else //Æ«×ó
+			else //åå·¦
 			{
 				if(Car_Mode == Mec_Car)
 					Move_X = 0;
@@ -845,7 +845,7 @@ void Lidar_Avoid(void)
 				if(Car_Mode == Akm_Car)
 					Move_Z = -PI/4;
 				else if(Car_Mode == Omni_Car)
-					Move_Z=-corner_velocity;//ÓÒ×ª
+					Move_Z=-corner_velocity;//å³è½¬
 				else
 					Move_Z=-other_corner_velocity;
 			}
@@ -856,20 +856,20 @@ void Lidar_Avoid(void)
 
 
 /**************************************************************************
-º¯Êı¹¦ÄÜ£ºĞ¡³µ¸úËæÄ£Ê½ 
-Èë¿Ú²ÎÊı£ºÎŞ
-·µ»Ø  Öµ£ºÎŞ
+å‡½æ•°åŠŸèƒ½ï¼šå°è½¦è·Ÿéšæ¨¡å¼ 
+å…¥å£å‚æ•°ï¼šæ— 
+è¿”å›  å€¼ï¼šæ— 
 **************************************************************************/
 void Lidar_Follow(void)
 {
 	static u16 cnt = 0;
 	int i;
 	int calculation_angle_cnt = 0;
-	static float angle = 0;				//±ÜÕÏµÄ½Ç¶È
+	static float angle = 0;				//é¿éšœçš„è§’åº¦
 	static float last_angle = 0;		//
 	u16 mini_distance = 65535;
-	static u8 data_count = 0;			//ÓÃÓÚÂË³ıÒ»Ğ´ÔëµãµÄ¼ÆÊı±äÁ¿
-	//ĞèÒªÕÒ³ö¸úËæµÄÄÇ¸öµãµÄ½Ç¶È
+	static u8 data_count = 0;			//ç”¨äºæ»¤é™¤ä¸€å†™å™ªç‚¹çš„è®¡æ•°å˜é‡
+	//éœ€è¦æ‰¾å‡ºè·Ÿéšçš„é‚£ä¸ªç‚¹çš„è§’åº¦
 	for(i = 0; i < 1152; i++)
 	{
 			if((0<Dataprocess[i].distance)&&(Dataprocess[i].distance<Follow_Distance))
@@ -882,25 +882,25 @@ void Lidar_Follow(void)
 				}
 			}
 	}
-	if(angle > 180)  //0--360¶È×ª»»³É0--180£»-180--0£¨Ë³Ê±Õë£©
+	if(angle > 180)  //0--360åº¦è½¬æ¢æˆ0--180ï¼›-180--0ï¼ˆé¡ºæ—¶é’ˆï¼‰
 		angle -= 360;
-	if((angle-last_angle > 10)||(angle-last_angle < -10))   //×öÒ»¶¨Ïû¶¶£¬²¨¶¯´óÓÚ10¶ÈµÄĞèÒª×öÅĞ¶Ï
+	if((angle-last_angle > 10)||(angle-last_angle < -10))   //åšä¸€å®šæ¶ˆæŠ–ï¼Œæ³¢åŠ¨å¤§äº10åº¦çš„éœ€è¦åšåˆ¤æ–­
 	{
-		if(++data_count > 30)   //Á¬Ğø30´Î²É¼¯µ½µÄÖµ(300msºó)ºÍÉÏ´ÎµÄ±È´óÓÚ10¶È£¬´ËÊ±²ÅÊÇÈÏÎªÊÇÓĞĞ§Öµ
+		if(++data_count > 30)   //è¿ç»­30æ¬¡é‡‡é›†åˆ°çš„å€¼(300mså)å’Œä¸Šæ¬¡çš„æ¯”å¤§äº10åº¦ï¼Œæ­¤æ—¶æ‰æ˜¯è®¤ä¸ºæ˜¯æœ‰æ•ˆå€¼
 		{
 			data_count = 0;
 			last_angle = angle;
 		}
 	}
-	else    //²¨¶¯Ğ¡ÓÚ10¶ÈµÄ¿ÉÒÔÖ±½ÓÈÏÎªÊÇÓĞĞ§Öµ
+	else    //æ³¢åŠ¨å°äº10åº¦çš„å¯ä»¥ç›´æ¥è®¤ä¸ºæ˜¯æœ‰æ•ˆå€¼
 	{
-		if(++data_count > 10)   //Á¬Ğø10´Î²É¼¯µ½µÄÖµ(100msºó)£¬´ËÊ±²ÅÊÇÈÏÎªÊÇÓĞĞ§Öµ
+		if(++data_count > 10)   //è¿ç»­10æ¬¡é‡‡é›†åˆ°çš„å€¼(100mså)ï¼Œæ­¤æ—¶æ‰æ˜¯è®¤ä¸ºæ˜¯æœ‰æ•ˆå€¼
 		{
 			data_count = 0;
 			last_angle = angle;
 		}
 	}
-	if(calculation_angle_cnt < 8)  //¸úËæ¾àÀëĞ¡ÓÚ8ÇÒµ±cnt>40µÄÊ±ºò£¬ÈÏÎªÔÚ1600ÄÚÃ»ÓĞ¸úËæÄ¿±ê
+	if(calculation_angle_cnt < 8)  //è·Ÿéšè·ç¦»å°äº8ä¸”å½“cnt>40çš„æ—¶å€™ï¼Œè®¤ä¸ºåœ¨1600å†…æ²¡æœ‰è·Ÿéšç›®æ ‡
 	{
 		if(cnt < 40)
 			cnt++;
@@ -913,39 +913,39 @@ void Lidar_Follow(void)
 	else
 	{
 		cnt = 0;
-		if(Move_X > 0.06f || Move_X < -0.06f)  //µ±Move_XÓĞËÙ¶ÈÊ±£¬×ªÏòPID¿ªÊ¼µ÷Õû
+		if(Move_X > 0.06f || Move_X < -0.06f)  //å½“Move_Xæœ‰é€Ÿåº¦æ—¶ï¼Œè½¬å‘PIDå¼€å§‹è°ƒæ•´
 		{
 			if(mini_distance < 700 && (last_angle > 60 || last_angle < -60))
 			{
-				Move_Z = -0.0098f*last_angle;  //µ±¾àÀëÆ«Ğ¡ÇÒ½Ç¶È²î¾à¹ı´óÖ±½Ó¿ìËÙ×ªÏò
+				Move_Z = -0.0098f*last_angle;  //å½“è·ç¦»åå°ä¸”è§’åº¦å·®è·è¿‡å¤§ç›´æ¥å¿«é€Ÿè½¬å‘
 			}
 			else
 			{
-				  Move_Z = -Follow_Turn_PID(last_angle,0);		//×ªÏòPID£¬³µÍ·ÓÀÔ¶¶Ô×Å¸úËæÎïÆ·
+				  Move_Z = -Follow_Turn_PID(last_angle,0);		//è½¬å‘PIDï¼Œè½¦å¤´æ°¸è¿œå¯¹ç€è·Ÿéšç‰©å“
 			}
 		}
 		else
 		{
 			Move_Z = 0;
 		}
-		if(angle>150 || angle<-150)  //Èç¹ûĞ¡³µÔÚºó·½60¡ãĞèÒª·´·½ÏòÔË¶¯ÒÔ¼°¿ìËÙ×ªÍä
+		if(angle>150 || angle<-150)  //å¦‚æœå°è½¦åœ¨åæ–¹60Â°éœ€è¦åæ–¹å‘è¿åŠ¨ä»¥åŠå¿«é€Ÿè½¬å¼¯
 		{
 			Move_X = -Distance_Adjust_PID(mini_distance, Keep_Follow_Distance);
 			Move_Z = -0.0098f*last_angle;
 		}
 		else
 		{
-		  Move_X = Distance_Adjust_PID(mini_distance, Keep_Follow_Distance);  //±£³Ö¾àÀë±£³ÖÔÚ500mm
+		  Move_X = Distance_Adjust_PID(mini_distance, Keep_Follow_Distance);  //ä¿æŒè·ç¦»ä¿æŒåœ¨500mm
 		}
-		Move_X = target_limit_float(Move_X,-amplitude_limiting,amplitude_limiting);   //¶ÔÇ°½øËÙ¶ÈÏŞ·ù
+		Move_X = target_limit_float(Move_X,-amplitude_limiting,amplitude_limiting);   //å¯¹å‰è¿›é€Ÿåº¦é™å¹…
 	}
 	Drive_Motor(Move_X,Move_Y,Move_Z);
 }
 
 /**************************************************************************
-º¯Êı¹¦ÄÜ£ºĞ¡³µ×ßÖ±ÏßÄ£Ê½
-Èë¿Ú²ÎÊı£ºÎŞ
-·µ»Ø  Öµ£ºÎŞ
+å‡½æ•°åŠŸèƒ½ï¼šå°è½¦èµ°ç›´çº¿æ¨¡å¼
+å…¥å£å‚æ•°ï¼šæ— 
+è¿”å›  å€¼ï¼šæ— 
 **************************************************************************/
 void Lidar_along_wall(void)
 {
@@ -953,41 +953,41 @@ void Lidar_along_wall(void)
 	static int i=0;
 
 	u32 distance, last_distance;
-	u8 data_count = 0;			//ÓÃÓÚÂË³ıÒ»Ğ´ÔëµãµÄ¼ÆÊı±äÁ¿
+	u8 data_count = 0;			//ç”¨äºæ»¤é™¤ä¸€å†™å™ªç‚¹çš„è®¡æ•°å˜é‡
 	
-	Move_X = forward_velocity;  //³õÊ¼ËÙ¶È
+	Move_X = forward_velocity;  //åˆå§‹é€Ÿåº¦
 	
 	for(int j=0;j<1152;j++) //225
 	{
-		if(Dataprocess[j].angle>268 && Dataprocess[j].angle<272)   //È¡À×´ïµÄ4¶ÈµÄµã
+		if(Dataprocess[j].angle>268 && Dataprocess[j].angle<272)   //å–é›·è¾¾çš„4åº¦çš„ç‚¹
 		{
 			if(i==0)
 			{
-				target_distance=Dataprocess[j].distance;  //À×´ï²¶»ñµÚÒ»¸ö¾àÀë
+				target_distance=Dataprocess[j].distance;  //é›·è¾¾æ•è·ç¬¬ä¸€ä¸ªè·ç¦»
 				i++;
 			}
-			 if(Dataprocess[j].distance<(target_distance+limit_distance))//ÏŞÖÆÒ»ÏÂÀ×´ïµÄÌ½²â¾àÀë
+			 if(Dataprocess[j].distance<(target_distance+limit_distance))//é™åˆ¶ä¸€ä¸‹é›·è¾¾çš„æ¢æµ‹è·ç¦»
 			 {
 				 data_count++;
-				 distance=Dataprocess[j].distance;//ÊµÊ±¾àÀë
+				 distance=Dataprocess[j].distance;//å®æ—¶è·ç¦»
 				 if(distance==0)		distance = last_distance;
 				 last_distance = distance;
 			 }
 		}
 	}
-	if(Car_Mode == Mec_Car || Car_Mode == Omni_Car)  //Ö»ÓĞÂóÂÖºÍÈ«Ïò¿ÉÒÔÓÃMove_Y
+	if(Car_Mode == Mec_Car || Car_Mode == Omni_Car)  //åªæœ‰éº¦è½®å’Œå…¨å‘å¯ä»¥ç”¨Move_Y
 	{
 		Move_Y=Along_Adjust_PID(distance,target_distance);
 		Move_X = forward_velocity;
 		Move_Z = 0;
 	}
-	else   //ÆäËû³µĞÍÊ¹ÓÃMove_Z±£³Ö×ßÖ±Ïß×´Ì¬
+	else   //å…¶ä»–è½¦å‹ä½¿ç”¨Move_Zä¿æŒèµ°ç›´çº¿çŠ¶æ€
 	{
 		Move_Z=Along_Adjust_PID(distance,target_distance);
 		Move_X = forward_velocity;
 		Move_Y = 0;
 	}
-	if(data_count == 0)  //µ±data_countµÈÓÚ0£¬Ö»ÓĞÇ°½øËÙ¶È
+	if(data_count == 0)  //å½“data_countç­‰äº0ï¼Œåªæœ‰å‰è¿›é€Ÿåº¦
 	{
 		Move_Y = 0;
 		Move_Z = 0;
@@ -995,58 +995,58 @@ void Lidar_along_wall(void)
 	Drive_Motor(Move_X,Move_Y,Move_Z);
 }
 /**************************************************************************
-º¯Êı¹¦ÄÜ£ºĞ¡³µÒ£¿Ø±ÜÕÏ¹¦ÄÜ
-Èë¿Ú²ÎÊı£ºÎŞ
-·µ»Ø  Öµ£ºÎŞ
+å‡½æ•°åŠŸèƒ½ï¼šå°è½¦é¥æ§é¿éšœåŠŸèƒ½
+å…¥å£å‚æ•°ï¼šæ— 
+è¿”å›  å€¼ï¼šæ— 
 **************************************************************************/
 void RC_Lidar_Aviod(float *Vx,float *Vy,float *Vz)
 {
 	int i;
-	int avoid_distance=450;//±ÜÕÏ¾àÀë
-	u16 avoid_point_count=0;//·¶Î§ÄÚĞèÒª±ÚÕÏµÄµãÊı
+	int avoid_distance=450;//é¿éšœè·ç¦»
+	u16 avoid_point_count=0;//èŒƒå›´å†…éœ€è¦å£éšœçš„ç‚¹æ•°
 	int left_angle_sum=0, right_angle_sum=0;
-	int mini_distance_count=0;//×îĞ¡×ªÍä¾àÀëµÄµãÊı
+	int mini_distance_count=0;//æœ€å°è½¬å¼¯è·ç¦»çš„ç‚¹æ•°
 	for(i=0;i<1152;i++)
 	{
 		if(Dataprocess[i].angle>300||Dataprocess[i].angle<60)
-		{//³µÇ°±ÜÕÏ½Ç¶È 300¡ã-60¡ã
+		{//è½¦å‰é¿éšœè§’åº¦ 300Â°-60Â°
 			if(0<Dataprocess[i].distance&&Dataprocess[i].distance<avoid_distance)
 			{
-				avoid_point_count++;//ĞèÒª±ÜÕÏµÄµãÊı
+				avoid_point_count++;//éœ€è¦é¿éšœçš„ç‚¹æ•°
 				if(Dataprocess[i].angle<60)
 				{
 					right_angle_sum+=Dataprocess[i].angle;
 				}
 				else if(Dataprocess[i].angle>300)
 				{
-					left_angle_sum+=(Dataprocess[i].angle-360);//300¡ãµ½359¡ã×ª»¯Îª-60¡ãµ½-1¡ã
+					left_angle_sum+=(Dataprocess[i].angle-360);//300Â°åˆ°359Â°è½¬åŒ–ä¸º-60Â°åˆ°-1Â°
 				}
 				if(Dataprocess[i].distance<Avoid_Min_Distance)
-				{//Ğ¡ÓÚ×îĞ¡±ÜÕÏ¾àÀë
+				{//å°äºæœ€å°é¿éšœè·ç¦»
 					mini_distance_count++;
 				}
 			}
 		}
 	
 	}
-	if(*Vx>0&&avoid_point_count>8){//ĞèÒª±ÜÕÏ
-		if(mini_distance_count>=8)//¾àÀëĞ¡ÓÚ×îĞ¡×ªÍä¾àÀëÒªÇó
+	if(*Vx>0&&avoid_point_count>8){//éœ€è¦é¿éšœ
+		if(mini_distance_count>=8)//è·ç¦»å°äºæœ€å°è½¬å¼¯è·ç¦»è¦æ±‚
 		{
-			*Vx=*Vx*-0.75f;//ºóÍË
+			*Vx=*Vx*-0.75f;//åé€€
 			*Vz=0;
 		}
 		else
 		{
 			if(right_angle_sum+left_angle_sum>0)
-			{//Íù×ó±ÜÈÃ
-				*Vx=*Vx*0.5f;//±ÜÕÏµÄXÖáËÙ¶ÈÊÇÇ°½øËÙ¶ÈµÄÒ»°ë
+			{//å¾€å·¦é¿è®©
+				*Vx=*Vx*0.5f;//é¿éšœçš„Xè½´é€Ÿåº¦æ˜¯å‰è¿›é€Ÿåº¦çš„ä¸€åŠ
 				if(Car_Mode==Akm_Car){
 					*Vz=(PI/2)*4/9;
 				}else{
 					*Vz=1;
 				}
-			}else{//ÍùÓÒ±ÜÈÃ
-				*Vx=*Vx*0.5f;//±ÜÕÏµÄXÖáËÙ¶ÈÊÇÇ°½øËÙ¶ÈµÄÒ»°ë
+			}else{//å¾€å³é¿è®©
+				*Vx=*Vx*0.5f;//é¿éšœçš„Xè½´é€Ÿåº¦æ˜¯å‰è¿›é€Ÿåº¦çš„ä¸€åŠ
 				if(Car_Mode==Akm_Car){
 					*Vz=(-PI/2)*4/9;
 				}else{
@@ -1062,14 +1062,14 @@ void RC_Lidar_Aviod(float *Vx,float *Vy,float *Vz)
 Function: Read the encoder value and calculate the wheel speed, unit m/s
 Input   : none
 Output  : none
-º¯Êı¹¦ÄÜ£º¶ÁÈ¡±àÂëÆ÷ÊıÖµ²¢¼ÆËã³µÂÖËÙ¶È£¬µ¥Î»m/s
-Èë¿Ú²ÎÊı£ºÎŞ
-·µ»Ø  Öµ£ºÎŞ
+å‡½æ•°åŠŸèƒ½ï¼šè¯»å–ç¼–ç å™¨æ•°å€¼å¹¶è®¡ç®—è½¦è½®é€Ÿåº¦ï¼Œå•ä½m/s
+å…¥å£å‚æ•°ï¼šæ— 
+è¿”å›  å€¼ï¼šæ— 
 **************************************************************************/
 void Get_Velocity_Form_Encoder(void)
 {
 	  //Retrieves the original data of the encoder
-	  //»ñÈ¡±àÂëÆ÷µÄÔ­Ê¼Êı¾İ
+	  //è·å–ç¼–ç å™¨çš„åŸå§‹æ•°æ®
 		float Encoder_A_pr,Encoder_B_pr,Encoder_C_pr,Encoder_D_pr; 
 		OriginalEncoder.A=Read_Encoder(2);	
 		OriginalEncoder.B=Read_Encoder(3);	
@@ -1077,7 +1077,7 @@ void Get_Velocity_Form_Encoder(void)
 		OriginalEncoder.D=Read_Encoder(5);	
 
 	  //Decide the encoder numerical polarity according to different car models
-		//¸ù¾İ²»Í¬Ğ¡³µĞÍºÅ¾ö¶¨±àÂëÆ÷ÊıÖµ¼«ĞÔ
+		//æ ¹æ®ä¸åŒå°è½¦å‹å·å†³å®šç¼–ç å™¨æ•°å€¼ææ€§
 		switch(Car_Mode)
 		{
 			case Mec_Car:       Encoder_A_pr=OriginalEncoder.A; Encoder_B_pr=OriginalEncoder.B; Encoder_C_pr= -OriginalEncoder.C;  Encoder_D_pr= -OriginalEncoder.D; break; 
@@ -1089,7 +1089,7 @@ void Get_Velocity_Form_Encoder(void)
 		}
 		
 		//The encoder converts the raw data to wheel speed in m/s
-		//±àÂëÆ÷Ô­Ê¼Êı¾İ×ª»»Îª³µÂÖËÙ¶È£¬µ¥Î»m/s
+		//ç¼–ç å™¨åŸå§‹æ•°æ®è½¬æ¢ä¸ºè½¦è½®é€Ÿåº¦ï¼Œå•ä½m/s
 		MOTOR_A.Encoder= Encoder_A_pr*CONTROL_FREQUENCY*Wheel_perimeter/Encoder_precision;  
 		MOTOR_B.Encoder= Encoder_B_pr*CONTROL_FREQUENCY*Wheel_perimeter/Encoder_precision;  
 		MOTOR_C.Encoder= Encoder_C_pr*CONTROL_FREQUENCY*Wheel_perimeter/Encoder_precision; 
@@ -1099,9 +1099,9 @@ void Get_Velocity_Form_Encoder(void)
 Function: Smoothing the three axis target velocity
 Input   : Three-axis target velocity
 Output  : none
-º¯Êı¹¦ÄÜ£º¶ÔÈıÖáÄ¿±êËÙ¶È×öÆ½»¬´¦Àí
-Èë¿Ú²ÎÊı£ºÈıÖáÄ¿±êËÙ¶È
-·µ»Ø  Öµ£ºÎŞ
+å‡½æ•°åŠŸèƒ½ï¼šå¯¹ä¸‰è½´ç›®æ ‡é€Ÿåº¦åšå¹³æ»‘å¤„ç†
+å…¥å£å‚æ•°ï¼šä¸‰è½´ç›®æ ‡é€Ÿåº¦
+è¿”å›  å€¼ï¼šæ— 
 **************************************************************************/
 void Smooth_control(float vx,float vy,float vz)
 {
@@ -1136,9 +1136,9 @@ void Smooth_control(float vx,float vy,float vz)
 Function: Floating-point data calculates the absolute value
 Input   : float
 Output  : The absolute value of the input number
-º¯Êı¹¦ÄÜ£º¸¡µãĞÍÊı¾İ¼ÆËã¾ø¶ÔÖµ
-Èë¿Ú²ÎÊı£º¸¡µãÊı
-·µ»Ø  Öµ£ºÊäÈëÊıµÄ¾ø¶ÔÖµ
+å‡½æ•°åŠŸèƒ½ï¼šæµ®ç‚¹å‹æ•°æ®è®¡ç®—ç»å¯¹å€¼
+å…¥å£å‚æ•°ï¼šæµ®ç‚¹æ•°
+è¿”å›  å€¼ï¼šè¾“å…¥æ•°çš„ç»å¯¹å€¼
 **************************************************************************/
 float float_abs(float insert)
 {
@@ -1158,9 +1158,9 @@ u32 int_abs(int a)
 Function: Prevent the potentiometer to choose the wrong mode, resulting in initialization error caused by the motor spinning.Out of service
 Input   : none
 Output  : none
-º¯Êı¹¦ÄÜ£º·ÀÖ¹µçÎ»Æ÷Ñ¡´íÄ£Ê½£¬µ¼ÖÂ³õÊ¼»¯³ö´íÒı·¢µç»úÂÒ×ª¡£ÒÑÍ£Ö¹Ê¹ÓÃ
-Èë¿Ú²ÎÊı£ºÎŞ
-·µ»Ø  Öµ£ºÎŞ
+å‡½æ•°åŠŸèƒ½ï¼šé˜²æ­¢ç”µä½å™¨é€‰é”™æ¨¡å¼ï¼Œå¯¼è‡´åˆå§‹åŒ–å‡ºé”™å¼•å‘ç”µæœºä¹±è½¬ã€‚å·²åœæ­¢ä½¿ç”¨
+å…¥å£å‚æ•°ï¼šæ— 
+è¿”å›  å€¼ï¼šæ— 
 **************************************************************************/
 void robot_mode_check(void)
 {
@@ -1168,7 +1168,7 @@ void robot_mode_check(void)
 
 	if(abs(MOTOR_A.Motor_Pwm)>2500||abs(MOTOR_B.Motor_Pwm)>2500||abs(MOTOR_C.Motor_Pwm)>2500||abs(MOTOR_D.Motor_Pwm)>2500)   error++;
 	//If the output is close to full amplitude for 6 times in a row, it is judged that the motor rotates wildly and makes the motor incapacitated
-	//Èç¹ûÁ¬Ğø6´Î½Ó½üÂú·ùÊä³ö£¬ÅĞ¶ÏÎªµç»úÂÒ×ª£¬ÈÃµç»úÊ§ÄÜ	
+	//å¦‚æœè¿ç»­6æ¬¡æ¥è¿‘æ»¡å¹…è¾“å‡ºï¼Œåˆ¤æ–­ä¸ºç”µæœºä¹±è½¬ï¼Œè®©ç”µæœºå¤±èƒ½	
 	if(error>6) EN=0,Flag_Stop=1,robot_mode_check_flag=1;  
 }
 
@@ -1176,29 +1176,29 @@ void robot_mode_check(void)
 Function: Distance_Adjust_PID
 Input   : Current_Distance;Target_Distance
 Output  : OutPut
-º¯Êı¹¦ÄÜ£º×ßÖ±ÏßÀ×´ï¾àÀëpid
-Èë¿Ú²ÎÊı: µ±Ç°¾àÀëºÍÄ¿±ê¾àÀë
-·µ»Ø  Öµ£ºµç»úÄ¿±êËÙ¶È
+å‡½æ•°åŠŸèƒ½ï¼šèµ°ç›´çº¿é›·è¾¾è·ç¦»pid
+å…¥å£å‚æ•°: å½“å‰è·ç¦»å’Œç›®æ ‡è·ç¦»
+è¿”å›  å€¼ï¼šç”µæœºç›®æ ‡é€Ÿåº¦
 **************************************************************************/	 	
-//×ßÖ±ÏßÀ×´ï¾àÀëµ÷Õûpid
+//èµ°ç›´çº¿é›·è¾¾è·ç¦»è°ƒæ•´pid
 
-float Along_Adjust_PID(float Current_Distance,float Target_Distance)//¾àÀëµ÷ÕûPID
+float Along_Adjust_PID(float Current_Distance,float Target_Distance)//è·ç¦»è°ƒæ•´PID
 {
 	static float Bias,OutPut,Integral_bias,Last_Bias;
-	Bias=Target_Distance-Current_Distance;                          	//¼ÆËãÆ«²î
-	Integral_bias+=Bias;	                                 			//Çó³öÆ«²îµÄ»ı·Ö
+	Bias=Target_Distance-Current_Distance;                          	//è®¡ç®—åå·®
+	Integral_bias+=Bias;	                                 			//æ±‚å‡ºåå·®çš„ç§¯åˆ†
 	if(Integral_bias>1000) Integral_bias=1000;
 	else if(Integral_bias<-1000) Integral_bias=-1000;
 	if(Car_Mode == FourWheel_Car)
-		OutPut=FourWheel_Along_Distance_KP*Bias/100000+FourWheel_Along_Distance_KI*Integral_bias/100000+FourWheel_Along_Distance_KD*(Bias-Last_Bias)/100000;//Î»ÖÃÊ½PID¿ØÖÆÆ÷
+		OutPut=FourWheel_Along_Distance_KP*Bias/100000+FourWheel_Along_Distance_KI*Integral_bias/100000+FourWheel_Along_Distance_KD*(Bias-Last_Bias)/100000;//ä½ç½®å¼PIDæ§åˆ¶å™¨
 	else if(Car_Mode == Akm_Car)
-		OutPut=Akm_Along_Distance_KP*Bias/100000+Akm_Along_Distance_KI*Integral_bias/100000+Akm_Along_Distance_KD*(Bias-Last_Bias)/1000;//Î»ÖÃÊ½PID¿ØÖÆÆ÷
+		OutPut=Akm_Along_Distance_KP*Bias/100000+Akm_Along_Distance_KI*Integral_bias/100000+Akm_Along_Distance_KD*(Bias-Last_Bias)/1000;//ä½ç½®å¼PIDæ§åˆ¶å™¨
 	else if(Car_Mode == Diff_Car || Car_Mode == Tank_Car)
-		OutPut=Diff_Along_Distance_KP*Bias/100+Diff_Along_Distance_KI*Integral_bias/100+Diff_Along_Distance_KD*(Bias-Last_Bias);//Î»ÖÃÊ½PID¿ØÖÆÆ÷
+		OutPut=Diff_Along_Distance_KP*Bias/100+Diff_Along_Distance_KI*Integral_bias/100+Diff_Along_Distance_KD*(Bias-Last_Bias);//ä½ç½®å¼PIDæ§åˆ¶å™¨
 	else
-	  OutPut=-Along_Distance_KP*Bias/100000-Along_Distance_KI*Integral_bias/100000-Along_Distance_KD*(Bias-Last_Bias)/1000;//Î»ÖÃÊ½PID¿ØÖÆÆ÷
-	Last_Bias=Bias;                                       		 			//±£´æÉÏÒ»´ÎÆ«²î
-	if(Turn_Off(Voltage)== 1)								//µç»ú¹Ø±Õ£¬´ËÊ±»ı·ÖÇåÁã
+	  OutPut=-Along_Distance_KP*Bias/100000-Along_Distance_KI*Integral_bias/100000-Along_Distance_KD*(Bias-Last_Bias)/1000;//ä½ç½®å¼PIDæ§åˆ¶å™¨
+	Last_Bias=Bias;                                       		 			//ä¿å­˜ä¸Šä¸€æ¬¡åå·®
+	if(Turn_Off(Voltage)== 1)								//ç”µæœºå…³é—­ï¼Œæ­¤æ—¶ç§¯åˆ†æ¸…é›¶
 		Integral_bias = 0;
 	return OutPut;                                          	
 }
@@ -1208,21 +1208,21 @@ float Along_Adjust_PID(float Current_Distance,float Target_Distance)//¾àÀëµ÷ÕûPI
 Function: Distance_Adjust_PID
 Input   : Current_Distance;Target_Distance
 Output  : OutPut
-º¯Êı¹¦ÄÜ£º¸úËæÀ×´ï¾àÀëpid
-Èë¿Ú²ÎÊı: µ±Ç°¾àÀëºÍÄ¿±ê¾àÀë
-·µ»Ø  Öµ£ºµç»úÄ¿±êËÙ¶È
+å‡½æ•°åŠŸèƒ½ï¼šè·Ÿéšé›·è¾¾è·ç¦»pid
+å…¥å£å‚æ•°: å½“å‰è·ç¦»å’Œç›®æ ‡è·ç¦»
+è¿”å›  å€¼ï¼šç”µæœºç›®æ ‡é€Ÿåº¦
 **************************************************************************/	 	
-//¸úËæÀ×´ï¾àÀëµ÷Õûpid
-float Distance_Adjust_PID(float Current_Distance,float Target_Distance)//¾àÀëµ÷ÕûPID
+//è·Ÿéšé›·è¾¾è·ç¦»è°ƒæ•´pid
+float Distance_Adjust_PID(float Current_Distance,float Target_Distance)//è·ç¦»è°ƒæ•´PID
 {
 	static float Bias,OutPut,Integral_bias,Last_Bias;
-	Bias=Target_Distance-Current_Distance;                          	//¼ÆËãÆ«²î
-	Integral_bias+=Bias;	                                 			//Çó³öÆ«²îµÄ»ı·Ö
+	Bias=Target_Distance-Current_Distance;                          	//è®¡ç®—åå·®
+	Integral_bias+=Bias;	                                 			//æ±‚å‡ºåå·®çš„ç§¯åˆ†
 	if(Integral_bias>1000) Integral_bias=1000;
 	else if(Integral_bias<-1000) Integral_bias=-1000;
-	OutPut=Distance_KP*Bias/100+Distance_KI*Integral_bias/100+Distance_KD*(Bias-Last_Bias)/100;//Î»ÖÃÊ½PID¿ØÖÆÆ÷
-	Last_Bias=Bias;                                       		 			//±£´æÉÏÒ»´ÎÆ«²î
-	if(Turn_Off(Voltage)== 1)								//µç»ú¹Ø±Õ£¬´ËÊ±»ı·ÖÇåÁã
+	OutPut=Distance_KP*Bias/100+Distance_KI*Integral_bias/100+Distance_KD*(Bias-Last_Bias)/100;//ä½ç½®å¼PIDæ§åˆ¶å™¨
+	Last_Bias=Bias;                                       		 			//ä¿å­˜ä¸Šä¸€æ¬¡åå·®
+	if(Turn_Off(Voltage)== 1)								//ç”µæœºå…³é—­ï¼Œæ­¤æ—¶ç§¯åˆ†æ¸…é›¶
 		Integral_bias = 0;
 	return OutPut;                                          	
 }
@@ -1231,26 +1231,26 @@ float Distance_Adjust_PID(float Current_Distance,float Target_Distance)//¾àÀëµ÷Õ
 Function: Follow_Turn_PID
 Input   : Current_Angle;Target_Angle
 Output  : OutPut
-º¯Êı¹¦ÄÜ£º¸úËæÀ×´ï×ªÏòpid
-Èë¿Ú²ÎÊı: µ±Ç°½Ç¶ÈºÍÄ¿±ê½Ç¶È
-·µ»Ø  Öµ£ºµç»ú×ªÏòËÙ¶È
+å‡½æ•°åŠŸèƒ½ï¼šè·Ÿéšé›·è¾¾è½¬å‘pid
+å…¥å£å‚æ•°: å½“å‰è§’åº¦å’Œç›®æ ‡è§’åº¦
+è¿”å›  å€¼ï¼šç”µæœºè½¬å‘é€Ÿåº¦
 **************************************************************************/	 	
-//¸úËæÀ×´ï×ªÏòpid
+//è·Ÿéšé›·è¾¾è½¬å‘pid
 float Follow_Turn_PID(float Current_Angle,float Target_Angle)
 {
 	static float Bias,OutPut,Integral_bias,Last_Bias;
-	Bias=Target_Angle-Current_Angle;                         				 //¼ÆËãÆ«²î
-	Integral_bias+=Bias;	                                 				 //Çó³öÆ«²îµÄ»ı·Ö
+	Bias=Target_Angle-Current_Angle;                         				 //è®¡ç®—åå·®
+	Integral_bias+=Bias;	                                 				 //æ±‚å‡ºåå·®çš„ç§¯åˆ†
 	if(Integral_bias>1000) Integral_bias=1000;
 	else if(Integral_bias<-1000) Integral_bias=-1000;
 	if(Car_Mode == Akm_Car || Car_Mode == Omni_Car)
-		OutPut=(Follow_KP_Akm/100)*Bias+(Follow_KI_Akm/100)*Integral_bias+(Follow_KD_Akm/100)*(Bias-Last_Bias);	//Î»ÖÃÊ½PID¿ØÖÆÆ÷
+		OutPut=(Follow_KP_Akm/100)*Bias+(Follow_KI_Akm/100)*Integral_bias+(Follow_KD_Akm/100)*(Bias-Last_Bias);	//ä½ç½®å¼PIDæ§åˆ¶å™¨
 	else
-	  OutPut=(Follow_KP/100)*Bias+(Follow_KI/100)*Integral_bias+(Follow_KD/100)*(Bias-Last_Bias);	//Î»ÖÃÊ½PID¿ØÖÆÆ÷
-	Last_Bias=Bias;                                       					 		//±£´æÉÏÒ»´ÎÆ«²î
-	if(Turn_Off(Voltage)== 1)								//µç»ú¹Ø±Õ£¬´ËÊ±»ı·ÖÇåÁã
+	  OutPut=(Follow_KP/100)*Bias+(Follow_KI/100)*Integral_bias+(Follow_KD/100)*(Bias-Last_Bias);	//ä½ç½®å¼PIDæ§åˆ¶å™¨
+	Last_Bias=Bias;                                       					 		//ä¿å­˜ä¸Šä¸€æ¬¡åå·®
+	if(Turn_Off(Voltage)== 1)								//ç”µæœºå…³é—­ï¼Œæ­¤æ—¶ç§¯åˆ†æ¸…é›¶
 		Integral_bias = 0;
-	return OutPut;                                           					 	//Êä³ö
+	return OutPut;                                           					 	//è¾“å‡º
 	
 }
 

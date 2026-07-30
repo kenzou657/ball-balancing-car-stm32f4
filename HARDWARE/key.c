@@ -4,50 +4,50 @@
 Function: Key initialization
 Input   : none
 Output  : none
-º¯Êı¹¦ÄÜ£º°´¼ü³õÊ¼»¯
-Èë¿Ú²ÎÊı£ºÎŞ
-·µ»Ø  Öµ£ºÎŞ 
+å‡½æ•°åŠŸèƒ½ï¼šæŒ‰é”®åˆå§‹åŒ–
+å…¥å£å‚æ•°ï¼šæ— 
+è¿”å›  å€¼ï¼šæ—  
 **************************************************************************/
 void KEY_Init(void)
 {
 	GPIO_InitTypeDef  GPIO_InitStructure;
-  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE, ENABLE);//Ê¹ÄÜGPIOBÊ±ÖÓ
-  GPIO_InitStructure.GPIO_Pin = KEY_PIN; //KEY¶ÔÓ¦Òı½Å
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;//ÆÕÍ¨ÊäÈëÄ£Ê½
+  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE, ENABLE);//ä½¿èƒ½GPIOBæ—¶é’Ÿ
+  GPIO_InitStructure.GPIO_Pin = KEY_PIN; //KEYå¯¹åº”å¼•è„š
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;//æ™®é€šè¾“å…¥æ¨¡å¼
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;//100M
-  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;//ÉÏÀ­
-  GPIO_Init(GPIOE, &GPIO_InitStructure);//³õÊ¼»¯GPIOB14	
+  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;//ä¸Šæ‹‰
+  GPIO_Init(GPIOE, &GPIO_InitStructure);//åˆå§‹åŒ–GPIOB14	
 } 
 /**************************************************************************
 Function: Buttons to scan
 Input   : none
 Output  : none
-º¯Êı¹¦ÄÜ£º°´¼üÉ¨Ãè
-Èë¿Ú²ÎÊı£ºÎŞ
-·µ»Ø  Öµ£º°´¼ü×´Ì¬ 0£ºÎŞ¶¯×÷ 1£ºµ¥»÷ 
+å‡½æ•°åŠŸèƒ½ï¼šæŒ‰é”®æ‰«æ
+å…¥å£å‚æ•°ï¼šæ— 
+è¿”å›  å€¼ï¼šæŒ‰é”®çŠ¶æ€ 0ï¼šæ— åŠ¨ä½œ 1ï¼šå•å‡» 
 **************************************************************************/
 u8 click(void)
 {
 	//Press the release sign
-	//°´¼ü°´ËÉ¿ª±êÖ¾
+	//æŒ‰é”®æŒ‰æ¾å¼€æ ‡å¿—
 	static u8 flag_key=1;
 	
 	if(flag_key&&KEY==0)
 	{
-	 flag_key=0; //The key is pressed //°´¼ü°´ÏÂ
+	 flag_key=0; //The key is pressed //æŒ‰é”®æŒ‰ä¸‹
 	 return 1;	
 	}
 	else if(1==KEY)			
 		flag_key=1;
-	return 0; //No key is pressed //ÎŞ°´¼ü°´ÏÂ
+	return 0; //No key is pressed //æ— æŒ‰é”®æŒ‰ä¸‹
 }
 /**************************************************************************
 Function: Delay function
 Input   : none
 Output  : none
-º¯Êı¹¦ÄÜ£ºÑÓ³Ùº¯Êı
-Èë¿Ú²ÎÊı£ºÎŞ
-·µ »Ø Öµ£ºÎŞ
+å‡½æ•°åŠŸèƒ½ï¼šå»¶è¿Ÿå‡½æ•°
+å…¥å£å‚æ•°ï¼šæ— 
+è¿” å› å€¼ï¼šæ— 
 **************************************************************************/
 void Delay_ms(void)
 {
@@ -61,9 +61,9 @@ void Delay_ms(void)
 Function: Buttons to scan
 Input   : Double click wait time
 Output  : Button status: 0- no action, 1- click, 2- double click
-º¯Êı¹¦ÄÜ£º°´¼üÉ¨Ãè
-Èë¿Ú²ÎÊı£ºË«»÷µÈ´ıÊ±¼ä
-·µ»Ø  Öµ£º°´¼ü×´Ì¬: 0-ÎŞ¶¯×÷, 1-µ¥»÷, 2-Ë«»÷ 
+å‡½æ•°åŠŸèƒ½ï¼šæŒ‰é”®æ‰«æ
+å…¥å£å‚æ•°ï¼šåŒå‡»ç­‰å¾…æ—¶é—´
+è¿”å›  å€¼ï¼šæŒ‰é”®çŠ¶æ€: 0-æ— åŠ¨ä½œ, 1-å•å‡», 2-åŒå‡» 
 **************************************************************************/
 u8 click_N_Double (u8 time)
 {
@@ -85,7 +85,7 @@ u8 click_N_Double (u8 time)
 				{
 					double_key=0;
 					count_single=0;
-					return 2; //Double click //Ë«»÷
+					return 2; //Double click //åŒå‡»
 				}
 		}
 		if(1==KEY)			flag_key=0,count_key=0;
@@ -97,7 +97,7 @@ u8 click_N_Double (u8 time)
 			{
 			double_key=0;
 			count_single=0;	
-			return 1; //Click //µ¥»÷
+			return 1; //Click //å•å‡»
 			}
 			if(Forever_count>time)
 			{
@@ -111,9 +111,9 @@ u8 click_N_Double (u8 time)
 Function: Button scan.Because static variables are used, a function with a different name needs to be defined when the keystroke scan function is used multiple times
 Input   : none
 Output  : Button status: 0- no action, 1- click, 2- double click
-º¯Êı¹¦ÄÜ£º°´¼üÉ¨Ãè¡£ÒòÎªÊ¹ÓÃµ½ÁË¾²Ì¬±äÁ¿£¬µ±¶à´¦ĞèÒªÊ¹ÓÃ°´¼üÉ¨Ãèº¯ÊıÊ±£¬ĞèÒªÔÙ¶¨ÒåÒ»¸ö²»Í¬Ãûº¯Êı
-Èë¿Ú²ÎÊı£ºÎŞ
-·µ »Ø Öµ£º°´¼ü×´Ì¬: 0-ÎŞ¶¯×÷, 1-µ¥»÷, 2-Ë«»÷ 
+å‡½æ•°åŠŸèƒ½ï¼šæŒ‰é”®æ‰«æã€‚å› ä¸ºä½¿ç”¨åˆ°äº†é™æ€å˜é‡ï¼Œå½“å¤šå¤„éœ€è¦ä½¿ç”¨æŒ‰é”®æ‰«æå‡½æ•°æ—¶ï¼Œéœ€è¦å†å®šä¹‰ä¸€ä¸ªä¸åŒåå‡½æ•°
+å…¥å£å‚æ•°ï¼šæ— 
+è¿” å› å€¼ï¼šæŒ‰é”®çŠ¶æ€: 0-æ— åŠ¨ä½œ, 1-å•å‡», 2-åŒå‡» 
 **************************************************************************/
 u8 click_N_Double_MPU6050 (u8 time)
 {
@@ -134,7 +134,7 @@ u8 click_N_Double_MPU6050 (u8 time)
 				{
 					double_key=0;
 					count_single=0;
-					return 2; //Double click //Ë«»÷
+					return 2; //Double click //åŒå‡»
 				}
 		}
 		if(1==KEY)			flag_key=0,count_key=0;
@@ -146,7 +146,7 @@ u8 click_N_Double_MPU6050 (u8 time)
 			{
 			double_key=0;
 			count_single=0;	
-			return 1; //Click //µ¥»÷
+			return 1; //Click //å•å‡»
 			}
 			if(Forever_count>time)
 			{
@@ -160,9 +160,9 @@ u8 click_N_Double_MPU6050 (u8 time)
 Function: Long according to the test
 Input   : none
 Output  : Key state 0: no action 1: long press 3s
-º¯Êı¹¦ÄÜ£º³¤°´¼ì²â
-Èë¿Ú²ÎÊı£ºÎŞ
-·µ»Ø  Öµ£º°´¼ü×´Ì¬ 0£ºÎŞ¶¯×÷ 1£º³¤°´3s
+å‡½æ•°åŠŸèƒ½ï¼šé•¿æŒ‰æ£€æµ‹
+å…¥å£å‚æ•°ï¼šæ— 
+è¿”å›  å€¼ï¼šæŒ‰é”®çŠ¶æ€ 0ï¼šæ— åŠ¨ä½œ 1ï¼šé•¿æŒ‰3s
 **************************************************************************/
 u8 Long_Press(void)
 {
@@ -171,48 +171,48 @@ u8 Long_Press(void)
 	if(Long_Press==0&&KEY==0)  Long_Press_count++; 
 	else                       Long_Press_count=0;
 
-	if(Long_Press_count>15)	//3 seconds //3Ãë	
+	if(Long_Press_count>15)	//3 seconds //3ç§’	
 	{
 		Long_Press=1;	
 		Long_Press_count=0;
 		return 1;
 	}				
-	 if(Long_Press==1) //Long press position 1 //³¤°´±êÖ¾Î»ÖÃ1
+	 if(Long_Press==1) //Long press position 1 //é•¿æŒ‰æ ‡å¿—ä½ç½®1
 	{
 			Long_Press=0;
 	}
 	return 0;
 }
 
-//°´¼üÉ¨Ãèº¯Êı
-//Èë¿Ú²ÎÊı£ºÖ´ĞĞ¸Ãº¯ÊıµÄÈÎÎñÆµÂÊ,ÑÓ³ÙÂË²¨µÄÊ±¼ä
-//·µ»ØÖµ£ºlong_click¡¢double_click¡¢single_click¡¢key_stateless
-//µäĞÍÖµ£º¢Ùµ±º¯ÊıÖ»É¨Ãè°´¼ü£¬KEY_Scan(3000,200)
-//       ¢Úµ±º¯ÊıÀïÆäËû²Ù×÷±È½Ï¶à£¬KEY_Scan(200,0)
+//æŒ‰é”®æ‰«æå‡½æ•°
+//å…¥å£å‚æ•°ï¼šæ‰§è¡Œè¯¥å‡½æ•°çš„ä»»åŠ¡é¢‘ç‡,å»¶è¿Ÿæ»¤æ³¢çš„æ—¶é—´
+//è¿”å›å€¼ï¼šlong_clickã€double_clickã€single_clickã€key_stateless
+//å…¸å‹å€¼ï¼šâ‘ å½“å‡½æ•°åªæ‰«ææŒ‰é”®ï¼ŒKEY_Scan(3000,200)
+//       â‘¡å½“å‡½æ•°é‡Œå…¶ä»–æ“ä½œæ¯”è¾ƒå¤šï¼ŒKEY_Scan(200,0)
 u8 KEY_Scan(u16 Frequency,u16 filter_times)
 {
-    static u16 time_core;//×ßÊ±ºËĞÄ
-    static u16 long_press_time;//³¤°´Ê¶±ğ
-    static u8 press_flag=0;//°´¼ü°´ÏÂ±ê¼Ç
-    static u8 check_once=0;//ÊÇ·ñÒÑ¾­Ê¶±ğ1´Î±ê¼Ç
+    static u16 time_core;//èµ°æ—¶æ ¸å¿ƒ
+    static u16 long_press_time;//é•¿æŒ‰è¯†åˆ«
+    static u8 press_flag=0;//æŒ‰é”®æŒ‰ä¸‹æ ‡è®°
+    static u8 check_once=0;//æ˜¯å¦å·²ç»è¯†åˆ«1æ¬¡æ ‡è®°
     static u16 delay_mini_1;
     static u16 delay_mini_2;
 	
-    float Count_time = (((float)(1.0f/(float)Frequency))*1000.0f);//Ëã³ö¼Æ1ĞèÒª¶àÉÙ¸öºÁÃë
+    float Count_time = (((float)(1.0f/(float)Frequency))*1000.0f);//ç®—å‡ºè®¡1éœ€è¦å¤šå°‘ä¸ªæ¯«ç§’
 
-    if(check_once)//Íê³ÉÁËÊ¶±ğ£¬ÔòÇå¿ÕËùÓĞ±äÁ¿
+    if(check_once)//å®Œæˆäº†è¯†åˆ«ï¼Œåˆ™æ¸…ç©ºæ‰€æœ‰å˜é‡
     {
-        press_flag=0;//Íê³ÉÁË1´ÎÊ¶±ğ£¬±ê¼ÇÇåÁã
-        time_core=0;//Íê³ÉÁË1´ÎÊ¶±ğ£¬Ê±¼äÇåÁã
-        long_press_time=0;//Íê³ÉÁË1´ÎÊ¶±ğ£¬Ê±¼äÇåÁã
+        press_flag=0;//å®Œæˆäº†1æ¬¡è¯†åˆ«ï¼Œæ ‡è®°æ¸…é›¶
+        time_core=0;//å®Œæˆäº†1æ¬¡è¯†åˆ«ï¼Œæ—¶é—´æ¸…é›¶
+        long_press_time=0;//å®Œæˆäº†1æ¬¡è¯†åˆ«ï¼Œæ—¶é—´æ¸…é›¶
         delay_mini_1=0;
         delay_mini_2=0;
     }
-    if(check_once&&KEY==1) check_once=0; //Íê³ÉÉ¨Ãèºó°´¼ü±»µ¯Æğ£¬Ôò¿ªÆôÏÂÒ»´ÎÉ¨Ãè
+    if(check_once&&KEY==1) check_once=0; //å®Œæˆæ‰«æåæŒ‰é”®è¢«å¼¹èµ·ï¼Œåˆ™å¼€å¯ä¸‹ä¸€æ¬¡æ‰«æ
 
-    if(KEY==0&&check_once==0)//°´¼üÉ¨Ãè
+    if(KEY==0&&check_once==0)//æŒ‰é”®æ‰«æ
     {
-        press_flag=1;//±ê¼Ç±»°´ÏÂ1´Î
+        press_flag=1;//æ ‡è®°è¢«æŒ‰ä¸‹1æ¬¡
 		
         if(++delay_mini_1>filter_times)
         {
@@ -221,13 +221,13 @@ u8 KEY_Scan(u16 Frequency,u16 filter_times)
         }
     }
 
-    if(long_press_time>(u16)(600.0f/Count_time))// ³¤°´1Ãë
+    if(long_press_time>(u16)(600.0f/Count_time))// é•¿æŒ‰1ç§’
     {	
-        check_once=1;//±ê¼ÇÒÑ±»Ê¶±ğ
-        return long_click; //³¤°´
+        check_once=1;//æ ‡è®°å·²è¢«è¯†åˆ«
+        return long_click; //é•¿æŒ‰
     }
 
-    //°´¼ü±»°´ÏÂ1´ÎÓÖµ¯Æğºó£¬¿ªÆôÄÚºË×ßÊ±
+    //æŒ‰é”®è¢«æŒ‰ä¸‹1æ¬¡åˆå¼¹èµ·åï¼Œå¼€å¯å†…æ ¸èµ°æ—¶
     if(press_flag&&KEY==1)
     {
         if(++delay_mini_2>filter_times)
@@ -237,18 +237,18 @@ u8 KEY_Scan(u16 Frequency,u16 filter_times)
         }
     }		
 	
-    if(press_flag&&(time_core>(u16)(50.0f/Count_time)&&time_core<(u16)(500.0f/Count_time)))//50~700msÄÚ±»ÔÙ´Î°´ÏÂ
+    if(press_flag&&(time_core>(u16)(50.0f/Count_time)&&time_core<(u16)(500.0f/Count_time)))//50~700mså†…è¢«å†æ¬¡æŒ‰ä¸‹
     {
-        if(KEY==0) //Èç¹ûÔÙ´Î°´ÏÂ
+        if(KEY==0) //å¦‚æœå†æ¬¡æŒ‰ä¸‹
         {
-            check_once=1;//±ê¼ÇÒÑ±»Ê¶±ğ
-            return double_click; //±ê¼ÇÎªË«»÷
+            check_once=1;//æ ‡è®°å·²è¢«è¯†åˆ«
+            return double_click; //æ ‡è®°ä¸ºåŒå‡»
         }
     }
     else if(press_flag&&time_core>(u16)(500.0f/Count_time))
     {
-        check_once=1;//±ê¼ÇÒÑ±»Ê¶±ğ
-        return single_click; //800msºó»¹Ã»±»°´ÏÂ£¬ÔòÊÇµ¥»÷
+        check_once=1;//æ ‡è®°å·²è¢«è¯†åˆ«
+        return single_click; //800msåè¿˜æ²¡è¢«æŒ‰ä¸‹ï¼Œåˆ™æ˜¯å•å‡»
     }
 
     return key_stateless;

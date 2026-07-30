@@ -73,11 +73,11 @@ void MX_USB_HOST_Init(void)
 	{
 		Error_Handler();
 	}
-	if (USBH_RegisterClass(&hUsbHostFS, &PS2_HID_Class) != USBH_OK) //×¢²áps2 hidÀà
+	if (USBH_RegisterClass(&hUsbHostFS, &PS2_HID_Class) != USBH_OK) //æ³¨å†Œps2 hidç±»
 	{
 		Error_Handler();
 	}
-	if (USBH_RegisterClass(&hUsbHostFS, &WiredlessPS2_HID_Class) != USBH_OK) //×¢²áÎÞÏßÊÖ±úps2 hidÀà
+	if (USBH_RegisterClass(&hUsbHostFS, &WiredlessPS2_HID_Class) != USBH_OK) //æ³¨å†Œæ— çº¿æ‰‹æŸ„ps2 hidç±»
 	{
 		Error_Handler();
 	}

@@ -111,9 +111,9 @@ typedef struct{
 	short z;
 }IMU_BASE_t;
 
-//imuÈıÖáÊı¾İ,°üº¬Æ«²îÖµºÍÔ­Ê¼Öµ
+//imuä¸‰è½´æ•°æ®,åŒ…å«åå·®å€¼å’ŒåŸå§‹å€¼
 typedef struct{
-	IMU_BASE_t Deviation_accel;//Æ«²îÖµ,ÓÃÓÚ¾ÀÕıÎó²î.¸ÃÖµ²É¼¯ºó²»»á·¢Éú¸Ä±ä
+	IMU_BASE_t Deviation_accel;//åå·®å€¼,ç”¨äºçº æ­£è¯¯å·®.è¯¥å€¼é‡‡é›†åä¸ä¼šå‘ç”Ÿæ”¹å˜
 	IMU_BASE_t Deviation_gyro;
 	IMU_BASE_t Original_accel;
 	IMU_BASE_t Original_gyro;
@@ -143,14 +143,14 @@ typedef struct imu_st_sensor_data_tag
 	int16_t s16Z;
 }IMU_ST_SENSOR_DATA;
 
-//¶ÔÍâ½Ó¿Úº¯Êı
+//å¯¹å¤–æ¥å£å‡½æ•°
 void invMSInit(void);
 u8 ICM20948_Get_Gyroscope(void);
 u8 ICM20948_Get_Accel(void);
 uint8_t ICM20948_getDeviceID(void);
 
 
-//ÄÚ²¿Ê¹ÓÃº¯Êı
+//å†…éƒ¨ä½¿ç”¨å‡½æ•°
 static void invmsICM20948Init(void);
 static void invmsICM20948GyroRead(int16_t* ps16X, int16_t* ps16Y, int16_t* ps16Z);
 static void invmsICM20948AccelRead(int16_t* ps16X, int16_t* ps16Y, int16_t* ps16Z);

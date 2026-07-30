@@ -1,5 +1,5 @@
 /*
- * Îª±ê×¼¿â+FreeRTOS»·¾³ÏÂµÄUSB Host¹¦ÄÜÌá¹©Ö§³ÖÎÄ¼ş
+ * ä¸ºæ ‡å‡†åº“+FreeRTOSç¯å¢ƒä¸‹çš„USB HoståŠŸèƒ½æä¾›æ”¯æŒæ–‡ä»¶
 */
 
 #include "usbh_os_middleware.h"
@@ -13,12 +13,12 @@ void osMessageQueuePut(osMessageQueueId_t mq_id, const void *msg_ptr, uint8_t ms
 
 	(void)msg_prio; /* Message priority is ignored */
 	
-	//ISRÖĞ¶Ï»·¾³
+	//ISRä¸­æ–­ç¯å¢ƒ
 	if (IS_IRQ())
 	{
 		if ((hQueue == NULL) || (msg_ptr == NULL) || (timeout != 0U))
 		{
-		  //²ÎÊıºÏ·¨¼ì²é
+		  //å‚æ•°åˆæ³•æ£€æŸ¥
 		}
 		else
 		{
@@ -26,20 +26,20 @@ void osMessageQueuePut(osMessageQueueId_t mq_id, const void *msg_ptr, uint8_t ms
 
 			if (xQueueSendToBackFromISR (hQueue, msg_ptr, &yield) != pdTRUE)
 			{
-				//Ğ´ÈëÊ§°Ü
+				//å†™å…¥å¤±è´¥
 			}
 			else
 			{
-				portYIELD_FROM_ISR (yield);//Ğ´Èë³É¹¦,²¢¸ù¾İÇé¿öÖ÷¶¯·¢ÆğÈÎÎñµ÷¶È
+				portYIELD_FROM_ISR (yield);//å†™å…¥æˆåŠŸ,å¹¶æ ¹æ®æƒ…å†µä¸»åŠ¨å‘èµ·ä»»åŠ¡è°ƒåº¦
 			}
 		}
 	}
-	//ÆÕÍ¨ÈÎÎñ»·¾³
+	//æ™®é€šä»»åŠ¡ç¯å¢ƒ
 	else 
 	{
 		if ((hQueue == NULL) || (msg_ptr == NULL)) 
 		{
-			//¼ì²é²ÎÊıÊÇ·ñºÏ·¨
+			//æ£€æŸ¥å‚æ•°æ˜¯å¦åˆæ³•
 		}
 		else 
 		{

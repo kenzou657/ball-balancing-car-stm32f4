@@ -3,8 +3,8 @@
 #include "sys.h"
 #include "system.h"
 
-#define LED_TASK_PRIO		2     //Task priority //ÈÎÎñÓÅÏÈ¼¶
-#define LED_STK_SIZE 		128   //Task stack size //ÈÎÎñ¶ÑÕ»´óĞ¡
+#define LED_TASK_PRIO		2     //Task priority //ä»»åŠ¡ä¼˜å…ˆçº§
+#define LED_STK_SIZE 		128   //Task stack size //ä»»åŠ¡å †æ ˆå¤§å°
 
 
 /*--------Buzzer control pin--------*/
@@ -16,10 +16,10 @@
 /*--------LED control pin--------*/
 #define LED_PORT GPIOA
 #define LED_PIN GPIO_Pin_12
-//¾É°åC30DLED¿ØÖÆ¿Ú
+//æ—§æ¿C30DLEDæ§åˆ¶å£
 #define V1_0_LED PAout(12) 
 /*----------------------------------*/
-//ĞÂ°åC30DLED¿ØÖÆ¿Ú
+//æ–°æ¿C30DLEDæ§åˆ¶å£
 #define V1_1_LED PEout(8) 
 
 

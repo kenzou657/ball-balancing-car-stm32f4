@@ -6,16 +6,16 @@
 extern void PS2Control_Reset(void);
 extern void PS2Control_Set(void);
 
-//PS2ÊÖ±úÀàĞÍ
+//PS2æ‰‹æŸ„ç±»å‹
 static PS2_TYPE_t ps2_type = UnKnown_Dev;
 
-//PS2 16¸ö°´¼üÊıÖµ¶ÁÈ¡
+//PS2 16ä¸ªæŒ‰é”®æ•°å€¼è¯»å–
 static uint16_t ps2_KeyVal = 0;
 
 extern PS2KEY_State_t ps2_checkkey(uint8_t bit);
 extern uint8_t ps2_checkkeystate(uint8_t bit);
 
-//usbÊÖ±úÊı¾İ½á¹¹Ìå
+//usbæ‰‹æŸ„æ•°æ®ç»“æ„ä½“
 PS2INFO_t ps2_info = { 
 	.LX = 127,
 	.LY = 127,
@@ -25,7 +25,7 @@ PS2INFO_t ps2_info = {
 	.getKeyState = ps2_checkkeystate
 };
 
-//ps2ÊÖ±úµÄÄ¬ÈÏÖµ,µ±ÊÖ±ú³öÏÖ²å°ÎÊ±»Ö¸´Ä¬ÈÏÖµ
+//ps2æ‰‹æŸ„çš„é»˜è®¤å€¼,å½“æ‰‹æŸ„å‡ºç°æ’æ‹”æ—¶æ¢å¤é»˜è®¤å€¼
 PS2INFO_t ps2_defaultVal = {
 	.LX = 127,
 	.LY = 127,
@@ -35,7 +35,7 @@ PS2INFO_t ps2_defaultVal = {
 	.getKeyState = ps2_checkkeystate
 };
 
-//PS2_HIDÀàÏà¹Øº¯ÊıÉùÃ÷
+//PS2_HIDç±»ç›¸å…³å‡½æ•°å£°æ˜
 static USBH_StatusTypeDef USBH_HID_InterfaceInit(USBH_HandleTypeDef *phost);
 static USBH_StatusTypeDef USBH_HID_InterfaceDeInit(USBH_HandleTypeDef *phost);
 static USBH_StatusTypeDef USBH_HID_ClassRequest(USBH_HandleTypeDef *phost);
@@ -43,14 +43,14 @@ static USBH_StatusTypeDef USBH_HID_Process(USBH_HandleTypeDef *phost);
 static USBH_StatusTypeDef USBH_HID_SOFProcess(USBH_HandleTypeDef *phost);
 static void USBH_HID_ParseHIDDesc(HID_DescTypeDef *desc, uint8_t *buf);
 
-//usbÊÖ±úµÄ³õÊ¼»¯ÉùÃ÷
+//usbæ‰‹æŸ„çš„åˆå§‹åŒ–å£°æ˜
 extern USBH_StatusTypeDef USBH_HID_PS2Init(USBH_HandleTypeDef *phost);
 
-//¶¨Òåps2µÄhidÀà
+//å®šä¹‰ps2çš„hidç±»
 USBH_ClassTypeDef  PS2_HID_Class =
 {
   .Name = "HID",
-  .ClassCode = USB_HID_CLASS, //ÓĞÏßps2ÊÖ±ú,Ä¬ÈÏÎªHIDÉè±¸
+  .ClassCode = USB_HID_CLASS, //æœ‰çº¿ps2æ‰‹æŸ„,é»˜è®¤ä¸ºHIDè®¾å¤‡
   .Init = USBH_HID_InterfaceInit,
   .DeInit = USBH_HID_InterfaceDeInit,
   .Requests = USBH_HID_ClassRequest,
@@ -62,7 +62,7 @@ USBH_ClassTypeDef  PS2_HID_Class =
 USBH_ClassTypeDef  WiredlessPS2_HID_Class =
 {
   .Name = "HID",
-  .ClassCode = 0xff, //ÎŞÏßps2ÊÖ±ú,°²×¿Ä£Ê½ÏÂ,Ã¶¾ÙÊ±¸ÃÀà·µ»ØµÄ´úÂëÎª0xff
+  .ClassCode = 0xff, //æ— çº¿ps2æ‰‹æŸ„,å®‰å“æ¨¡å¼ä¸‹,æšä¸¾æ—¶è¯¥ç±»è¿”å›çš„ä»£ç ä¸º0xff
   .Init = USBH_HID_InterfaceInit,
   .DeInit = USBH_HID_InterfaceDeInit,
   .Requests = USBH_HID_ClassRequest,
@@ -89,10 +89,10 @@ static USBH_StatusTypeDef USBH_HID_InterfaceInit(USBH_HandleTypeDef *phost)
 
 	USBH_UsrLog("start find interface now");
 	
-	//½Ó¿ÚÆ¥Åä,Ö÷Òª¶ÔÏÂÃæµÄÕâ¸öÊı×é½Ó¿Ú½øĞĞÆ¥Åä
+	//æ¥å£åŒ¹é…,ä¸»è¦å¯¹ä¸‹é¢çš„è¿™ä¸ªæ•°ç»„æ¥å£è¿›è¡ŒåŒ¹é…
 	//phost->device.CfgDesc.Itf_Desc[0,1,2,3...,n...].bInterfaceSubClass
 
-	//0xff±íÊ¾Æ¥ÅäËùÓĞÀàĞÍ
+	//0xffè¡¨ç¤ºåŒ¹é…æ‰€æœ‰ç±»å‹
 	interface = USBH_FindInterface(phost, 0xFFU, 0xFFU, 0xFFU);
 	
 	if ((interface == 0xFFU) || (interface >= USBH_MAX_NUM_INTERFACES)) /* No Valid Interface */
@@ -122,23 +122,23 @@ static USBH_StatusTypeDef USBH_HID_InterfaceInit(USBH_HandleTypeDef *phost)
 
   HID_Handle->state = USBH_HID_ERROR;
 
-  //¸ù¾İHIDÉè±¸µÄ PID¡¢VID½øĞĞ²»Í¬µÄÉè±¸ÀàĞÍÊ¶±ğ
+  //æ ¹æ®HIDè®¾å¤‡çš„ PIDã€VIDè¿›è¡Œä¸åŒçš„è®¾å¤‡ç±»å‹è¯†åˆ«
   if( phost->device.DevDesc.idProduct == Wired_PS2_PID && phost->device.DevDesc.idVendor==Wired_PS2_VID )
-  {	  //ÓĞÏßPS2ÊÖ±úµÄPID/VID
+  {	  //æœ‰çº¿PS2æ‰‹æŸ„çš„PID/VID
 	  USBH_UsrLog("Wired PS2 device found!");
 	  ps2_type = Wired_PS2;
 	  HID_Handle->Init = USBH_HID_PS2Init;
   }
   
   else if( phost->device.DevDesc.idProduct == Wireless_PC_PS2_PID && phost->device.DevDesc.idVendor==Wireless_PC_PS2_VID )
-  {	  //ÎŞÏßPS2ÊÖ±ú PCÄ£Ê½ PID/VID
+  {	  //æ— çº¿PS2æ‰‹æŸ„ PCæ¨¡å¼ PID/VID
 	  USBH_UsrLog("Wireless PC PS2 device found!");
 	  ps2_type = Wiredless_PC_PS2;
 	  HID_Handle->Init = USBH_HID_PS2Init;
   }
   
   else if( phost->device.DevDesc.idProduct == Wireless_Android_PS2_PID && phost->device.DevDesc.idVendor==Wireless_Android_PS2_VID )
-  {	  //ÎŞÏßPS2ÊÖ±ú AndroidÄ£Ê½ µÄPID/VID
+  {	  //æ— çº¿PS2æ‰‹æŸ„ Androidæ¨¡å¼ çš„PID/VID
 	  USBH_UsrLog("Wireless Android PS2 device found!");
 	  ps2_type = Wiredless_Android_PS2;
 	  HID_Handle->Init = USBH_HID_PS2Init;
@@ -146,7 +146,7 @@ static USBH_StatusTypeDef USBH_HID_InterfaceInit(USBH_HandleTypeDef *phost)
   
   else
   {
-	ps2_type = UnKnown_Dev;//Î´ÖªµÄÉè±¸ÀàĞÍ
+	ps2_type = UnKnown_Dev;//æœªçŸ¥çš„è®¾å¤‡ç±»å‹
     USBH_UsrLog("Protocol not supported.");
     return USBH_FAIL;
   }
@@ -230,10 +230,10 @@ static USBH_StatusTypeDef USBH_HID_InterfaceDeInit(USBH_HandleTypeDef *phost)
     phost->pActiveClass->pData = 0U;
   }
 
-  //Éè±¸°Î³öÊ±,½«½øĞĞ·´³õÊ¼»¯,ps2ÊÖ±úÊı¾İÒ²ĞèÒªÒ»Æğ¸´Î»
+  //è®¾å¤‡æ‹”å‡ºæ—¶,å°†è¿›è¡Œååˆå§‹åŒ–,ps2æ‰‹æŸ„æ•°æ®ä¹Ÿéœ€è¦ä¸€èµ·å¤ä½
   memcpy(&ps2_info,&ps2_defaultVal,sizeof(PS2INFO_t));
   
-  //ps2ÊÖ±úÀàĞÍ¡¢°´¼üÖµ¸´Î»
+  //ps2æ‰‹æŸ„ç±»å‹ã€æŒ‰é”®å€¼å¤ä½
   ps2_type = UnKnown_Dev;
   ps2_KeyVal = 0;
   
@@ -376,7 +376,7 @@ static USBH_StatusTypeDef USBH_HID_Process(USBH_HandleTypeDef *phost)
 
     case USBH_HID_IDLE:
 		
-	//·¢ËÍGetReportÇëÇó£¬ÇëÇóHIDÉè±¸·µ»ØÊı¾İ.ÔÚ´ËÖ®Ç° HID_Handle->pData ±ØĞëÍê³É³õÊ¼»¯,ÕâÒ»²½Í¨³£ÔÚ HID_Handle->Init º¯ÊıÍê³É,·ñÔò½«ÎŞ·¨ÇëÇó³É¹¦
+	//å‘é€GetReportè¯·æ±‚ï¼Œè¯·æ±‚HIDè®¾å¤‡è¿”å›æ•°æ®.åœ¨æ­¤ä¹‹å‰ HID_Handle->pData å¿…é¡»å®Œæˆåˆå§‹åŒ–,è¿™ä¸€æ­¥é€šå¸¸åœ¨ HID_Handle->Init å‡½æ•°å®Œæˆ,å¦åˆ™å°†æ— æ³•è¯·æ±‚æˆåŠŸ
 	
       status = USBH_HID_GetReport(phost, 0x01U, 0U, HID_Handle->pData, (uint8_t)HID_Handle->length);
 
@@ -429,7 +429,7 @@ static USBH_StatusTypeDef USBH_HID_Process(USBH_HandleTypeDef *phost)
 
     case USBH_HID_GET_DATA:
 		
-	//½ÓÊÕHIDÉè±¸µÄÊı¾İ,±£´æÔÚ HID_Handle->pData
+	//æ¥æ”¶HIDè®¾å¤‡çš„æ•°æ®,ä¿å­˜åœ¨ HID_Handle->pData
       (void)USBH_InterruptReceiveData(phost, HID_Handle->pData,
                                       (uint8_t)HID_Handle->length,
                                       HID_Handle->InPipe);
@@ -446,7 +446,7 @@ static USBH_StatusTypeDef USBH_HID_Process(USBH_HandleTypeDef *phost)
 
         if ((HID_Handle->DataReady == 0U) && (XferSize != 0U) && (HID_Handle->fifo.buf != NULL))
         {
-		  //½«±£´æÔÚHID_Handle->pDataµÄHIDÉè±¸Êı¾İĞ´Èëµ½fifoÖĞ£¬ºóĞøÍ¨¹ıfifoÀ´»ñÈ¡hidÉè±¸µÄÊı¾İ
+		  //å°†ä¿å­˜åœ¨HID_Handle->pDataçš„HIDè®¾å¤‡æ•°æ®å†™å…¥åˆ°fifoä¸­ï¼Œåç»­é€šè¿‡fifoæ¥è·å–hidè®¾å¤‡çš„æ•°æ®
           (void)USBH_HID_FifoWrite(&HID_Handle->fifo, HID_Handle->pData, HID_Handle->length); 
           HID_Handle->DataReady = 1U;
           USBH_HID_EventCallback(phost);
@@ -550,31 +550,31 @@ static void USBH_HID_ParseHIDDesc(HID_DescTypeDef *desc, uint8_t *buf)
   }
 }
 
-///////////////////////// PS2 ³õÊ¼»¯ÊµÏÖ¡¢½âÂëÊµÏÖ ///////////////////////////////
-//ps2ÊÖ±úµÄÊäÈë±¨¸æ
-static uint8_t ps2_report_data[64] = { 0 }; //ÓÃÓÚ´æ·ÅHIDÉè±¸·¢ËÍ¹ıÀ´µÄÊı¾İ
+///////////////////////// PS2 åˆå§‹åŒ–å®ç°ã€è§£ç å®ç° ///////////////////////////////
+//ps2æ‰‹æŸ„çš„è¾“å…¥æŠ¥å‘Š
+static uint8_t ps2_report_data[64] = { 0 }; //ç”¨äºå­˜æ”¾HIDè®¾å¤‡å‘é€è¿‡æ¥çš„æ•°æ®
 
-//ps2³õÊ¼»¯º¯Êı
+//ps2åˆå§‹åŒ–å‡½æ•°
 USBH_StatusTypeDef USBH_HID_PS2Init(USBH_HandleTypeDef *phost)
 {
 	HID_HandleTypeDef *HID_Handle = (HID_HandleTypeDef *) phost->pActiveClass->pData;
 	
-	//HID_Handle->lengthÔÚ³õÊ¼»¯Éè±¸Ê±ÓÉHIDÉè±¸È·¶¨
+	//HID_Handle->lengthåœ¨åˆå§‹åŒ–è®¾å¤‡æ—¶ç”±HIDè®¾å¤‡ç¡®å®š
 	if (HID_Handle->length > sizeof(ps2_report_data))
 	{
 		HID_Handle->length = (uint16_t)sizeof(ps2_report_data);
 	}
 	
-	//³õÊ¼»¯pData,±ØĞë²½Öè.
+	//åˆå§‹åŒ–pData,å¿…é¡»æ­¥éª¤.
 	HID_Handle->pData = ps2_report_data;
 	
 	if ((HID_QUEUE_SIZE * sizeof(ps2_report_data)) > sizeof(phost->device.Data))
-	{	//sizeof(phost->device.Data) ´óĞ¡ÓÉ USBH_MAX_DATA_BUFFER ÅäÖÃ
+	{	//sizeof(phost->device.Data) å¤§å°ç”± USBH_MAX_DATA_BUFFER é…ç½®
 		return USBH_FAIL;
 	}
 	else
 	{
-		//³õÊ¼»¯fifo
+		//åˆå§‹åŒ–fifo
 		USBH_HID_FifoInit(&HID_Handle->fifo, phost->device.Data, (uint16_t)(HID_QUEUE_SIZE * sizeof(ps2_report_data)));
 	}
 	
@@ -584,29 +584,29 @@ USBH_StatusTypeDef USBH_HID_PS2Init(USBH_HandleTypeDef *phost)
 	return USBH_OK;
 }
 
-//3ÖÖÄ£Ê½µÄÊÖ±úÊı¾İ½â°üº¯Êı
+//3ç§æ¨¡å¼çš„æ‰‹æŸ„æ•°æ®è§£åŒ…å‡½æ•°
 static void Wired_PS2_Decode(const uint8_t *data);
 static void Wiredless_PC_PS2_Decode(const uint8_t *data);
 static void Wiredless_Android_PS2_Decode(const uint8_t *data);
 
-//ps2Êı¾İ½âÂë,Èë¿Ú²ÎÊıÎªHIDÉè±¸.ÔËĞĞ»·¾³ÎªÈÎÎñ.
+//ps2æ•°æ®è§£ç ,å…¥å£å‚æ•°ä¸ºHIDè®¾å¤‡.è¿è¡Œç¯å¢ƒä¸ºä»»åŠ¡.
 USBH_StatusTypeDef USBH_HID_PS2_Decode(USBH_HandleTypeDef *phost)
 {
 	HID_HandleTypeDef *HID_Handle = (HID_HandleTypeDef *) phost->pActiveClass->pData;
 	
-	//¼ì²éÊÇ·ñ³É¹¦Ê¶±ğµ½ÊÖ±úÀàĞÍ
+	//æ£€æŸ¥æ˜¯å¦æˆåŠŸè¯†åˆ«åˆ°æ‰‹æŸ„ç±»å‹
 	if( ps2_type == UnKnown_Dev ) return USBH_FAIL;
 	
-	//¼ì²éhidÉè±¸ÊÇ·ñÓĞÊı¾İ
+	//æ£€æŸ¥hidè®¾å¤‡æ˜¯å¦æœ‰æ•°æ®
 	if ((HID_Handle->length == 0U) || (HID_Handle->fifo.buf == NULL))
 	{
 		return USBH_FAIL;
 	}
 	
-	//´ÓfifoÖĞ¶ÁÈ¡hidÊı¾İ·ÅÈëps2_report_data£¬²¢½øĞĞ½âÎö
+	//ä»fifoä¸­è¯»å–hidæ•°æ®æ”¾å…¥ps2_report_dataï¼Œå¹¶è¿›è¡Œè§£æ
 	if (USBH_HID_FifoRead(&HID_Handle->fifo, (uint8_t* )ps2_report_data, HID_Handle->length) == HID_Handle->length)
 	{
-		//¸ù¾İ²»Í¬µÄps2Éè±¸Ö´ĞĞ²»Í¬µÄ½âÂëº¯Êı
+		//æ ¹æ®ä¸åŒçš„ps2è®¾å¤‡æ‰§è¡Œä¸åŒçš„è§£ç å‡½æ•°
 		if(  Wired_PS2 == ps2_type )
 		{
 			Wired_PS2_Decode(ps2_report_data);
@@ -626,18 +626,18 @@ USBH_StatusTypeDef USBH_HID_PS2_Decode(USBH_HandleTypeDef *phost)
 
 }
 
-////////////////// PS2°´¼ü¼ì²âº¯Êı ///////////////
-//16¸öps2°´¼ü
+////////////////// PS2æŒ‰é”®æ£€æµ‹å‡½æ•° ///////////////
+//16ä¸ªps2æŒ‰é”®
 #define PS2_KEY_NUM 16 
 
 
 
-//°´¼ü¼ì²âÊ±¼ä,µ¥Î»ms
-#define PS2_LONGPRESS_TIEM 1000 //³¤°´¼ì²âÊ±¼ä
-#define PS2_CLICK_TIME     400  //µ¥Ë«»÷¼ì²âÊ±¼ä
-#define PS2_KEYFILTER_TIME 50   //°´¼üÂË²¨Ê±¼ä
+//æŒ‰é”®æ£€æµ‹æ—¶é—´,å•ä½ms
+#define PS2_LONGPRESS_TIEM 1000 //é•¿æŒ‰æ£€æµ‹æ—¶é—´
+#define PS2_CLICK_TIME     400  //å•åŒå‡»æ£€æµ‹æ—¶é—´
+#define PS2_KEYFILTER_TIME 50   //æŒ‰é”®æ»¤æ³¢æ—¶é—´
 
-//×´Ì¬»úµÄ×´Ì¬Öµ
+//çŠ¶æ€æœºçš„çŠ¶æ€å€¼
 typedef enum{
     WaitToPress = 0,
     WaitToRelease ,
@@ -646,22 +646,22 @@ typedef enum{
     LONG_CLICK  ,
 }PS2KEY_CheckState;
 
-//¼ì²â°´¼ü°´ÏÂµÄ¸¨Öú±äÁ¿
+//æ£€æµ‹æŒ‰é”®æŒ‰ä¸‹çš„è¾…åŠ©å˜é‡
 typedef struct 
 {
-    uint8_t keystate;       //°´¼üµÄ×´Ì¬,0±íÊ¾ËÉ¿ª,1±íÊ¾±»°´ÏÂ
-    uint32_t timebase;      //°´¼ü¼ì²âµÄÊ±»ù
-    uint32_t statetime;     //×´Ì¬Í³¼ÆÊ±¼ä
-    PS2KEY_CheckState statemachine; //¼ì²â°´¼üµÄ×´Ì¬»ú
+    uint8_t keystate;       //æŒ‰é”®çš„çŠ¶æ€,0è¡¨ç¤ºæ¾å¼€,1è¡¨ç¤ºè¢«æŒ‰ä¸‹
+    uint32_t timebase;      //æŒ‰é”®æ£€æµ‹çš„æ—¶åŸº
+    uint32_t statetime;     //çŠ¶æ€ç»Ÿè®¡æ—¶é—´
+    PS2KEY_CheckState statemachine; //æ£€æµ‹æŒ‰é”®çš„çŠ¶æ€æœº
 }PS2_CheckKey_t;
 
 PS2_CheckKey_t ps2key[PS2_KEY_NUM] = { 0 };
 
 PS2KEY_State_t ps2_checkkey(uint8_t bit)
 {
-    PS2_CheckKey_t* key = &ps2key[bit]; //Ö¸¶¨Òª¼ì²âÄÄÒ»¸ö°´¼ü
+    PS2_CheckKey_t* key = &ps2key[bit]; //æŒ‡å®šè¦æ£€æµ‹å“ªä¸€ä¸ªæŒ‰é”®
     
-    //¶ÁÈ¡¶ÔÓ¦µÄ¼üÖµ×´Ì¬
+    //è¯»å–å¯¹åº”çš„é”®å€¼çŠ¶æ€
     key->keystate = (ps2_KeyVal>>bit)&0x01;
 
     switch (key->statemachine)
@@ -674,28 +674,28 @@ PS2KEY_State_t ps2_checkkey(uint8_t bit)
             } 
             break;
         case KEYPress:
-            //Í³¼ÆµÚÒ»´Î°´ÏÂ°´¼üÒÔºóµÄÊ±¼ä(ÎŞ·ûºÅÒç³öÊ±×ÔÈ»»·ÈÆ.²»ĞèÒªÒç³öÅĞ¶Ï)
+            //ç»Ÿè®¡ç¬¬ä¸€æ¬¡æŒ‰ä¸‹æŒ‰é”®ä»¥åçš„æ—¶é—´(æ— ç¬¦å·æº¢å‡ºæ—¶è‡ªç„¶ç¯ç»•.ä¸éœ€è¦æº¢å‡ºåˆ¤æ–­)
             key->statetime = xTaskGetTickCount() - key->timebase;
 
-            //¼ì²é°´¼üÊÇ·ñÓĞËÉ¿ª
+            //æ£€æŸ¥æŒ‰é”®æ˜¯å¦æœ‰æ¾å¼€
             if( PS2KEY_PressUP == key->keystate )
             {
-                //µ¥´Î°´¼ü°´ÏÂµÄÊ±¼äÌ«¶Ì,ºöÂÔ.×÷ÎªÂË²¨×÷ÓÃ
+                //å•æ¬¡æŒ‰é”®æŒ‰ä¸‹çš„æ—¶é—´å¤ªçŸ­,å¿½ç•¥.ä½œä¸ºæ»¤æ³¢ä½œç”¨
                 if( key->statetime < PS2_KEYFILTER_TIME ) key->statemachine = WaitToPress;
                 else
                 {
-                   key->timebase = xTaskGetTickCount();//ÖØĞÂ¸üĞÂÊ±»ù,ÓÃÓÚÏÂÒ»¸ö×´Ì¬µÄ¼ì²â
-                   key->statemachine = KEYUp;    //°´¼ü°´ÏÂÒ»¶¨Ê±¼ä,ÓÖµ¯Æğ,½øÈëÏÂÒ»¸ö¼ì²â×´Ì¬
+                   key->timebase = xTaskGetTickCount();//é‡æ–°æ›´æ–°æ—¶åŸº,ç”¨äºä¸‹ä¸€ä¸ªçŠ¶æ€çš„æ£€æµ‹
+                   key->statemachine = KEYUp;    //æŒ‰é”®æŒ‰ä¸‹ä¸€å®šæ—¶é—´,åˆå¼¹èµ·,è¿›å…¥ä¸‹ä¸€ä¸ªæ£€æµ‹çŠ¶æ€
                 }
             }
             else if( key->statetime > PS2_LONGPRESS_TIEM ) 
-            {   //°´¼üÎ´ËÉ¿ª,ÇÒ±£³ÖÒ»¶¨µÄÊ±¼ä,ÔòÎª³¤°´.
+            {   //æŒ‰é”®æœªæ¾å¼€,ä¸”ä¿æŒä¸€å®šçš„æ—¶é—´,åˆ™ä¸ºé•¿æŒ‰.
                 key->statemachine = LONG_CLICK;
             }
 
             break;
         case KEYUp:
-            //Í³¼ÆµÚÒ»´Î°´ÏÂ°´¼üÒÔºóµÄÊ±¼ä(ÎŞ·ûºÅÒç³öÊ±×ÔÈ»»·ÈÆ.²»ĞèÒªÒç³öÅĞ¶Ï)
+            //ç»Ÿè®¡ç¬¬ä¸€æ¬¡æŒ‰ä¸‹æŒ‰é”®ä»¥åçš„æ—¶é—´(æ— ç¬¦å·æº¢å‡ºæ—¶è‡ªç„¶ç¯ç»•.ä¸éœ€è¦æº¢å‡ºåˆ¤æ–­)
             key->statetime = xTaskGetTickCount() - key->timebase;
 
             if( PS2KEY_PressDOWN == key->keystate && key->statetime < PS2_CLICK_TIME && key->statetime > PS2_KEYFILTER_TIME )
@@ -713,7 +713,7 @@ PS2KEY_State_t ps2_checkkey(uint8_t bit)
             key->statemachine = WaitToRelease;
             return PS2KEYSTATE_LONGCLICK;
         case WaitToRelease:
-            //°´¼ü¼ì²âÍê±Ï,µÈÓÃ»§ËÉ¿ª°´¼üºó,ÔÙ»Ö¸´×´Ì¬»úµÄ×´Ì¬
+            //æŒ‰é”®æ£€æµ‹å®Œæ¯•,ç­‰ç”¨æˆ·æ¾å¼€æŒ‰é”®å,å†æ¢å¤çŠ¶æ€æœºçš„çŠ¶æ€
             if( PS2KEY_PressUP == key->keystate ) key->statemachine = WaitToPress;
             break;
         default:
@@ -723,29 +723,29 @@ PS2KEY_State_t ps2_checkkey(uint8_t bit)
     return PS2KEYSTATE_NONE;
 }
 
-//Ö±½Ó·´À¡°´¼üµÄ×´Ì¬Öµ
+//ç›´æ¥åé¦ˆæŒ‰é”®çš„çŠ¶æ€å€¼
 uint8_t ps2_checkkeystate(uint8_t bit)
 {
     return (ps2_KeyVal>>bit)&0x01;
 }
 
-////////////////// PS2°´¼ü¼ì²âº¯Êı END ///////////////
+////////////////// PS2æŒ‰é”®æ£€æµ‹å‡½æ•° END ///////////////
 
-///////////////////////////////////////////////// ½âÂëº¯ÊıÏ¸½Ú ////////////////////////////////////////////////////////
-//±êÖ¾Î»ÉèÖÃº¯Êı,ÓÃÓÚ¸¨Öúps2ÊÖ±ú½âÂë
+///////////////////////////////////////////////// è§£ç å‡½æ•°ç»†èŠ‚ ////////////////////////////////////////////////////////
+//æ ‡å¿—ä½è®¾ç½®å‡½æ•°,ç”¨äºè¾…åŠ©ps2æ‰‹æŸ„è§£ç 
 static void ps2_set_bit(uint16_t* state,uint8_t state_bit,uint8_t bit)
 {
-	if(state_bit==1) //Ö¸¶¨µÄÎ»(bit)ÉèÖÃÎª1,ÆäËûÎ»²»±ä
+	if(state_bit==1) //æŒ‡å®šçš„ä½(bit)è®¾ç½®ä¸º1,å…¶ä»–ä½ä¸å˜
 	{
 		*state |= (1U<<bit);
 	}
-	else //Ö¸¶¨µÄÎ»(bit)ÉèÖÃÎª0,ÆäËûÎ»²»±ä
+	else //æŒ‡å®šçš„ä½(bit)è®¾ç½®ä¸º0,å…¶ä»–ä½ä¸å˜
 	{
 		*state &= ~(1U<<bit);
 	}
 }
 
-//ÓĞÏßPS2ÊÖ±úµÄÊı¾İ½âÂë
+//æœ‰çº¿PS2æ‰‹æŸ„çš„æ•°æ®è§£ç 
 static void Wired_PS2_Decode(const uint8_t *data)
 {
 	uint8_t tmp_bool = 0 ;
@@ -756,64 +756,64 @@ static void Wired_PS2_Decode(const uint8_t *data)
 	ps2_info.RY = data[2];
 	
 	tmp_bool = (data[6]>>4)&0x01;
-	ps2_set_bit(&ps2_KeyVal,tmp_bool,0); //seltec key Ñ¡Ôñ°´¼ü
+	ps2_set_bit(&ps2_KeyVal,tmp_bool,0); //seltec key é€‰æ‹©æŒ‰é”®
 	
 	tmp_bool = (data[6]>>6)&0x01;
-	ps2_set_bit(&ps2_KeyVal,tmp_bool,1); //×óÒ¡¸Ë°´¼ü
+	ps2_set_bit(&ps2_KeyVal,tmp_bool,1); //å·¦æ‘‡æ†æŒ‰é”®
 	
 	tmp_bool = (data[6]>>7)&0x01;
-	ps2_set_bit(&ps2_KeyVal,tmp_bool,2); //ÓÒÒ¡¸Ë°´¼ü
+	ps2_set_bit(&ps2_KeyVal,tmp_bool,2); //å³æ‘‡æ†æŒ‰é”®
 	
 	tmp_bool = (data[6]>>5)&0x01;
 	ps2_set_bit(&ps2_KeyVal,tmp_bool,3); //start
 	
-	tmp_bool = data[5]&0x0F;//È¡³öµÍ4Î»
-	if(tmp_bool==0x0F)//Ã»ÓĞÈÎºÎ°´¼ü°´ÏÂ
+	tmp_bool = data[5]&0x0F;//å–å‡ºä½4ä½
+	if(tmp_bool==0x0F)//æ²¡æœ‰ä»»ä½•æŒ‰é”®æŒ‰ä¸‹
 	{
-		ps2_set_bit(&ps2_KeyVal,0,4); //¡ü
-		ps2_set_bit(&ps2_KeyVal,0,5); //¡ú
-		ps2_set_bit(&ps2_KeyVal,0,6); //¡ı
-		ps2_set_bit(&ps2_KeyVal,0,7); //¡û
+		ps2_set_bit(&ps2_KeyVal,0,4); //â†‘
+		ps2_set_bit(&ps2_KeyVal,0,5); //â†’
+		ps2_set_bit(&ps2_KeyVal,0,6); //â†“
+		ps2_set_bit(&ps2_KeyVal,0,7); //â†
 	}
 	else if( (tmp_bool&0x01)==0 )
 	{	
 		switch ((tmp_bool>>1)&0x03)
 		{
-			case 0x00://¡ü
-				ps2_set_bit(&ps2_KeyVal,1,4); //¡ü
+			case 0x00://â†‘
+				ps2_set_bit(&ps2_KeyVal,1,4); //â†‘
 				break;
-			case 0x01://¡ú
-				ps2_set_bit(&ps2_KeyVal,1,5); //¡ú
+			case 0x01://â†’
+				ps2_set_bit(&ps2_KeyVal,1,5); //â†’
 				break;
-			case 0x02://¡ı
-				ps2_set_bit(&ps2_KeyVal,1,6); //¡ı
+			case 0x02://â†“
+				ps2_set_bit(&ps2_KeyVal,1,6); //â†“
 				break;
-			case 0x03://¡û
-				ps2_set_bit(&ps2_KeyVal,1,7); //¡û
+			case 0x03://â†
+				ps2_set_bit(&ps2_KeyVal,1,7); //â†
 				break;
 			default:
 				break;
 		}
 	}
-	else if( (tmp_bool&0x01)==1 ) //Ê×Î»Îª1,´ú±í´æÔÚ×óÅÌ2¸ö°´¼ü°´ÏÂµÄÇé¿ö
+	else if( (tmp_bool&0x01)==1 ) //é¦–ä½ä¸º1,ä»£è¡¨å­˜åœ¨å·¦ç›˜2ä¸ªæŒ‰é”®æŒ‰ä¸‹çš„æƒ…å†µ
 	{
 		switch ((tmp_bool>>1)&0x03)
 		{
-			case 0x00://¡ü¡ú
-				ps2_set_bit(&ps2_KeyVal,1,4);//¡ü
-				ps2_set_bit(&ps2_KeyVal,1,5); //¡ú
+			case 0x00://â†‘â†’
+				ps2_set_bit(&ps2_KeyVal,1,4);//â†‘
+				ps2_set_bit(&ps2_KeyVal,1,5); //â†’
 				break;
-			case 0x01://¡ı¡ú
-				ps2_set_bit(&ps2_KeyVal,1,6); //¡ı
-				ps2_set_bit(&ps2_KeyVal,1,5); //¡ú
+			case 0x01://â†“â†’
+				ps2_set_bit(&ps2_KeyVal,1,6); //â†“
+				ps2_set_bit(&ps2_KeyVal,1,5); //â†’
 				break;
-			case 0x02://¡ı¡û
-				ps2_set_bit(&ps2_KeyVal,1,6); //¡ı
-				ps2_set_bit(&ps2_KeyVal,1,7); //¡û
+			case 0x02://â†“â†
+				ps2_set_bit(&ps2_KeyVal,1,6); //â†“
+				ps2_set_bit(&ps2_KeyVal,1,7); //â†
 				break;
-			case 0x03://¡ü¡û
-				ps2_set_bit(&ps2_KeyVal,1,4); //¡ü
-				ps2_set_bit(&ps2_KeyVal,1,7); //¡û
+			case 0x03://â†‘â†
+				ps2_set_bit(&ps2_KeyVal,1,4); //â†‘
+				ps2_set_bit(&ps2_KeyVal,1,7); //â†
 				break;
 			default:
 				break;
@@ -821,31 +821,31 @@ static void Wired_PS2_Decode(const uint8_t *data)
 	}
 	
 	tmp_bool = (data[6]>>2)&0x01;
-	ps2_set_bit(&ps2_KeyVal,tmp_bool,8); //×ó°â»ú2ºÅ
+	ps2_set_bit(&ps2_KeyVal,tmp_bool,8); //å·¦æ‰³æœº2å·
 	
 	tmp_bool = (data[6]>>3)&0x01;
-	ps2_set_bit(&ps2_KeyVal,tmp_bool,9); //ÓÒ°â»ú2ºÅ
+	ps2_set_bit(&ps2_KeyVal,tmp_bool,9); //å³æ‰³æœº2å·
 	
 	tmp_bool = (data[6]>>0)&0x01;
-	ps2_set_bit(&ps2_KeyVal,tmp_bool,10); //×ó°â»ú1ºÅ
+	ps2_set_bit(&ps2_KeyVal,tmp_bool,10); //å·¦æ‰³æœº1å·
 	
 	tmp_bool = (data[6]>>1)&0x01;
-	ps2_set_bit(&ps2_KeyVal,tmp_bool,11); //ÓÒ°â»ú1ºÅ
+	ps2_set_bit(&ps2_KeyVal,tmp_bool,11); //å³æ‰³æœº1å·
 	
 	tmp_bool = (data[5]>>4)&0x01;
-	ps2_set_bit(&ps2_KeyVal,tmp_bool,12); //Ò»ºÅ,ÂÌÉ«GREEN
+	ps2_set_bit(&ps2_KeyVal,tmp_bool,12); //ä¸€å·,ç»¿è‰²GREEN
 	
 	tmp_bool = (data[5]>>5)&0x01;
-	ps2_set_bit(&ps2_KeyVal,tmp_bool,13); //¶şºÅ,ºìÉ«RED
+	ps2_set_bit(&ps2_KeyVal,tmp_bool,13); //äºŒå·,çº¢è‰²RED
 
 	tmp_bool = (data[5]>>6)&0x01;
-	ps2_set_bit(&ps2_KeyVal,tmp_bool,14); //ÈıºÅ,À¶ÑÀBLUE
+	ps2_set_bit(&ps2_KeyVal,tmp_bool,14); //ä¸‰å·,è“ç‰™BLUE
 	
 	tmp_bool = (data[5]>>7)&0x01;
-	ps2_set_bit(&ps2_KeyVal,tmp_bool,15); //ËÄºÅ,·ÛÉ«PINK
+	ps2_set_bit(&ps2_KeyVal,tmp_bool,15); //å››å·,ç²‰è‰²PINK
 }
 
-//ÎŞÏß°²×¿Ä£Ê½ÊÖ±úÊı¾İ½âÂë
+//æ— çº¿å®‰å“æ¨¡å¼æ‰‹æŸ„æ•°æ®è§£ç 
 static void Wiredless_Android_PS2_Decode(const uint8_t *data)
 {
 	uint8_t tmp_bool = 0 ;
@@ -868,45 +868,45 @@ static void Wiredless_Android_PS2_Decode(const uint8_t *data)
 	ps2_info.RY = 255 - rm_val;
 	
 	//data[2]
-	//Rm    Lm    select   start    ¡ú      ¡û       ¡ı        ¡ü
+	//Rm    Lm    select   start    â†’      â†       â†“        â†‘
 	//0		0		0		0		0		0		0		0
 	tmp_bool = (data[2]>>0)&0x01;
-	ps2_set_bit(&ps2_KeyVal,tmp_bool,4); //¡ü
+	ps2_set_bit(&ps2_KeyVal,tmp_bool,4); //â†‘
 	
 	tmp_bool = (data[2]>>3)&0x01;
-	ps2_set_bit(&ps2_KeyVal,tmp_bool,5); //¡ú
+	ps2_set_bit(&ps2_KeyVal,tmp_bool,5); //â†’
 	
 	tmp_bool = (data[2]>>1)&0x01;
-	ps2_set_bit(&ps2_KeyVal,tmp_bool,6); //¡ı
+	ps2_set_bit(&ps2_KeyVal,tmp_bool,6); //â†“
 	
 	tmp_bool = (data[2]>>2)&0x01;
-	ps2_set_bit(&ps2_KeyVal,tmp_bool,7); //¡û
+	ps2_set_bit(&ps2_KeyVal,tmp_bool,7); //â†
 	
 	tmp_bool = (data[2]>>5)&0x01;
-	ps2_set_bit(&ps2_KeyVal,tmp_bool,0); //seltec key Ñ¡Ôñ°´¼ü	
+	ps2_set_bit(&ps2_KeyVal,tmp_bool,0); //seltec key é€‰æ‹©æŒ‰é”®	
 	
 	tmp_bool = (data[2]>>4)&0x01;
-	ps2_set_bit(&ps2_KeyVal,tmp_bool,3); //start key Ñ¡Ôñ°´¼ü
+	ps2_set_bit(&ps2_KeyVal,tmp_bool,3); //start key é€‰æ‹©æŒ‰é”®
 	
 	tmp_bool = (data[2]>>6)&0x01;
-	ps2_set_bit(&ps2_KeyVal,tmp_bool,1); //×óÒ¡¸Ë°´¼ü	
+	ps2_set_bit(&ps2_KeyVal,tmp_bool,1); //å·¦æ‘‡æ†æŒ‰é”®	
 	
 	tmp_bool = (data[2]>>7)&0x01;
-	ps2_set_bit(&ps2_KeyVal,tmp_bool,2); //ÓÒÒ¡¸Ë°´¼ü
+	ps2_set_bit(&ps2_KeyVal,tmp_bool,2); //å³æ‘‡æ†æŒ‰é”®
 	
 	tmp_bool = (data[3]>>0)&0x01;
-	ps2_set_bit(&ps2_KeyVal,tmp_bool,10); //×ó°â»ú1ºÅ
+	ps2_set_bit(&ps2_KeyVal,tmp_bool,10); //å·¦æ‰³æœº1å·
 	
 	tmp_bool = (data[3]>>1)&0x01;
-	ps2_set_bit(&ps2_KeyVal,tmp_bool,11); //ÓÒ°â»ú1ºÅ
+	ps2_set_bit(&ps2_KeyVal,tmp_bool,11); //å³æ‰³æœº1å·
 	
 	if(data[4]==0xff) tmp_bool=1;
 	else tmp_bool=0;
-	ps2_set_bit(&ps2_KeyVal,tmp_bool,8); //×ó°â»ú2ºÅ
+	ps2_set_bit(&ps2_KeyVal,tmp_bool,8); //å·¦æ‰³æœº2å·
 	
 	if(data[5]==0xff) tmp_bool=1;
 	else tmp_bool=0;
-	ps2_set_bit(&ps2_KeyVal,tmp_bool,9); //ÓÒ°â»ú2ºÅ
+	ps2_set_bit(&ps2_KeyVal,tmp_bool,9); //å³æ‰³æœº2å·
 	
 	tmp_bool = (data[3]>>4)&0x01;//BLUE
 	ps2_set_bit(&ps2_KeyVal,tmp_bool,14);
@@ -921,7 +921,7 @@ static void Wiredless_Android_PS2_Decode(const uint8_t *data)
 	ps2_set_bit(&ps2_KeyVal,tmp_bool,12);
 }
 
-//ÎŞÏßpcÄ£Ê½ÊÖ±úÊı¾İ½âÂë
+//æ— çº¿pcæ¨¡å¼æ‰‹æŸ„æ•°æ®è§£ç 
 static void  Wiredless_PC_PS2_Decode(const uint8_t *data)
 {
 	uint8_t tmp_bool = 0;
@@ -932,28 +932,28 @@ static void  Wiredless_PC_PS2_Decode(const uint8_t *data)
 	ps2_info.RY = data[6];
 	
 	tmp_bool = (data[1]>>0)&0x01;//select
-	ps2_set_bit(&ps2_KeyVal,tmp_bool,0); //seltec key Ñ¡Ôñ°´¼ü	
+	ps2_set_bit(&ps2_KeyVal,tmp_bool,0); //seltec key é€‰æ‹©æŒ‰é”®	
 	
 	tmp_bool = (data[1]>>1)&0x01;//start
-	ps2_set_bit(&ps2_KeyVal,tmp_bool,3); //start key Ñ¡Ôñ°´¼ü
+	ps2_set_bit(&ps2_KeyVal,tmp_bool,3); //start key é€‰æ‹©æŒ‰é”®
 	
 	tmp_bool = (data[1]>>2)&0x01;//Lm
-	ps2_set_bit(&ps2_KeyVal,tmp_bool,1); //×óÒ¡¸Ë°´¼ü	
+	ps2_set_bit(&ps2_KeyVal,tmp_bool,1); //å·¦æ‘‡æ†æŒ‰é”®	
 	
 	tmp_bool = (data[1]>>3)&0x01;//Rm
-	ps2_set_bit(&ps2_KeyVal,tmp_bool,2); //ÓÒÒ¡¸Ë°´¼ü
+	ps2_set_bit(&ps2_KeyVal,tmp_bool,2); //å³æ‘‡æ†æŒ‰é”®
 	
 	tmp_bool = (data[0]>>4)&0x01;//L1
-	ps2_set_bit(&ps2_KeyVal,tmp_bool,10); //×ó°â»ú1ºÅ
+	ps2_set_bit(&ps2_KeyVal,tmp_bool,10); //å·¦æ‰³æœº1å·
 	
 	tmp_bool = (data[0]>>5)&0x01;//R1
-	ps2_set_bit(&ps2_KeyVal,tmp_bool,11); //ÓÒ°â»ú1ºÅ
+	ps2_set_bit(&ps2_KeyVal,tmp_bool,11); //å³æ‰³æœº1å·
 	
 	tmp_bool = (data[0]>>6)&0x01;//L2
-	ps2_set_bit(&ps2_KeyVal,tmp_bool,8); //×ó°â»ú2ºÅ
+	ps2_set_bit(&ps2_KeyVal,tmp_bool,8); //å·¦æ‰³æœº2å·
 	
 	tmp_bool = (data[0]>>7)&0x01;//R2
-	ps2_set_bit(&ps2_KeyVal,tmp_bool,9); //×ó°â»ú2ºÅ
+	ps2_set_bit(&ps2_KeyVal,tmp_bool,9); //å·¦æ‰³æœº2å·
 	
 	tmp_bool = (data[0]>>0)&0x01;//GREEN
 	ps2_set_bit(&ps2_KeyVal,tmp_bool,12);
@@ -967,57 +967,57 @@ static void  Wiredless_PC_PS2_Decode(const uint8_t *data)
 	tmp_bool = (data[0]>>3)&0x01;//PINK
 	ps2_set_bit(&ps2_KeyVal,tmp_bool,15);
 	
-	tmp_bool = data[2]&0x0F;//È¡³öµÍ4Î»
-	if(tmp_bool==0x0F)//Ã»ÓĞÈÎºÎ°´¼ü°´ÏÂ
+	tmp_bool = data[2]&0x0F;//å–å‡ºä½4ä½
+	if(tmp_bool==0x0F)//æ²¡æœ‰ä»»ä½•æŒ‰é”®æŒ‰ä¸‹
 	{
-		ps2_set_bit(&ps2_KeyVal,0,4); //¡ü
-		ps2_set_bit(&ps2_KeyVal,0,5); //¡ú
-		ps2_set_bit(&ps2_KeyVal,0,6); //¡ı
-		ps2_set_bit(&ps2_KeyVal,0,7); //¡û
+		ps2_set_bit(&ps2_KeyVal,0,4); //â†‘
+		ps2_set_bit(&ps2_KeyVal,0,5); //â†’
+		ps2_set_bit(&ps2_KeyVal,0,6); //â†“
+		ps2_set_bit(&ps2_KeyVal,0,7); //â†
 	}
 	else if( (tmp_bool&0x01)==0 )
 	{	
 		switch ((tmp_bool>>1)&0x03)
 		{
-			case 0x00://¡ü
-				ps2_set_bit(&ps2_KeyVal,1,4); //¡ü
+			case 0x00://â†‘
+				ps2_set_bit(&ps2_KeyVal,1,4); //â†‘
 				break;
-			case 0x01://¡ú
-				ps2_set_bit(&ps2_KeyVal,1,5); //¡ú
+			case 0x01://â†’
+				ps2_set_bit(&ps2_KeyVal,1,5); //â†’
 				break;
-			case 0x02://¡ı
-				ps2_set_bit(&ps2_KeyVal,1,6); //¡ı
+			case 0x02://â†“
+				ps2_set_bit(&ps2_KeyVal,1,6); //â†“
 				break;
-			case 0x03://¡û
-				ps2_set_bit(&ps2_KeyVal,1,7); //¡û
+			case 0x03://â†
+				ps2_set_bit(&ps2_KeyVal,1,7); //â†
 				break;
 			default:
 				break;
 		}
 	}
-	else if( (tmp_bool&0x01)==1 ) //Ê×Î»Îª1,´ú±í´æÔÚ×óÅÌ2¸ö°´¼ü°´ÏÂµÄÇé¿ö
+	else if( (tmp_bool&0x01)==1 ) //é¦–ä½ä¸º1,ä»£è¡¨å­˜åœ¨å·¦ç›˜2ä¸ªæŒ‰é”®æŒ‰ä¸‹çš„æƒ…å†µ
 	{
 		switch ((tmp_bool>>1)&0x03)
 		{
-			case 0x00://¡ü¡ú
-				ps2_set_bit(&ps2_KeyVal,1,4);//¡ü
-				ps2_set_bit(&ps2_KeyVal,1,5); //¡ú
+			case 0x00://â†‘â†’
+				ps2_set_bit(&ps2_KeyVal,1,4);//â†‘
+				ps2_set_bit(&ps2_KeyVal,1,5); //â†’
 				break;
-			case 0x01://¡ı¡ú
-				ps2_set_bit(&ps2_KeyVal,1,6); //¡ı
-				ps2_set_bit(&ps2_KeyVal,1,5); //¡ú
+			case 0x01://â†“â†’
+				ps2_set_bit(&ps2_KeyVal,1,6); //â†“
+				ps2_set_bit(&ps2_KeyVal,1,5); //â†’
 				break;
-			case 0x02://¡ı¡û
-				ps2_set_bit(&ps2_KeyVal,1,6); //¡ı
-				ps2_set_bit(&ps2_KeyVal,1,7); //¡û
+			case 0x02://â†“â†
+				ps2_set_bit(&ps2_KeyVal,1,6); //â†“
+				ps2_set_bit(&ps2_KeyVal,1,7); //â†
 				break;
-			case 0x03://¡ü¡û
-				ps2_set_bit(&ps2_KeyVal,1,4); //¡ü
-				ps2_set_bit(&ps2_KeyVal,1,7); //¡û
+			case 0x03://â†‘â†
+				ps2_set_bit(&ps2_KeyVal,1,4); //â†‘
+				ps2_set_bit(&ps2_KeyVal,1,7); //â†
 				break;
 			default:
 				break;
 		}
 	}	
 }
-///////////////////////////////////////////////// ½âÂëº¯ÊıÏ¸½Ú END ////////////////////////////////////////////////////////
+///////////////////////////////////////////////// è§£ç å‡½æ•°ç»†èŠ‚ END ////////////////////////////////////////////////////////

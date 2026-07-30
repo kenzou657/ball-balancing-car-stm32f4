@@ -92,25 +92,25 @@ void HAL_HCD_MspInit(HCD_HandleTypeDef* hcdHandle)
 
 	GPIO_InitTypeDef  GPIO_InitStructure;
 	
-	//TOOD:USB FSÉè±¸Ê±ÖÓ±ØĞëÅäÖÃÎª48M
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);//Ê¹ÄÜGPIOAÊ±ÖÓ
-	RCC_AHB2PeriphClockCmd(RCC_AHB2Periph_OTG_FS, ENABLE);//Ê¹ÄÜUSB OTGÊ±ÖÓ	
-	//GPIOA11,A12ÉèÖÃ
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11 | GPIO_Pin_12;//PA11/12¸´ÓÃ¹¦ÄÜÊä³ö	
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;//¸´ÓÃ¹¦ÄÜ
+	//TOOD:USB FSè®¾å¤‡æ—¶é’Ÿå¿…é¡»é…ç½®ä¸º48M
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);//ä½¿èƒ½GPIOAæ—¶é’Ÿ
+	RCC_AHB2PeriphClockCmd(RCC_AHB2Periph_OTG_FS, ENABLE);//ä½¿èƒ½USB OTGæ—¶é’Ÿ	
+	//GPIOA11,A12è®¾ç½®
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11 | GPIO_Pin_12;//PA11/12å¤ç”¨åŠŸèƒ½è¾“å‡º	
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;//å¤ç”¨åŠŸèƒ½
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;//100MHz
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL; 
-	GPIO_Init(GPIOA, &GPIO_InitStructure);//³õÊ¼»¯
+	GPIO_Init(GPIOA, &GPIO_InitStructure);//åˆå§‹åŒ–
 
 	GPIO_PinAFConfig(GPIOA,GPIO_PinSource11,GPIO_AF_OTG_FS);//PA11,AF10(USB)
 	GPIO_PinAFConfig(GPIOA,GPIO_PinSource12,GPIO_AF_OTG_FS);//PA12,AF10(USB)
 	
-	//NVIC ÅäÖÃ
+	//NVIC é…ç½®
 	NVIC_InitTypeDef NVIC_InitStructure;
 	NVIC_InitStructure.NVIC_IRQChannel = OTG_FS_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=5; //ÇÀÕ¼ÓÅÏÈ¼¶
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority =0;		//×ÓÓÅÏÈ¼¶
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;			//IRQÍ¨µÀÊ¹ÄÜ
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=5; //æŠ¢å ä¼˜å…ˆçº§
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority =0;		//å­ä¼˜å…ˆçº§
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;			//IRQé€šé“ä½¿èƒ½
 	NVIC_Init(&NVIC_InitStructure);
 }
 
@@ -144,7 +144,7 @@ void HAL_HCD_MspDeInit(HCD_HandleTypeDef* hcdHandle)
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;//100MHz
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL; 
-	GPIO_Init(GPIOA, &GPIO_InitStructure);//³õÊ¼»¯
+	GPIO_Init(GPIOA, &GPIO_InitStructure);//åˆå§‹åŒ–
 }
 
 /**

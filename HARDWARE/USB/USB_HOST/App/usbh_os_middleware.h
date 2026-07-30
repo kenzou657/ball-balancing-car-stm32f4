@@ -9,7 +9,7 @@
 #define osCMSIS               0x20001U
 
 /******************************************
- **********   USB HOSTµÿ÷∑«˝∂Ø  ************
+ **********   USB HOSTÂú∞ÂùÄÈ©±Âä®  ************
 ******************************************/
 /*!< USB registers base address */
 #define USB_OTG_HS_PERIPH_BASE               0x40040000UL
@@ -1333,7 +1333,7 @@
 #define USB_OTG_FRMNUM_3                         (0x8UL << USB_OTG_FRMNUM_Pos)  /*!< 0x01000000 */
 
 /******************************************
- * …Ÿ≤ø∑÷HALø‚°¢LLø‚ƒ£◊È,ΩˆUSB_HOST«˝∂Ø π”√ *
+ * Â∞ëÈÉ®ÂàÜHALÂ∫ì„ÄÅLLÂ∫ìÊ®°ÁªÑ,‰ªÖUSB_HOSTÈ©±Âä®‰ΩøÁî® *
 ******************************************/
 typedef enum 
 {
@@ -1370,7 +1370,7 @@ typedef enum
 								  (__HANDLE__)->Lock = HAL_UNLOCKED;    \
 								}while (0U)
 
-//__packed∑≈÷√--->usbh_def.h line499
+//__packedÊîæÁΩÆ--->usbh_def.h line499
 #ifndef   __PACKED
   #define __PACKED                               __attribute__((packed))
 #endif

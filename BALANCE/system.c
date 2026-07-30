@@ -1,18 +1,18 @@
 /***********************************************
-¹«Ë¾£ºÂÖÈ¤¿Æ¼¼£¨¶«İ¸£©ÓĞÏŞ¹«Ë¾
-Æ·ÅÆ£ºWHEELTEC
-¹ÙÍø£ºwheeltec.net
-ÌÔ±¦µêÆÌ£ºshop114407458.taobao.com
-ËÙÂôÍ¨: https://minibalance.aliexpress.com/store/4455017
-°æ±¾£ºV5.0
-ĞŞ¸ÄÊ±¼ä£º2022-05-05
+å…¬å¸ï¼šè½®è¶£ç§‘æŠ€ï¼ˆä¸œèï¼‰æœ‰é™å…¬å¸
+å“ç‰Œï¼šWHEELTEC
+å®˜ç½‘ï¼šwheeltec.net
+æ·˜å®åº—é“ºï¼šshop114407458.taobao.com
+é€Ÿå–é€š: https://minibalance.aliexpress.com/store/4455017
+ç‰ˆæœ¬ï¼šV5.0
+ä¿®æ”¹æ—¶é—´ï¼š2022-05-05
 
 Brand: WHEELTEC
 Website: wheeltec.net
 Taobao shop: shop114407458.taobao.com
 Aliexpress: https://minibalance.aliexpress.com/store/4455017
 Version: V5.0
-Update£º2022-05-05
+Updateï¼š2022-05-05
 
 All rights reserved
 ***********************************************/
@@ -20,104 +20,104 @@ All rights reserved
 #include "system.h"
 
 //Robot software fails to flag bits
-//»úÆ÷ÈËÈí¼şÊ§ÄÜ±êÖ¾Î»
+//æœºå™¨äººè½¯ä»¶å¤±èƒ½æ ‡å¿—ä½
 u8 Flag_Stop=0;   
 
 //The ADC value is variable in segments, depending on the number of car models. Currently there are 6 car models
-//ADCÖµ·Ö¶Î±äÁ¿£¬È¡¾öÓÚĞ¡³µĞÍºÅÊıÁ¿£¬Ä¿Ç°ÓĞ6ÖÖĞ¡³µĞÍºÅ
+//ADCå€¼åˆ†æ®µå˜é‡ï¼Œå–å†³äºå°è½¦å‹å·æ•°é‡ï¼Œç›®å‰æœ‰6ç§å°è½¦å‹å·
 int Divisor_Mode;
 
 // Robot type variable
-//»úÆ÷ÈËĞÍºÅ±äÁ¿
-//0=Mec_Car£¬1=Omni_Car£¬2=Akm_Car£¬3=Diff_Car£¬4=FourWheel_Car£¬5=Tank_Car
+//æœºå™¨äººå‹å·å˜é‡
+//0=Mec_Carï¼Œ1=Omni_Carï¼Œ2=Akm_Carï¼Œ3=Diff_Carï¼Œ4=FourWheel_Carï¼Œ5=Tank_Car
 u8 Car_Mode=0; 
 
 //Servo control PWM value, Ackerman car special
-//¶æ»ú¿ØÖÆPWMÖµ£¬°¢¿ËÂüĞ¡³µ×¨ÓÃ
+//èˆµæœºæ§åˆ¶PWMå€¼ï¼Œé˜¿å…‹æ›¼å°è½¦ä¸“ç”¨
 int Servo;  
 
 //Default speed of remote control car, unit: mm/s
-//Ò£¿ØĞ¡³µµÄÄ¬ÈÏËÙ¶È£¬µ¥Î»£ºmm/s
+//é¥æ§å°è½¦çš„é»˜è®¤é€Ÿåº¦ï¼Œå•ä½ï¼šmm/s
 float RC_Velocity=350; 
 
 //The Tank_Car CCD related variables
-//È«ÏòĞ¡³µCCDÏà¹Ø±äÁ¿
+//å…¨å‘å°è½¦CCDç›¸å…³å˜é‡
 float Tank_Car_CCD_KP=35,Tank_Car_CCD_KI=140;
 
 //The Tank_Car ELE related variables
-//È«ÏòĞ¡³µELEÏà¹Ø±äÁ¿
+//å…¨å‘å°è½¦ELEç›¸å…³å˜é‡
 float Tank_Car_ELE_KP=25,Tank_Car_ELE_KI=200;
 
 //The Omni_Car CCD related variables
-//È«ÏòĞ¡³µCCDÏà¹Ø±äÁ¿
+//å…¨å‘å°è½¦CCDç›¸å…³å˜é‡
 float Omni_Car_CCD_KP=10,Omni_Car_CCD_KI=110;
 
 //The Omni_Car ELE related variables
-//È«ÏòĞ¡³µELEÏà¹Ø±äÁ¿
+//å…¨å‘å°è½¦ELEç›¸å…³å˜é‡
 float Omni_Car_ELE_KP=9,Omni_Car_ELE_KI=100;
 
 //The other CCD related variables
-//ÆäËûĞ¡³µCCDÏà¹Ø±äÁ¿
+//å…¶ä»–å°è½¦CCDç›¸å…³å˜é‡
 float CCD_KP=50,CCD_KI=140;
 
 //The other ELE related variables
-//ÆäËûĞ¡³µELEÏà¹Ø±äÁ¿
+//å…¶ä»–å°è½¦ELEç›¸å…³å˜é‡
 float ELE_KP=30,ELE_KI=200;
 
 //The PS2 gamepad controls related variables
-//PS2ÊÖ±ú¿ØÖÆÏà¹Ø±äÁ¿
+//PS2æ‰‹æŸ„æ§åˆ¶ç›¸å…³å˜é‡
 float PS2_LX=128,PS2_LY=128,PS2_RX=128,PS2_RY=128,PS2_KEY; 
 
 //Vehicle three-axis target moving speed, unit: m/s
-//Ğ¡³µÈıÖáÄ¿±êÔË¶¯ËÙ¶È£¬µ¥Î»£ºm/s
+//å°è½¦ä¸‰è½´ç›®æ ‡è¿åŠ¨é€Ÿåº¦ï¼Œå•ä½ï¼šm/s
 float Move_X, Move_Y, Move_Z;   
 
 //PID parameters of Speed control
-//ËÙ¶È¿ØÖÆPID²ÎÊı
+//é€Ÿåº¦æ§åˆ¶PIDå‚æ•°
 float Velocity_KP=700,Velocity_KI=700; 
 
 //Smooth control of intermediate variables, dedicated to omni-directional moving cars
-//Æ½»¬¿ØÖÆÖĞ¼ä±äÁ¿£¬È«ÏòÒÆ¶¯Ğ¡³µ×¨ÓÃ
+//å¹³æ»‘æ§åˆ¶ä¸­é—´å˜é‡ï¼Œå…¨å‘ç§»åŠ¨å°è½¦ä¸“ç”¨
 Smooth_Control smooth_control;  
 
 //The parameter structure of the motor
-//µç»úµÄ²ÎÊı½á¹¹Ìå
+//ç”µæœºçš„å‚æ•°ç»“æ„ä½“
 Motor_parameter MOTOR_A,MOTOR_B,MOTOR_C,MOTOR_D;  
 
-/************ Ğ¡³µĞÍºÅÏà¹Ø±äÁ¿ **************************/
+/************ å°è½¦å‹å·ç›¸å…³å˜é‡ **************************/
 /************ Variables related to car model ************/
 //Encoder accuracy
-//±àÂëÆ÷¾«¶È
+//ç¼–ç å™¨ç²¾åº¦
 float Encoder_precision; 
 //Wheel circumference, unit: m
-//ÂÖ×ÓÖÜ³¤£¬µ¥Î»£ºm
+//è½®å­å‘¨é•¿ï¼Œå•ä½ï¼šm
 float Wheel_perimeter; 
 //Drive wheel base, unit: m
-//Ö÷¶¯ÂÖÂÖ¾à£¬µ¥Î»£ºm
+//ä¸»åŠ¨è½®è½®è·ï¼Œå•ä½ï¼šm
 float Wheel_spacing; 
 //The wheelbase of the front and rear axles of the trolley, unit: m
-//Ğ¡³µÇ°ºóÖáµÄÖá¾à£¬µ¥Î»£ºm
+//å°è½¦å‰åè½´çš„è½´è·ï¼Œå•ä½ï¼šm
 float Axle_spacing; 
 //All-directional wheel turning radius, unit: m
-//È«ÏòÂÖ×ªÍä°ë¾¶£¬µ¥Î»£ºm
+//å…¨å‘è½®è½¬å¼¯åŠå¾„ï¼Œå•ä½ï¼šm
 float Omni_turn_radiaus; 
-/************ Ğ¡³µĞÍºÅÏà¹Ø±äÁ¿ **************************/
+/************ å°è½¦å‹å·ç›¸å…³å˜é‡ **************************/
 /************ Variables related to car model ************/
 
 //PS2 controller, Bluetooth APP, aircraft model controller, CAN communication, serial port 1 communication control flag bit.
 //These 5 flag bits are all 0 by default, representing the serial port 3 control mode
-//PS2ÊÖ±ú¡¢À¶ÑÀAPP¡¢º½Ä£ÊÖ±ú¡¢CANÍ¨ĞÅ¡¢´®¿Ú1Í¨ĞÅ¿ØÖÆ±êÖ¾Î»¡£Õâ5¸ö±êÖ¾Î»Ä¬ÈÏ¶¼Îª0£¬´ú±í´®¿Ú3¿ØÖÆÄ£Ê½
+//PS2æ‰‹æŸ„ã€è“ç‰™APPã€èˆªæ¨¡æ‰‹æŸ„ã€CANé€šä¿¡ã€ä¸²å£1é€šä¿¡æ§åˆ¶æ ‡å¿—ä½ã€‚è¿™5ä¸ªæ ‡å¿—ä½é»˜è®¤éƒ½ä¸º0ï¼Œä»£è¡¨ä¸²å£3æ§åˆ¶æ¨¡å¼
 u8 CCD_ON_Flag=0, APP_ON_Flag=0, ELE_ON_Flag=0, Avoid_ON_Flag=0, Follow_ON_Flag=0, Along_wall=0, PS2_ON_Flag=0; 
 
 //Bluetooth remote control associated flag bits
-//À¶ÑÀÒ£¿ØÏà¹ØµÄ±êÖ¾Î»
+//è“ç‰™é¥æ§ç›¸å…³çš„æ ‡å¿—ä½
 u8 Flag_Left, Flag_Right, Flag_Direction=0, Turn_Flag; 
 
 //Sends the parameter's flag bit to the Bluetooth APP
-//ÏòÀ¶ÑÀAPP·¢ËÍ²ÎÊıµÄ±êÖ¾Î»
+//å‘è“ç‰™APPå‘é€å‚æ•°çš„æ ‡å¿—ä½
 u8 PID_Send;
 
-//ÏµÍ³Ïà¹Ø±äÁ¿
+//ç³»ç»Ÿç›¸å…³å˜é‡
 SYS_VAL_t SysVal;
 
 int POT_val;
@@ -129,112 +129,112 @@ int Full_rotation = 16799;
 void systemInit(void)
 {
 	//Interrupt priority group setti  ng
-	//ÖĞ¶ÏÓÅÏÈ¼¶·Ö×éÉèÖÃ
+	//ä¸­æ–­ä¼˜å…ˆçº§åˆ†ç»„è®¾ç½®
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
 
 	//Delay function initialization
-	//ÑÓÊ±º¯Êı³õÊ¼»¯
+	//å»¶æ—¶å‡½æ•°åˆå§‹åŒ–
     delay_init(168);
 	//IIC initialization for IMU
-    //IIC³õÊ¼»¯£¬ÓÃÓÚIMU
+    //IICåˆå§‹åŒ–ï¼Œç”¨äºIMU
     I2C_GPIOInit();
-	//ÏµÍ³Ïà¹ØÈí¼ş²ÎÊı³õÊ¼»¯
+	//ç³»ç»Ÿç›¸å…³è½¯ä»¶å‚æ•°åˆå§‹åŒ–
 	SYS_VAL_t_Init(&SysVal);
 	
 	//Serial port 1 initialization, communication baud rate 115200,
     //can be used to communicate with ROS terminal
-    //´®¿Ú1³õÊ¼»¯£¬Í¨ĞÅ²¨ÌØÂÊ115200£¬¿ÉÓÃÓÚÓëROS¶ËÍ¨ĞÅ
+    //ä¸²å£1åˆå§‹åŒ–ï¼Œé€šä¿¡æ³¢ç‰¹ç‡115200ï¼Œå¯ç”¨äºä¸ROSç«¯é€šä¿¡
     uart1_init(115200);
 
     //Serial port 2 initialization, communication baud rate 9600,
     //used to communicate with Bluetooth APP terminal
-    //´®¿Ú2³õÊ¼»¯£¬Í¨ĞÅ²¨ÌØÂÊ9600£¬ÓÃÓÚÓëÀ¶ÑÀAPP¶ËÍ¨ĞÅ
+    //ä¸²å£2åˆå§‹åŒ–ï¼Œé€šä¿¡æ³¢ç‰¹ç‡9600ï¼Œç”¨äºä¸è“ç‰™APPç«¯é€šä¿¡
     uart2_init(9600);
 	
     //Serial port 5 initialization, communication baud rate 115200,
     //can be used to communicate with ROS terminal
-    //´®¿Ú5³õÊ¼»¯£¬Í¨ĞÅ²¨ÌØÂÊ115200£¬¿ÉÓÃÓÚÓëROS¶ËÍ¨ĞÅ
+    //ä¸²å£5åˆå§‹åŒ–ï¼Œé€šä¿¡æ³¢ç‰¹ç‡115200ï¼Œå¯ç”¨äºä¸ROSç«¯é€šä¿¡
     uart5_init(460800);
 	
-	//Èç¹ûIMUÎªMPU6050,ÔòÊÇ¾É°æC30D
+	//å¦‚æœIMUä¸ºMPU6050,åˆ™æ˜¯æ—§ç‰ˆC30D
 	if( MPU6050_DEFAULT_ADDRESS == MPU6050_getDeviceID() )
 	{
 		SysVal.HardWare_Ver = V1_0;
 		//Initialize the hardware interface to the PS2 controller
-		//³õÊ¼»¯ÓëPS2ÊÖ±úÁ¬½ÓµÄÓ²¼ş½Ó¿Ú
+		//åˆå§‹åŒ–ä¸PS2æ‰‹æŸ„è¿æ¥çš„ç¡¬ä»¶æ¥å£
 		PS2_Init();
 		//PS2 gamepad configuration is initialized and configured in analog mode
-		//PS2ÊÖ±úÅäÖÃ³õÊ¼»¯,ÅäÖÃÎªÄ£ÄâÁ¿Ä£Ê½	
+		//PS2æ‰‹æŸ„é…ç½®åˆå§‹åŒ–,é…ç½®ä¸ºæ¨¡æ‹Ÿé‡æ¨¡å¼	
 		PS2_SetInit();		 
 		//Initialize the hardware interface connected to the LED lamp
-		//³õÊ¼»¯ÓëLEDµÆÁ¬½ÓµÄÓ²¼ş½Ó¿Ú
+		//åˆå§‹åŒ–ä¸LEDç¯è¿æ¥çš„ç¡¬ä»¶æ¥å£
 		V1_0_LED_Init(); 
 	}
-	//Èç¹ûIMUĞÍºÅÎªICM20948,ÔòÊÇĞÂ°æC30D
-	else if( REG_VAL_WIA == ICM20948_getDeviceID() )//¶ÁÈ¡ICM20948 id
+	//å¦‚æœIMUå‹å·ä¸ºICM20948,åˆ™æ˜¯æ–°ç‰ˆC30D
+	else if( REG_VAL_WIA == ICM20948_getDeviceID() )//è¯»å–ICM20948 id
 	{
 		SysVal.HardWare_Ver = V1_1;
-		//USBHOS³õÊ¼»¯
+		//USBHOSåˆå§‹åŒ–
 		MX_USB_HOST_Init();
 		//Initialize the hardware interface connected to the LED lamp
-		//³õÊ¼»¯ÓëLEDµÆÁ¬½ÓµÄÓ²¼ş½Ó¿Ú
+		//åˆå§‹åŒ–ä¸LEDç¯è¿æ¥çš„ç¡¬ä»¶æ¥å£
 		V1_1_LED_Init();
 	}
-	else //ÎŞ·¨Ê¶±ğµÄÍÓÂİÒÇ,¸´Î»ÏµÍ³
+	else //æ— æ³•è¯†åˆ«çš„é™€èºä»ª,å¤ä½ç³»ç»Ÿ
 	{
 		NVIC_SystemReset();
 	}         
 
     //Initialize the hardware interface connected to the buzzer
-    //³õÊ¼»¯Óë·äÃùÆ÷Á¬½ÓµÄÓ²¼ş½Ó¿Ú
+    //åˆå§‹åŒ–ä¸èœ‚é¸£å™¨è¿æ¥çš„ç¡¬ä»¶æ¥å£
     Buzzer_Init();
 
     //Initialize the hardware interface connected to the enable switch
-    //³õÊ¼»¯ÓëÊ¹ÄÜ¿ª¹ØÁ¬½ÓµÄÓ²¼ş½Ó¿Ú
+    //åˆå§‹åŒ–ä¸ä½¿èƒ½å¼€å…³è¿æ¥çš„ç¡¬ä»¶æ¥å£
     Enable_Pin();
 
     //Initialize the hardware interface connected to the OLED display
-    //³õÊ¼»¯ÓëOLEDÏÔÊ¾ÆÁÁ¬½ÓµÄÓ²¼ş½Ó¿Ú
+    //åˆå§‹åŒ–ä¸OLEDæ˜¾ç¤ºå±è¿æ¥çš„ç¡¬ä»¶æ¥å£
     OLED_Init();
 
     //Initialize the hardware interface connected to the user's key
-    //³õÊ¼»¯ÓëÓÃ»§°´¼üÁ¬½ÓµÄÓ²¼ş½Ó¿Ú
+    //åˆå§‹åŒ–ä¸ç”¨æˆ·æŒ‰é”®è¿æ¥çš„ç¡¬ä»¶æ¥å£
     KEY_Init();
 
     //ADC pin initialization, used to read the battery voltage and potentiometer gear,
     //potentiometer gear determines the car after the boot of the car model
-    //ADCÒı½Å³õÊ¼»¯£¬ÓÃÓÚ¶ÁÈ¡µç³ØµçÑ¹ÓëµçÎ»Æ÷µµÎ»£¬µçÎ»Æ÷µµÎ»¾ö¶¨Ğ¡³µ¿ª»úºóµÄĞ¡³µÊÊÅäĞÍºÅ
+    //ADCå¼•è„šåˆå§‹åŒ–ï¼Œç”¨äºè¯»å–ç”µæ± ç”µå‹ä¸ç”µä½å™¨æ¡£ä½ï¼Œç”µä½å™¨æ¡£ä½å†³å®šå°è½¦å¼€æœºåçš„å°è½¦é€‚é…å‹å·
     Adc_Init();
     Adc_POWER_Init();
 
 
     //According to the tap position of the potentiometer, determine which type of car needs to be matched,
     //and then initialize the corresponding parameters
-    //¸ù¾İµçÎ»Æ÷µÄµµÎ»ÅĞ¶ÏĞèÒªÊÊÅäµÄÊÇÄÄÒ»ÖÖĞÍºÅµÄĞ¡³µ£¬È»ºó½øĞĞ¶ÔÓ¦µÄ²ÎÊı³õÊ¼»¯
+    //æ ¹æ®ç”µä½å™¨çš„æ¡£ä½åˆ¤æ–­éœ€è¦é€‚é…çš„æ˜¯å“ªä¸€ç§å‹å·çš„å°è½¦ï¼Œç„¶åè¿›è¡Œå¯¹åº”çš„å‚æ•°åˆå§‹åŒ–
     Robot_Select();
 
-    //ÆÕÍ¨Ğ¡³µÄ¬ÈÏ¶¨Ê±Æ÷8ÓÃ×÷º½Ä£½Ó¿Ú
-    TIM8_SERVO_Init(9999,168-1);//APB2µÄÊ±ÖÓÆµÂÊÎª168M , ÆµÂÊ=168M/((9999+1)*(167+1))=100Hz
+    //æ™®é€šå°è½¦é»˜è®¤å®šæ—¶å™¨8ç”¨ä½œèˆªæ¨¡æ¥å£
+    TIM8_SERVO_Init(9999,168-1);//APB2çš„æ—¶é’Ÿé¢‘ç‡ä¸º168M , é¢‘ç‡=168M/((9999+1)*(167+1))=100Hz
 
     //Initialize motor speed control and, for controlling motor speed, PWM frequency 10kHz
-    //³õÊ¼»¯µç»úËÙ¶È¿ØÖÆÒÔ¼°£¬ÓÃÓÚ¿ØÖÆµç»úËÙ¶È£¬PWMÆµÂÊ10KHZ
-    //APB2Ê±ÖÓÆµÂÊÎª168M£¬ÂúPWMÎª16799£¬ÆµÂÊ=168M/((16799+1)*(0+1))=10k
+    //åˆå§‹åŒ–ç”µæœºé€Ÿåº¦æ§åˆ¶ä»¥åŠï¼Œç”¨äºæ§åˆ¶ç”µæœºé€Ÿåº¦ï¼ŒPWMé¢‘ç‡10KHZ
+    //APB2æ—¶é’Ÿé¢‘ç‡ä¸º168Mï¼Œæ»¡PWMä¸º16799ï¼Œé¢‘ç‡=168M/((16799+1)*(0+1))=10k
 	TIM1_PWM_Init(16799,0);
 	TIM9_PWM_Init(16799,0);
     TIM10_PWM_Init(16799,0);
     TIM11_PWM_Init(16799,0);
 	
     //Encoder A is initialized to read the real time speed of motor C
-    //±àÂëÆ÷A³õÊ¼»¯£¬ÓÃÓÚ¶ÁÈ¡µç»úCµÄÊµÊ±ËÙ¶È
+    //ç¼–ç å™¨Aåˆå§‹åŒ–ï¼Œç”¨äºè¯»å–ç”µæœºCçš„å®æ—¶é€Ÿåº¦
     Encoder_Init_TIM2();
     //Encoder B is initialized to read the real time speed of motor D
-    //±àÂëÆ÷B³õÊ¼»¯£¬ÓÃÓÚ¶ÁÈ¡µç»úDµÄÊµÊ±ËÙ¶È
+    //ç¼–ç å™¨Båˆå§‹åŒ–ï¼Œç”¨äºè¯»å–ç”µæœºDçš„å®æ—¶é€Ÿåº¦
     Encoder_Init_TIM3();
     //Encoder C is initialized to read the real time speed of motor B
-    //±àÂëÆ÷C³õÊ¼»¯£¬ÓÃÓÚ¶ÁÈ¡µç»úBµÄÊµÊ±ËÙ¶È
+    //ç¼–ç å™¨Cåˆå§‹åŒ–ï¼Œç”¨äºè¯»å–ç”µæœºBçš„å®æ—¶é€Ÿåº¦
     Encoder_Init_TIM4();
     //Encoder D is initialized to read the real time speed of motor A
-    //±àÂëÆ÷D³õÊ¼»¯£¬ÓÃÓÚ¶ÁÈ¡µç»úAµÄÊµÊ±ËÙ¶È
+    //ç¼–ç å™¨Dåˆå§‹åŒ–ï¼Œç”¨äºè¯»å–ç”µæœºAçš„å®æ—¶é€Ÿåº¦
     Encoder_Init_TIM5();
 	
 }

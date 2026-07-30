@@ -3,31 +3,31 @@
 
 #include <stdint.h>
 
-//ÓĞÏßps2ÊÖ±úÉè±¸±êÊ¶·û
+//æœ‰çº¿ps2æ‰‹æŸ„è®¾å¤‡æ ‡è¯†ç¬¦
 #define Wired_PS2_VID 0x0810
 #define Wired_PS2_PID 0x0001
 
-//ÎŞÏßps2ÊÖ±ú°²×¿Ä£Ê½Éè±¸±êÊ¶·û
+//æ— çº¿ps2æ‰‹æŸ„å®‰å“æ¨¡å¼è®¾å¤‡æ ‡è¯†ç¬¦
 #define Wireless_Android_PS2_VID 0x045E
 #define Wireless_Android_PS2_PID 0x028E
 
-//ÎŞÏßps2ÊÖ±úPCÄ£Ê½Éè±¸±êÊ¶·û
+//æ— çº¿ps2æ‰‹æŸ„PCæ¨¡å¼è®¾å¤‡æ ‡è¯†ç¬¦
 #define Wireless_PC_PS2_VID 0x0079
 #define Wireless_PC_PS2_PID 0x0126
 
-//PS2ÊÖ±úÀàĞÍ¶¨Òå
+//PS2æ‰‹æŸ„ç±»å‹å®šä¹‰
 typedef enum{
-	UnKnown_Dev,          //Î´ÖªÉè±¸
-	Wired_PS2,            //ÓĞÏßps2ÊÖ±ú
-	Wiredless_PC_PS2,     //ÎŞÏßps2ÊÖ±úpcÄ£Ê½
-	Wiredless_Android_PS2,//ÎŞÏßps2ÊÖ±ú°²×¿Ä£Ê½
+	UnKnown_Dev,          //æœªçŸ¥è®¾å¤‡
+	Wired_PS2,            //æœ‰çº¿ps2æ‰‹æŸ„
+	Wiredless_PC_PS2,     //æ— çº¿ps2æ‰‹æŸ„pcæ¨¡å¼
+	Wiredless_Android_PS2,//æ— çº¿ps2æ‰‹æŸ„å®‰å“æ¨¡å¼
 }PS2_TYPE_t;
 
-//±íÊ¾°´¼üµÄ×´Ì¬Öµ
-#define PS2KEY_PressDOWN 1  //°´¼üËÉ¿ª
-#define PS2KEY_PressUP   0  //°´¼ü°´ÏÂ
+//è¡¨ç¤ºæŒ‰é”®çš„çŠ¶æ€å€¼
+#define PS2KEY_PressDOWN 1  //æŒ‰é”®æ¾å¼€
+#define PS2KEY_PressUP   0  //æŒ‰é”®æŒ‰ä¸‹
 
-//PS2°´¼ü×´Ì¬(ÎŞ×´Ì¬¡¢µ¥»÷¡¢Ë«»÷¡¢³¤°´)
+//PS2æŒ‰é”®çŠ¶æ€(æ— çŠ¶æ€ã€å•å‡»ã€åŒå‡»ã€é•¿æŒ‰)
 typedef enum{
     PS2KEYSTATE_NONE,
     PS2KEYSTATE_SINGLECLICK,
@@ -35,32 +35,32 @@ typedef enum{
     PS2KEYSTATE_LONGCLICK
 }PS2KEY_State_t;
 
-//PS2ÊÖ±ú¶ÔÏó
+//PS2æ‰‹æŸ„å¯¹è±¡
 typedef struct{
-	uint8_t LX;      //4¸ö·½ÏòÒ¡¸ËÖµ,È¡Öµ0~255
+	uint8_t LX;      //4ä¸ªæ–¹å‘æ‘‡æ†å€¼,å–å€¼0~255
 	uint8_t LY;
 	uint8_t RX;
 	uint8_t RY;
-	PS2KEY_State_t (*getKeyEvent)(uint8_t keybit); //»ñÈ¡°´¼üÊÂ¼ş,ÓĞµ¥»÷¡¢Ë«»÷¡¢³¤°´3ÖÖÊÂ¼ş¿ÉÒÔ»ñÈ¡,Èë¿Ú²ÎÊıÎª°´¼üµÄÃ¶¾Ù¼üÖµ
-	uint8_t (*getKeyState)(uint8_t keybit);        //»ñÈ¡°´¼üµÄ×´Ì¬,0±íÊ¾°´ÏÂ,1±íÊ¾ËÉ¿ª,Èë¿Ú²ÎÊıÎª°´¼üµÄÃ¶¾Ù¼üÖµ
+	PS2KEY_State_t (*getKeyEvent)(uint8_t keybit); //è·å–æŒ‰é”®äº‹ä»¶,æœ‰å•å‡»ã€åŒå‡»ã€é•¿æŒ‰3ç§äº‹ä»¶å¯ä»¥è·å–,å…¥å£å‚æ•°ä¸ºæŒ‰é”®çš„æšä¸¾é”®å€¼
+	uint8_t (*getKeyState)(uint8_t keybit);        //è·å–æŒ‰é”®çš„çŠ¶æ€,0è¡¨ç¤ºæŒ‰ä¸‹,1è¡¨ç¤ºæ¾å¼€,å…¥å£å‚æ•°ä¸ºæŒ‰é”®çš„æšä¸¾é”®å€¼
 }PS2INFO_t;
 
-//PS2°´¼üÎ»ÖÃÃ¶¾Ù(bit0~bit15·Ö±ğÎªÏÂÃæµÄ0~15)
+//PS2æŒ‰é”®ä½ç½®æšä¸¾(bit0~bit15åˆ†åˆ«ä¸ºä¸‹é¢çš„0~15)
 enum 
 {
-	PS2KEY_SELECT	   = 0, //Ñ¡Ôñ°´¼ü
-	PS2KEY_LROCKER      , //×óÓÒÒ¡¸Ë°´ÏÂ¼üÖµ
+	PS2KEY_SELECT	   = 0, //é€‰æ‹©æŒ‰é”®
+	PS2KEY_LROCKER      , //å·¦å³æ‘‡æ†æŒ‰ä¸‹é”®å€¼
 	PS2KEY_RROCKER      ,
-	PS2KEY_START        , //¿ªÊ¼°´¼ü
-	PS2KEY_UP           , //×ó°´¼üÇøÓò
+	PS2KEY_START        , //å¼€å§‹æŒ‰é”®
+	PS2KEY_UP           , //å·¦æŒ‰é”®åŒºåŸŸ
 	PS2KEY_RIGHT        ,
 	PS2KEY_DOWN         ,
 	PS2KEY_LEFT         ,
-	PS2KEY_L2           ,	//×óÓÒ°â»ú°´¼üÖµ
+	PS2KEY_L2           ,	//å·¦å³æ‰³æœºæŒ‰é”®å€¼
 	PS2KEY_R2           ,
 	PS2KEY_L1           ,  
 	PS2KEY_R1           ,
-	PS2KEY_1GREEN       , //ÓÒ°´¼üÇøÓò
+	PS2KEY_1GREEN       , //å³æŒ‰é”®åŒºåŸŸ
 	PS2KEY_2RED         , 
 	PS2KEY_3BLUE        , 
 	PS2KEY_4PINK           

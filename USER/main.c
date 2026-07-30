@@ -1,65 +1,65 @@
 /***********************************************
-¹«Ë¾£ºÂÖÈ¤¿Æ¼¼£¨¶«İ¸£©ÓĞÏŞ¹«Ë¾
-Æ·ÅÆ£ºWHEELTEC
-¹ÙÍø£ºwheeltec.net
-ÌÔ±¦µêÆÌ£ºshop114407458.taobao.com 
-ËÙÂôÍ¨: https://minibalance.aliexpress.com/store/4455017
-°æ±¾£ºV5.0
-ĞŞ¸ÄÊ±¼ä£º2022-05-05
+å…¬å¸ï¼šè½®è¶£ç§‘æŠ€ï¼ˆä¸œèï¼‰æœ‰é™å…¬å¸
+å“ç‰Œï¼šWHEELTEC
+å®˜ç½‘ï¼šwheeltec.net
+æ·˜å®åº—é“ºï¼šshop114407458.taobao.com 
+é€Ÿå–é€š: https://minibalance.aliexpress.com/store/4455017
+ç‰ˆæœ¬ï¼šV5.0
+ä¿®æ”¹æ—¶é—´ï¼š2022-05-05
 
 Brand: WHEELTEC
 Website: wheeltec.net
 Taobao shop: shop114407458.taobao.com 
 Aliexpress: https://minibalance.aliexpress.com/store/4455017
 Version: V5.0
-Update£º2022-05-05
+Updateï¼š2022-05-05
 
 All rights reserved
 ***********************************************/
 #include "system.h"
 
-//Task priority    //ÈÎÎñÓÅÏÈ¼¶
+//Task priority    //ä»»åŠ¡ä¼˜å…ˆçº§
 #define START_TASK_PRIO	1
 
-//Task stack size //ÈÎÎñ¶ÑÕ»´óĞ¡	
+//Task stack size //ä»»åŠ¡å †æ ˆå¤§å°	
 #define START_STK_SIZE 	256  
 
-//Task handle     //ÈÎÎñ¾ä±ú
+//Task handle     //ä»»åŠ¡å¥æŸ„
 TaskHandle_t StartTask_Handler;
 
-//Task function   //ÈÎÎñº¯Êı
+//Task function   //ä»»åŠ¡å‡½æ•°
 void start_task(void *pvParameters);
 
-//Main function //Ö÷º¯Êı
+//Main function //ä¸»å‡½æ•°
 int main(void)
 { 
-  systemInit(); //Hardware initialization //Ó²¼ş³õÊ¼»¯
+  systemInit(); //Hardware initialization //ç¡¬ä»¶åˆå§‹åŒ–
 	
-	//Create the start task //´´½¨¿ªÊ¼ÈÎÎñ
-	xTaskCreate((TaskFunction_t )start_task,            //Task function   //ÈÎÎñº¯Êı
-							(const char*    )"start_task",          //Task name       //ÈÎÎñÃû³Æ
-							(uint16_t       )START_STK_SIZE,        //Task stack size //ÈÎÎñ¶ÑÕ»´óĞ¡
-							(void*          )NULL,                  //Arguments passed to the task function //´«µİ¸øÈÎÎñº¯ÊıµÄ²ÎÊı
-							(UBaseType_t    )START_TASK_PRIO,       //Task priority   //ÈÎÎñÓÅÏÈ¼¶
-							(TaskHandle_t*  )&StartTask_Handler);   //Task handle     //ÈÎÎñ¾ä±ú    					
-	vTaskStartScheduler();  //Enables task scheduling //¿ªÆôÈÎÎñµ÷¶È	
+	//Create the start task //åˆ›å»ºå¼€å§‹ä»»åŠ¡
+	xTaskCreate((TaskFunction_t )start_task,            //Task function   //ä»»åŠ¡å‡½æ•°
+							(const char*    )"start_task",          //Task name       //ä»»åŠ¡åç§°
+							(uint16_t       )START_STK_SIZE,        //Task stack size //ä»»åŠ¡å †æ ˆå¤§å°
+							(void*          )NULL,                  //Arguments passed to the task function //ä¼ é€’ç»™ä»»åŠ¡å‡½æ•°çš„å‚æ•°
+							(UBaseType_t    )START_TASK_PRIO,       //Task priority   //ä»»åŠ¡ä¼˜å…ˆçº§
+							(TaskHandle_t*  )&StartTask_Handler);   //Task handle     //ä»»åŠ¡å¥æŸ„    					
+	vTaskStartScheduler();  //Enables task scheduling //å¼€å¯ä»»åŠ¡è°ƒåº¦	
 }
 
-//Start task task function //¿ªÊ¼ÈÎÎñÈÎÎñº¯Êı
+//Start task task function //å¼€å§‹ä»»åŠ¡ä»»åŠ¡å‡½æ•°
 void start_task(void *pvParameters)
 {
-  taskENTER_CRITICAL(); //Enter the critical area //½øÈëÁÙ½çÇø
+  taskENTER_CRITICAL(); //Enter the critical area //è¿›å…¥ä¸´ç•ŒåŒº
 	
-  //Create the task //´´½¨ÈÎÎñ
-	xTaskCreate(Balance_task,  "Balance_task",  BALANCE_STK_SIZE,  NULL, BALANCE_TASK_PRIO,  NULL);	//Vehicle motion control task //Ğ¡³µÔË¶¯¿ØÖÆÈÎÎñ
-	xTaskCreate(show_task,     "show_task",     SHOW_STK_SIZE,     NULL, SHOW_TASK_PRIO,     NULL); //The OLED display displays tasks //OLEDÏÔÊ¾ÆÁÏÔÊ¾ÈÎÎñ
-	xTaskCreate(led_task,      "led_task",      LED_STK_SIZE,      NULL, LED_TASK_PRIO,      NULL);	//LED light flashing task //LEDµÆÉÁË¸ÈÎÎñ
-	xTaskCreate(pstwo_task,    "PSTWO_task",    PS2_STK_SIZE,      NULL, PS2_TASK_PRIO,      NULL);	//Read the PS2 controller task //¶ÁÈ¡PS2ÊÖ±úÈÎÎñ
-	xTaskCreate(adc_task,      "ADC_task",      ADC_STK_SIZE,      NULL, ADC_TASK_PRIO,     NULL);//ADC acquisition task 	//ADC²É¼¯ÈÎÎñ
+  //Create the task //åˆ›å»ºä»»åŠ¡
+	xTaskCreate(Balance_task,  "Balance_task",  BALANCE_STK_SIZE,  NULL, BALANCE_TASK_PRIO,  NULL);	//Vehicle motion control task //å°è½¦è¿åŠ¨æ§åˆ¶ä»»åŠ¡
+	xTaskCreate(show_task,     "show_task",     SHOW_STK_SIZE,     NULL, SHOW_TASK_PRIO,     NULL); //The OLED display displays tasks //OLEDæ˜¾ç¤ºå±æ˜¾ç¤ºä»»åŠ¡
+	xTaskCreate(led_task,      "led_task",      LED_STK_SIZE,      NULL, LED_TASK_PRIO,      NULL);	//LED light flashing task //LEDç¯é—ªçƒä»»åŠ¡
+	xTaskCreate(pstwo_task,    "PSTWO_task",    PS2_STK_SIZE,      NULL, PS2_TASK_PRIO,      NULL);	//Read the PS2 controller task //è¯»å–PS2æ‰‹æŸ„ä»»åŠ¡
+	xTaskCreate(adc_task,      "ADC_task",      ADC_STK_SIZE,      NULL, ADC_TASK_PRIO,     NULL);//ADC acquisition task 	//ADCé‡‡é›†ä»»åŠ¡
 
-  vTaskDelete(StartTask_Handler); //Delete the start task //É¾³ı¿ªÊ¼ÈÎÎñ
+  vTaskDelete(StartTask_Handler); //Delete the start task //åˆ é™¤å¼€å§‹ä»»åŠ¡
 
-  taskEXIT_CRITICAL();            //Exit the critical section//ÍË³öÁÙ½çÇø
+  taskEXIT_CRITICAL();            //Exit the critical section//é€€å‡ºä¸´ç•ŒåŒº
 }
 
 

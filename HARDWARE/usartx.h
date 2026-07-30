@@ -41,18 +41,18 @@ typedef struct PointDataProcess_
 	float angle;
 }PointDataProcessDef;
 
-extern PointDataProcessDef PointDataProcess[1200];//¸üĞÂ225¸öÊı¾İ
+extern PointDataProcessDef PointDataProcess[1200];//æ›´æ–°225ä¸ªæ•°æ®
 extern LiDARFrameTypeDef Pack_Data;
-extern PointDataProcessDef Dataprocess[1200];//ÓÃÓÚĞ¡³µ±ÜÕÏ¡¢¸úËæ¡¢×ßÖ±Ïß¡¢ELEÀ×´ï±ÜÕÏµÄÀ×´ïÊı¾İ
+extern PointDataProcessDef Dataprocess[1200];//ç”¨äºå°è½¦é¿éšœã€è·Ÿéšã€èµ°ç›´çº¿ã€ELEé›·è¾¾é¿éšœçš„é›·è¾¾æ•°æ®
 
-extern float Distance_KP,Distance_KD,Distance_KI;		//¾àÀëµ÷ÕûPID²ÎÊı
-extern float Follow_KP,Follow_KD,Follow_KI;  //×ªÏòPID
+extern float Distance_KP,Distance_KD,Distance_KI;		//è·ç¦»è°ƒæ•´PIDå‚æ•°
+extern float Follow_KP,Follow_KD,Follow_KI;  //è½¬å‘PID
 extern float Follow_KP_Akm,Follow_KD_Akm,Follow_KI_Akm;
 
-extern float Diff_Along_Distance_KP,Diff_Along_Distance_KD,Diff_Along_Distance_KI;	//¾àÀëµ÷ÕûPID²ÎÊı
-extern float Akm_Along_Distance_KP,Akm_Along_Distance_KD,Akm_Along_Distance_KI;	//¾àÀëµ÷ÕûPID²ÎÊı
-extern float FourWheel_Along_Distance_KP,FourWheel_Along_Distance_KD,FourWheel_Along_Distance_KI;	//¾àÀëµ÷ÕûPID²ÎÊı
-extern float Along_Distance_KP,Along_Distance_KD,Along_Distance_KI;		//¾àÀëµ÷ÕûPID²ÎÊı
+extern float Diff_Along_Distance_KP,Diff_Along_Distance_KD,Diff_Along_Distance_KI;	//è·ç¦»è°ƒæ•´PIDå‚æ•°
+extern float Akm_Along_Distance_KP,Akm_Along_Distance_KD,Akm_Along_Distance_KI;	//è·ç¦»è°ƒæ•´PIDå‚æ•°
+extern float FourWheel_Along_Distance_KP,FourWheel_Along_Distance_KD,FourWheel_Along_Distance_KI;	//è·ç¦»è°ƒæ•´PIDå‚æ•°
+extern float Along_Distance_KP,Along_Distance_KD,Along_Distance_KI;		//è·ç¦»è°ƒæ•´PIDå‚æ•°
 
 
 //void data_task(void *pvParameters);
