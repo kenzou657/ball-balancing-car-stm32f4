@@ -194,6 +194,7 @@ void Balance_task(void *pvParameters)
 { 
 //	static u8 Count_CCD = 0;								//调节CCD控制频率
 	static u8 last_mode = 0;
+	u8 contest_key = key_stateless;
 	u32 lastWakeTime = getSysTickCnt();
 
 	while(1)
@@ -210,35 +211,10 @@ void Balance_task(void *pvParameters)
 		Get_Velocity_Form_Encoder();   
 
 		if(++Lidar_flag_count==10) Lidar_Success_Receive_flag=0,Lidar_flag_count=0,RC_Lidar_Avoid_FLAG=RC_Avoid_OFF; //100ms清零雷达接收到数据标志位
-		switch(click_N_Double(50))
-		{
-			case 1:    //单击用来切换模式
-				Mode+=1;
-				if(Mode == ELE_Line_Patrol_Mode)			//选择电磁巡线控制模式
-				{
-						ele_Init();							//初始化ELE
-				}
-				else if(Mode == CCD_Line_Patrol_Mode)			//选择电磁巡线控制模式
-				{
-						ccd_Init();							//初始化ELE
-				}
-				if(Mode>6)						Mode = 0;
-				 break;
-			case 2:    //电磁巡线状态时，双击可以打开/关闭雷达检测障碍物，默认打开
-				if(Mode == ELE_Line_Patrol_Mode)			//电磁巡线控制模式下
-				{
-					Lidar_Detect = !Lidar_Detect;
-					if(Lidar_Detect == Lidar_Detect_OFF)
-						memset(Dataprocess,0, sizeof(PointDataProcessDef)*225);		//用于雷达检测障碍物的数组清零
-				}
-				else if(Mode == APP_Control_Mode||Mode ==PS2_Control_Mode){
-					RC_Lidar_Avoid_FLAG=!RC_Lidar_Avoid_FLAG;
-					if(RC_Lidar_Avoid_FLAG == RC_Avoid_OFF)
-						memset(Dataprocess,0, sizeof(PointDataProcessDef)*225);		//用于雷达检测障碍物的数组清零
-				}
-				break;				 
-		}
-		
+		Contest_Task_Update(CONTEST_TRACK_PERIOD_MS);
+		contest_key = KEY_Scan(RATE_100_HZ, 0);
+		Contest_Task_KeyAction(contest_key);
+		 
 		if(last_mode != Mode)  //切换模式时屏幕清零
 		{
 			last_mode++;
@@ -252,16 +228,18 @@ void Balance_task(void *pvParameters)
 				
 		if(Mode != ELE_Line_Patrol_Mode)
 			Buzzer_Alarm(0);
-		if(Mode == APP_Control_Mode)          Get_RC();             //Handle the APP remote commands //处理APP遥控命令
-		else if(Mode == PS2_Control_Mode)     PS2_Control();        //Handle PS2 controller commands //处理PS2手柄控制命令
-		else if(Mode == Lidar_Avoid_Mode)     Lidar_Avoid();        //Avoid Mode //避障模式
-		else if(Mode == Lidar_Follow_Mode)    Lidar_Follow();       //Follow Mode //跟随模式
-		else if(Mode == Lidar_Along_Mode)     Lidar_along_wall();   //Along Mode //走直线模式
-		else if(Mode == CCD_Line_Patrol_Mode) Get_RC_CCD();	
-		else													
+		if(Contest_Task_IsRunning() == 0)
 		{
-			Get_RC_ELE();											
-		}					
+			//Contest mode only: keep the fixed differential chassis stopped until long press starts a task.
+			//赛题模式专用：长按启动任务前，固定差速车保持停止，不再进入旧遥控/巡线模式。
+			Move_X = 0.0f;
+			Move_Y = 0.0f;
+			Move_Z = 0.0f;
+			MOTOR_A.Target = 0.0f;
+			MOTOR_B.Target = 0.0f;
+			MOTOR_C.Target = 0.0f;
+			MOTOR_D.Target = 0.0f;
+		}
 		//If there is no abnormity in the battery voltage, and the enable switch is in the ON position,
 		//and the software failure flag is 0
 		//如果电池电压不存在异常，而且使能开关在ON档位，而且软件失能标志位为0
@@ -282,7 +260,7 @@ void Balance_task(void *pvParameters)
 					case Mec_Car:       Set_Pwm(-MOTOR_A.Motor_Pwm,  -MOTOR_B.Motor_Pwm, MOTOR_C.Motor_Pwm, MOTOR_D.Motor_Pwm, 0    ); break; //Mecanum wheel car       //麦克纳姆轮小车
 					case Omni_Car:      Set_Pwm( MOTOR_A.Motor_Pwm,  MOTOR_B.Motor_Pwm,  MOTOR_C.Motor_Pwm, MOTOR_D.Motor_Pwm, 0    ); break; //Omni car                //全向轮小车
 					case Akm_Car:       Set_Pwm(-MOTOR_A.Motor_Pwm,  MOTOR_B.Motor_Pwm,  MOTOR_C.Motor_Pwm, MOTOR_D.Motor_Pwm, Servo); break; //Ackermann structure car //阿克曼小车
-					case Diff_Car:      Set_Pwm(-MOTOR_A.Motor_Pwm,  MOTOR_B.Motor_Pwm,  MOTOR_C.Motor_Pwm, MOTOR_D.Motor_Pwm, 0    ); break; //Differential car        //两轮差速小车
+					case Diff_Car:      Set_Pwm(-MOTOR_A.Motor_Pwm,  MOTOR_B.Motor_Pwm,  0, 0, 0    ); break; //Differential car        //两轮差速小车
 					case FourWheel_Car: Set_Pwm(-MOTOR_A.Motor_Pwm, -MOTOR_B.Motor_Pwm,  MOTOR_C.Motor_Pwm, MOTOR_D.Motor_Pwm, 0    ); break; //FourWheel car           //四驱车 
 					case Tank_Car:      Set_Pwm(-MOTOR_A.Motor_Pwm,  MOTOR_B.Motor_Pwm,  MOTOR_C.Motor_Pwm, MOTOR_D.Motor_Pwm, 0    ); break; //Tank Car                //履带车
 			 }
@@ -436,8 +414,8 @@ int Incremental_PI_A (float Encoder,float Target)
 	 static float Bias,Pwm,Last_bias;
 	 Bias=Target-Encoder; //Calculate the deviation //计算偏差
 	 Pwm+=Velocity_KP*(Bias-Last_bias)+Velocity_KI*Bias; 
-	 if(Pwm>16800)Pwm=16800;
-	 if(Pwm<-16800)Pwm=-16800;
+	 if(Pwm>14000)Pwm=14000;
+	 if(Pwm<-14000)Pwm=-14000;
 	 Last_bias=Bias; //Save the last deviation //保存上一次偏差 
 	 return Pwm;    
 }
@@ -446,8 +424,8 @@ int Incremental_PI_B (float Encoder,float Target)
 	 static float Bias,Pwm,Last_bias;
 	 Bias=Target-Encoder; //Calculate the deviation //计算偏差
 	 Pwm+=Velocity_KP*(Bias-Last_bias)+Velocity_KI*Bias;  
-	 if(Pwm>16800)Pwm=16800;
-	 if(Pwm<-16800)Pwm=-16800;
+	 if(Pwm>14000)Pwm=14000;
+	 if(Pwm<-14000)Pwm=-14000;
 	 Last_bias=Bias; //Save the last deviation //保存上一次偏差 
 	 return Pwm;
 }
@@ -456,8 +434,8 @@ int Incremental_PI_C (float Encoder,float Target)
 	 static float Bias,Pwm,Last_bias;
 	 Bias=Target-Encoder; //Calculate the deviation //计算偏差
 	 Pwm+=Velocity_KP*(Bias-Last_bias)+Velocity_KI*Bias; 
-	 if(Pwm>16800)Pwm=16800;
-	 if(Pwm<-16800)Pwm=-16800;
+	 if(Pwm>14000)Pwm=14000;
+	 if(Pwm<-14000)Pwm=-14000;
 	 Last_bias=Bias; //Save the last deviation //保存上一次偏差 
 	 return Pwm; 
 }
@@ -466,8 +444,8 @@ int Incremental_PI_D (float Encoder,float Target)
 	 static float Bias,Pwm,Last_bias;
 	 Bias=Target-Encoder; //Calculate the deviation //计算偏差
 	 Pwm+=Velocity_KP*(Bias-Last_bias)+Velocity_KI*Bias;  
-	 if(Pwm>16800)Pwm=16800;
-	 if(Pwm<-16800)Pwm=-16800;
+	 if(Pwm>14000)Pwm=14000;
+	 if(Pwm<-14000)Pwm=-14000;
 	 Last_bias=Bias; //Save the last deviation //保存上一次偏差 
 	 return Pwm; 
 }

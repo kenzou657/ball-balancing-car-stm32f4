@@ -463,6 +463,11 @@
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\I2C.c</FilePath>
             </File>
+            <File>
+              <FileName>track_ir.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\track_ir.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -627,6 +632,16 @@
               <FileName>show.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\BALANCE\show.c</FilePath>
+            </File>
+            <File>
+              <FileName>track_control.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BALANCE\track_control.c</FilePath>
+            </File>
+            <File>
+              <FileName>contest_task.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BALANCE\contest_task.c</FilePath>
             </File>
           </Files>
         </Group>

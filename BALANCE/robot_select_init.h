@@ -54,6 +54,7 @@ typedef struct
 //Motor_gear_ratio
 //电机减速比
 #define   HALL_30F    30
+#define   HALL_28F    28
 #define   MD36N_5_18  5.18
 #define   MD36N_27    27
 #define   MD36N_51    51

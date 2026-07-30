@@ -201,6 +201,12 @@ void systemInit(void)
     //初始化与用户按键连接的硬件接口
     KEY_Init();
 
+    //Initialize contest line-following GPIO and control state
+    //初始化赛题循迹 GPIO 与控制状态
+    Track_IR_Init();
+    Track_Control_Init();
+    Contest_Task_Init();
+
     //ADC pin initialization, used to read the battery voltage and potentiometer gear,
     //potentiometer gear determines the car after the boot of the car model
     //ADC引脚初始化，用于读取电池电压与电位器档位，电位器档位决定小车开机后的小车适配型号

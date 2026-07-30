@@ -35,6 +35,9 @@
 #include "ICM20948.h"
 #include "usb_host.h"
 #include "bsp_ps2.h"
+#include "track_ir.h"
+#include "track_control.h"
+#include "contest_task.h"
 
 // Enumeration of car types
 //小车型号的枚举定义
@@ -105,6 +108,8 @@ extern int Full_rotation;
 void systemInit(void);
 
 /***Macros define***/ /***宏定义***/
+#define CONTEST_FIXED_CAR_MODE Diff_Car
+
 //After starting the car (1000/100Hz =10) for seconds, it is allowed to control the car to move
 //开机(1000/100hz=10)秒后才允许控制小车进行运动
 #define CONTROL_DELAY		1000

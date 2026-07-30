@@ -70,21 +70,26 @@ extern u8 usb_wait_EnumReady;
 extern u8 usb_showEnum;
 
 void oled_show(void)
-{   
-//	static int count=0;	 
+{
+//	static int count=0;
 	 int Car_Mode_Show;
-	
-	///////////// usb ps2 设备插拔提示 /////////////
 	static u8 clear=0;
 	static u8 show_done=0;
+	
+	/* 赛题固定为差速车显示界面：清空旧内容，仅显示任务和时间。 */
+	memset(OLED_GRAM,0, 128*8*sizeof(u8));
+	Contest_Task_OLEDShow();
+	return;
+	
+	///////////// usb ps2 设备插拔提示 /////////////
 	
 	//Collect the tap information of the potentiometer, 
 		 //and display the car model to be fitted when the car starts up in real time
 		 //采集电位器档位信息，实时显示小车开机时要适配的小车型号
 		 Divisor_Mode=2048/CAR_NUMBER+5;
 		POT_val = Get_adc_Average(Potentiometer,10);
-		 Car_Mode_Show=(int) (POT_val/Divisor_Mode); 
-		 if(Car_Mode_Show>5)Car_Mode_Show=5; 
+		 Car_Mode_Show=Diff_Car;
+		 if(Car_Mode_Show>5)Car_Mode_Show=5;
 	Voltage_Show=Voltage*100;
 		  //Car_Mode_Show=0;
 	

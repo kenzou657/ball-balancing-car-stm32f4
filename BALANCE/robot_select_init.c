@@ -13,23 +13,11 @@ Output  : none
 **************************************************************************/
 void Robot_Select(void)
 {
-	//The ADC value is variable in segments, depending on the number of car models. Currently there are 6 car models, CAR_NUMBER=6
-  //ADC值分段变量，取决于小车型号数量，目前有8种小车型号，CAR_NUMBER=8
+	//Contest chassis is fixed to two-wheel differential mode.
+	//赛题底盘固定为两轮差速车，不再通过电位器选择车型。
 	Divisor_Mode=2048/CAR_NUMBER+5;
-	Car_Mode=(int) ((Get_adc_Average(Potentiometer,10))/Divisor_Mode); //Collect the pin information of potentiometer //采集电位器引脚信息	
-  if(Car_Mode>5)Car_Mode=5;
-
-	//Car_Mode=0;
-	
-	switch(Car_Mode)
-	{
-		case Mec_Car:       Robot_Init(MEC_wheelspacing,         MEC_axlespacing,          0,                     HALL_30F, Hall_13, Mecanum_75);            break; //麦克纳姆轮小车
-		case Omni_Car:      Robot_Init(0,                        0,                        Omni_Turn_Radiaus_109, HALL_30F, Hall_13, FullDirecion_60);       break; //全向轮小车
-		case Akm_Car:       Robot_Init(Akm_wheelspacing,         Akm_axlespacing,          0,                     HALL_30F, Hall_13, Black_WheelDiameter);   break; //阿克曼小车
-		case Diff_Car:      Robot_Init(Diff_wheelSpacing,        0,                        0,                     HALL_30F, Hall_13, Black_WheelDiameter);   break; //两轮差速小车
-		case FourWheel_Car: Robot_Init(Four_Mortor_wheelSpacing, Four_Mortor__axlespacing, 0,                     HALL_30F, Hall_13, Black_WheelDiameter);   break; //四驱车 
-		case Tank_Car:      Robot_Init(Tank_wheelSpacing,        0,                        0,                     HALL_30F, Hall_13, Tank_WheelDiameter);    break; //履带车
-	}
+	Car_Mode=CONTEST_FIXED_CAR_MODE;
+	Robot_Init(Diff_wheelSpacing, 0, 0, HALL_28F, Hall_13, Black_WheelDiameter);
 	
 	
 	//Check the parameters//自检相关参数
