@@ -38,6 +38,7 @@
 #include "track_ir.h"
 #include "track_control.h"
 #include "contest_task.h"
+#include "ball_control.h"
 
 // Enumeration of car types
 //小车型号的枚举定义

@@ -303,8 +303,15 @@ void Set_Pwm(int motor_a,int motor_b,int motor_c,int motor_d,int servo)
 	else 	            	PWMD2=16799,PWMD1=16799-motor_d;
 	
 	//Servo control
-	//舵机控制
-	Servo_PWM =servo;
+	//舵机控制。滚球稳定启用时覆盖普通舵机输入，PC9/TIM8_CH4 输出滚球舵机 PWM。
+	if(Ball_Control_IsServoOverrideEnabled())
+	{
+		Servo_PWM = Ball_Control_GetServoPwm();
+	}
+	else
+	{
+		Servo_PWM = servo;
+	}
 }
 
 /**************************************************************************

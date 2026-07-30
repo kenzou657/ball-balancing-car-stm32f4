@@ -3,6 +3,7 @@
 PointDataProcessDef PointDataProcess[1200];//更新225个数据
 LiDARFrameTypeDef Pack_Data;
 PointDataProcessDef Dataprocess[1200];      //用于小车避障、跟随、走直线、ELE雷达避障的雷达数据
+CameraBallState_t CameraBallState;
 
 float Diff_Along_Distance_KP = -0.030f,Diff_Along_Distance_KD = -0.245f,Diff_Along_Distance_KI = -0.001f;	//差速小车走直线距离调整PID参数
 float Akm_Along_Distance_KP = -0.115f*1000,Akm_Along_Distance_KD = -1000.245f*1000,Akm_Along_Distance_KI = -0.001f*1000;	//阿克曼走直线距离调整PID参数
@@ -13,6 +14,99 @@ float Distance_KP = -0.150f,Distance_KD = -0.052f,Distance_KI = -0.001;	//跟随
 
 float Follow_KP = -2.566f,Follow_KD = -1.368f,Follow_KI = -0.001f;  //转向PID
 float Follow_KP_Akm = -0.550f,Follow_KD_Akm = -0.121f,Follow_KI_Akm = -0.001f;
+
+static void Camera_Ball_ParseByte(uint8_t data)
+{
+    static uint8_t rx_index = 0;
+    static uint8_t rx_buf[5];
+    int16_t pos;
+
+    if(rx_index == 0)
+    {
+        if(data != CAMERA_BALL_FRAME_HEAD)
+        {
+            CameraBallState.error_count++;
+            return;
+        }
+    }
+
+    rx_buf[rx_index++] = data;
+
+    if(rx_index < 5)
+    {
+        return;
+    }
+
+    rx_index = 0;
+
+    if(rx_buf[0] != CAMERA_BALL_FRAME_HEAD || rx_buf[4] != CAMERA_BALL_FRAME_TAIL)
+    {
+        CameraBallState.error_count++;
+        return;
+    }
+
+    CameraBallState.online = 1;
+    CameraBallState.last_cmd = rx_buf[1];
+    CameraBallState.frame_count++;
+
+    switch(rx_buf[1])
+    {
+        case CAMERA_BALL_CMD_POSITION:
+            pos = (int16_t)(((uint16_t)rx_buf[2] << 8) | rx_buf[3]);
+            CameraBallState.pos_0p1mm = pos;
+            CameraBallState.ball_lost = 0;
+            CameraBallState.new_data = 1;
+            Ball_Control_SetVisionPosition(pos);
+            break;
+
+        case CAMERA_BALL_CMD_LOST:
+            CameraBallState.ball_lost = 1;
+            CameraBallState.new_data = 1;
+            Ball_Control_SetVisionLost();
+            break;
+
+        case CAMERA_BALL_CMD_HEARTBEAT:
+            CameraBallState.heartbeat = 1;
+            Ball_Control_SetVisionHeartbeat();
+            break;
+
+        default:
+            CameraBallState.error_count++;
+            break;
+    }
+}
+
+void Camera_Ball_Reset(void)
+{
+    CameraBallState.online = 0;
+    CameraBallState.ball_lost = 0;
+    CameraBallState.heartbeat = 0;
+    CameraBallState.new_data = 0;
+    CameraBallState.last_cmd = 0;
+    CameraBallState.pos_0p1mm = 0;
+    CameraBallState.frame_count = 0;
+    CameraBallState.error_count = 0;
+}
+
+CameraBallState_t Camera_Ball_GetState(void)
+{
+    return CameraBallState;
+}
+
+int16_t Camera_Ball_GetPosition(void)
+{
+    return CameraBallState.pos_0p1mm;
+}
+
+uint8_t Camera_Ball_IsOnline(void)
+{
+    return CameraBallState.online;
+}
+
+uint8_t Camera_Ball_IsLost(void)
+{
+    return CameraBallState.ball_lost;
+}
 
 /**************************************************************************
 Function: Serial port 1 initialization
@@ -74,23 +168,23 @@ Output  : none
 返回  值：无
 **************************************************************************/
 void uart2_init(u32 bound)
-{  	 
+{
 	GPIO_InitTypeDef GPIO_InitStructure;
 	USART_InitTypeDef USART_InitStructure;
 	NVIC_InitTypeDef NVIC_InitStructure;
 
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);	 //Enable the gpio clock  //使能GPIO时钟
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);	 //Enable the gpio clock  //使能GPIO时钟
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE); //Enable the Usart clock //使能USART时钟
 	
-	GPIO_PinAFConfig(GPIOD,GPIO_PinSource5,GPIO_AF_USART2);	
-	GPIO_PinAFConfig(GPIOD,GPIO_PinSource6 ,GPIO_AF_USART2);	 
+	GPIO_PinAFConfig(GPIOA,GPIO_PinSource2,GPIO_AF_USART2);
+	GPIO_PinAFConfig(GPIOA,GPIO_PinSource3,GPIO_AF_USART2);
 	
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5|GPIO_Pin_6;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2|GPIO_Pin_3;
 	GPIO_InitStructure.GPIO_Mode=GPIO_Mode_AF;            //输出模式
 	GPIO_InitStructure.GPIO_OType=GPIO_OType_PP;          //推挽输出
 	GPIO_InitStructure.GPIO_Speed=GPIO_Speed_50MHz;       //高速50MHZ
 	GPIO_InitStructure.GPIO_PuPd=GPIO_PuPd_UP;            //上拉
-	GPIO_Init(GPIOD, &GPIO_InitStructure);  		          //初始化
+	GPIO_Init(GPIOA, &GPIO_InitStructure);  		          //初始化
 	
 	//UsartNVIC configuration //UsartNVIC配置
 	NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
@@ -185,193 +279,36 @@ Output  : none
 返 回 值：无
 **************************************************************************/
 int USART1_IRQHandler(void)
-{	
-	if(USART_GetITStatus(USART1, USART_IT_RXNE) != RESET) //Check if data is received //判断是否接收到数据
-	{
-//		u8 Usart_Receive;		
-//		Usart_Receive = 
-		USART_ReceiveData(USART1); //Read the data //读取数据	
-	}
-	return 0;	
+{
+    uint8_t usart_receive;
+
+    if(USART_GetITStatus(USART1, USART_IT_RXNE) != RESET) //Check if data is received //判断是否接收到数据
+    {
+        usart_receive = (uint8_t)USART_ReceiveData(USART1); //Read the data //读取数据
+        (void)usart_receive;
+    }
+
+    return 0;
 }
 /**************************************************************************
-Function: Refresh the OLED screen
+Function: Serial port 2 receives interrupted
 Input   : none
 Output  : none
-函数功能：串口2接收中断
+函数功能：串口2接收中断，PA2/PA3 摄像头滚球协议接收
 入口参数：无
 返回  值：无
 **************************************************************************/
 int USART2_IRQHandler(void)
-{	
-	static int temp_count = 0;				//用于记录前进的指令的次数，第一次连接蓝牙的时候需要用到
-	int Usart_Receive;
-	if(USART_GetITStatus(USART2, USART_IT_RXNE) != RESET) //Check if data is received //判断是否接收到数据
-	{	      
-		static u8 Flag_PID,i,j,Receive[50];
-		static float Data;
-				
-		Usart_Receive=USART2->DR; //Read the data //读取数据
-		//抓包方法和使用
-		if(AT_Command_Capture(Usart_Receive)) return 1;
-	  
-		if(Usart_Receive==0x4B) 
-			//Enter the APP steering control interface
-		  //进入APP转向控制界面
-			Turn_Flag=1;   
-	  else	if(Usart_Receive==0x49||Usart_Receive==0x4A) 
-      // Enter the APP direction control interface		
-			//进入APP方向控制界面	
-			Turn_Flag=0;	
-		
-		if(Turn_Flag==0) 
-		{
-			//App rocker control interface command
-			//APP摇杆控制界面命令
-			if(Usart_Receive>=0x41&&Usart_Receive<=0x48)  
-			{	
-				Mode=APP_Control_Mode;
-				Flag_Direction=Usart_Receive-0x40;
-			}
-			else	if(Usart_Receive<=8)   
-			{			
-				Flag_Direction=Usart_Receive;
-			}	
-			else  Flag_Direction=0;
-		}
-		else if(Turn_Flag==1)
-		{
-			//APP steering control interface command
-			//APP转向控制界面命令
-			if     (Usart_Receive==0x43) Flag_Left=0,Flag_Right=1; //Right rotation //右自转
-			else if(Usart_Receive==0x47) Flag_Left=1,Flag_Right=0; //Left rotation  //左自转
-			else                         Flag_Left=0,Flag_Right=0;
-			if     (Usart_Receive==0x41||Usart_Receive==0x45) 
-			{
-				if((++temp_count) == 5)					//需要连续发送5次前进的指令，上拉转盘一段时间可开始app控制
-				{
-					temp_count = 0;
-					APP_ON_Flag = RC_ON;		
-					PS2_ON_Flag = RC_OFF;
-					Mode=APP_Control_Mode;
-				}
-				Flag_Direction=Usart_Receive-0x40;
-			}
-			else  Flag_Direction=0;
-		}
-		if(Usart_Receive==0x58)  RC_Velocity=RC_Velocity+100; //Accelerate the keys, +100mm/s //加速按键，+100mm/s
-		if(Usart_Receive==0x59)  RC_Velocity=RC_Velocity-100; //Slow down buttons,   -100mm/s //减速按键，-100mm/s
-	  
-	if(Usart_Receive=='a')	RC_Lidar_Avoid_FLAG=!RC_Lidar_Avoid_FLAG;
-	 // The following is the communication with the APP debugging interface
-	 //以下是与APP调试界面通讯
-	 if(Usart_Receive==0x7B) Flag_PID=1;   //The start bit of the APP parameter instruction //APP参数指令起始位
-	 if(Usart_Receive==0x7D) Flag_PID=2;   //The APP parameter instruction stops the bit    //APP参数指令停止位
+{
+    uint8_t usart_receive;
 
-	 if(Flag_PID==1) //Collect data //采集数据
-	 {
-		Receive[i]=Usart_Receive;
-		i++;
-	 }
-	 if(Flag_PID==2) //Analyze the data //分析数据
-	 {
-			if(Receive[3]==0x50) 	 PID_Send=1;
-			else  if(Receive[1]!=0x23) 
-      {								
-				for(j=i;j>=4;j--)
-				{
-					Data+=(Receive[j-1]-48)*pow(10,i-j);
-				}
-				
-				if(Mode == APP_Control_Mode)
-					{
-					switch(Receive[1])			//APP电机调参
-					 {
-						 case 0x30:  RC_Velocity=Data;break;
-						 case 0x31:  Velocity_KP=Data;break;
-						 case 0x32:  Velocity_KI=Data;break;
-						 case 0x33:  break;
-						 case 0x34:  break;
-						 case 0x35:  break;
-						 case 0x36:  break;
-						 case 0x37:  break;
-						 case 0x38:  break; 				
-					 } 
-					}
-					else if(Mode == ELE_Line_Patrol_Mode)		//电磁巡线z轴速度调参
-					{
-					switch(Receive[1])
-					 {
-						 case 0x30:  RC_Velocity_ELE=Data;break;
-						 case 0x31:  ELE_KP=Data;break;
-						 case 0x32:  ELE_KI=Data;break;
-						 case 0x33:  break;
-						 case 0x34:  break;
-						 case 0x35:  break;
-						 case 0x36:  break;
-						 case 0x37:  break;
-						 case 0x38:  break; 				
-					 } 
-					}
-					else 	if(Mode == CCD_Line_Patrol_Mode)									//CCD巡线z轴速度调参
-					{
-					switch(Receive[1])
-					 {
-						 case 0x30:  RC_Velocity_CCD=Data;break;
-						 case 0x31:  CCD_KP=Data;break;
-						 case 0x32:  CCD_KI=Data;break;
-						 case 0x33:  break;
-						 case 0x34:  break;
-						 case 0x35:  break;
-						 case 0x36:  break;
-						 case 0x37:  break;
-						 case 0x38:  break; 				
-					 } 
-					}
-					else if(Mode == Lidar_Along_Mode)
-					{
-						switch(Receive[1])
-						{
-						 case 0x30:  Along_Distance_KP=Data;break;
-						 case 0x31:  Along_Distance_KD=Data;break;
-						 case 0x32:  Along_Distance_KI=Data;break;
-						 case 0x33:  break;
-						 case 0x34:  break;
-						 case 0x35:  break;
-						 case 0x36:  break;
-						 case 0x37:  break;
-						 case 0x38:  break; 	
-						}
-					}
-					else if(Mode == Lidar_Follow_Mode)
-					{
-						switch(Receive[1])
-						{
-						 case 0x30:  break;
-						 case 0x31:  break;
-						 case 0x32:  break;
-						 case 0x33:  break;
-						 case 0x34:  break;
-						 case 0x35:  break;
-						 case 0x36:  break;
-						 case 0x37:  break;
-						 case 0x38:  break; 	
-						}
-					}
-				}		
-      //Relevant flag position is cleared			
-      //相关标志位清零			
-			Flag_PID=0;
-			i=0;
-			j=0;
-			Data=0;
-			memset(Receive, 0, sizeof(u8)*50); //Clear the array to zero//数组清零
-	 }
-   if(RC_Velocity<0)   RC_Velocity=0; 
-	 if(RC_Velocity_CCD<0)   RC_Velocity_CCD=0;
-	 if(RC_Velocity_ELE<0)   RC_Velocity_ELE=0;		 
-  }
-  return 0;	
+    if(USART_GetITStatus(USART2, USART_IT_RXNE) != RESET) //Check if data is received //判断是否接收到数据
+    {
+        usart_receive = (uint8_t)USART_ReceiveData(USART2); //Read the data //读取数据
+        Camera_Ball_ParseByte(usart_receive);
+    }
+
+    return 0;
 }
 
 /**************************************************************************

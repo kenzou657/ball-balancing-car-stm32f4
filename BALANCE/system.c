@@ -147,9 +147,9 @@ void systemInit(void)
     uart1_init(115200);
 
     //Serial port 2 initialization, communication baud rate 9600,
-    //used to communicate with Bluetooth APP terminal
-    //串口2初始化，通信波特率9600，用于与蓝牙APP端通信
-    uart2_init(9600);
+    //used to receive camera ball position frames on PA2/PA3
+    //串口2初始化，通信波特率9600，用于 PA2/PA3 接收摄像头滚球位置帧
+    uart2_init(115200);
 	
     //Serial port 5 initialization, communication baud rate 115200,
     //can be used to communicate with ROS terminal
@@ -201,10 +201,11 @@ void systemInit(void)
     //初始化与用户按键连接的硬件接口
     KEY_Init();
 
-    //Initialize contest line-following GPIO and control state
-    //初始化赛题循迹 GPIO 与控制状态
+    //Initialize contest line-following GPIO, ball control and control state
+    //初始化赛题循迹 GPIO、滚球控制与控制状态
     Track_IR_Init();
     Track_Control_Init();
+    Ball_Control_Init();
     Contest_Task_Init();
 
     //ADC pin initialization, used to read the battery voltage and potentiometer gear,

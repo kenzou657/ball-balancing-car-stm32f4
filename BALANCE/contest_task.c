@@ -6,6 +6,9 @@ ContestTaskContext_t ContestTaskContext;
 
 #define CONTEST_TASK1_MOTOR_DEBUG_SPEED        0.20f
 
+#define CONTEST_TASK3_PHASE_HOLD_MS            1500u
+#define CONTEST_TASK3_PHASE_TIMEOUT_MS         8000u
+
 #define CONTEST_TASK2_STRAIGHT_DISTANCE_M      1.50f
 #define CONTEST_TASK2_CURVE_RADIUS_M           0.50f
 #define CONTEST_TASK2_CURVE_DISTANCE_M         (3.1416f * CONTEST_TASK2_CURVE_RADIUS_M)
@@ -43,6 +46,10 @@ static void Contest_Task_ResetRuntime(void)
     ContestTaskContext.yaw_deg = 0.0f;
     ContestTaskContext.phase_start_yaw_deg = 0.0f;
     ContestTaskContext.task2_phase = CONTEST_TASK2_PHASE_IDLE;
+    ContestTaskContext.task3_phase = CONTEST_TASK3_PHASE_IDLE;
+    Ball_Control_Enable(0);
+    Ball_Control_Reset();
+    Ball_Control_StopSafe();
     ContestTaskContext.finished_task = CONTEST_TASK_NONE;
     ContestTaskContext.finished_time_ms = 0;
     Track_Control_Stop(TRACK_STOP_BY_USER);
@@ -54,9 +61,11 @@ static uint8_t Contest_Task_IsExecutableTask(uint8_t task_id)
 {
     return (task_id == CONTEST_TASK_1 ||
             task_id == CONTEST_TASK_2 ||
+            task_id == CONTEST_TASK_3 ||
             task_id == CONTEST_TASK_4 ||
             task_id == CONTEST_TASK_5 ||
-            task_id == CONTEST_TASK_6) ? 1 : 0;
+            task_id == CONTEST_TASK_6 ||
+            task_id == CONTEST_TASK_SERVO_DEBUG) ? 1 : 0;
 }
 
 static float Contest_Task_UpdateYaw(uint16_t period_ms)
@@ -325,6 +334,93 @@ static void Contest_Task2_Update(uint16_t period_ms)
     }
 }
 
+static void Contest_Task3_SetPhase(uint8_t phase, float target_0p1mm)
+{
+    ContestTaskContext.task3_phase = phase;
+    ContestTaskContext.phase_time_ms = 0;
+    Ball_Control_SetTarget(target_0p1mm);
+    Ball_Control_Enable(1);
+}
+
+static void Contest_Task3_Update(uint16_t period_ms)
+{
+    Contest_Task_ClearMotion();
+    Ball_Control_Update(period_ms);
+    ContestTaskContext.phase_time_ms += period_ms;
+
+    switch(ContestTaskContext.state)
+    {
+        case CONTEST_STATE_START:
+            Ball_Control_Reset();
+            Contest_Task3_SetPhase(CONTEST_TASK3_PHASE_CENTER, BALL_TARGET_CENTER_0P1MM);
+            ContestTaskContext.state = CONTEST_STATE_TRACK;
+            break;
+
+        case CONTEST_STATE_TRACK:
+            switch(ContestTaskContext.task3_phase)
+            {
+                case CONTEST_TASK3_PHASE_CENTER:
+                    if((Ball_Control_IsStable() && ContestTaskContext.phase_time_ms >= CONTEST_TASK3_PHASE_HOLD_MS) ||
+                       ContestTaskContext.phase_time_ms >= CONTEST_TASK3_PHASE_TIMEOUT_MS)
+                    {
+                        Contest_Task3_SetPhase(CONTEST_TASK3_PHASE_POS_5CM, BALL_TARGET_POSITIVE_5CM_0P1MM);
+                    }
+                    break;
+
+                case CONTEST_TASK3_PHASE_POS_5CM:
+                    if((Ball_Control_IsStable() && ContestTaskContext.phase_time_ms >= CONTEST_TASK3_PHASE_HOLD_MS) ||
+                       ContestTaskContext.phase_time_ms >= CONTEST_TASK3_PHASE_TIMEOUT_MS)
+                    {
+                        Contest_Task3_SetPhase(CONTEST_TASK3_PHASE_NEG_5CM, BALL_TARGET_NEGATIVE_5CM_0P1MM);
+                    }
+                    break;
+
+                case CONTEST_TASK3_PHASE_NEG_5CM:
+                    if((Ball_Control_IsStable() && ContestTaskContext.phase_time_ms >= CONTEST_TASK3_PHASE_HOLD_MS) ||
+                       ContestTaskContext.phase_time_ms >= CONTEST_TASK3_PHASE_TIMEOUT_MS)
+                    {
+                        ContestTaskContext.task3_phase = CONTEST_TASK3_PHASE_FINISH;
+                        Contest_Task_Finish();
+                    }
+                    break;
+
+                default:
+                    Contest_Task3_SetPhase(CONTEST_TASK3_PHASE_CENTER, BALL_TARGET_CENTER_0P1MM);
+                    break;
+            }
+            break;
+
+        default:
+            break;
+    }
+}
+
+static void Contest_TaskServoDebug_Update(uint16_t period_ms)
+{
+    Contest_Task_ClearMotion();
+    Ball_Control_Update(period_ms);
+
+    switch(ContestTaskContext.state)
+    {
+        case CONTEST_STATE_START:
+            Ball_Control_Reset();
+            Ball_Control_SetTarget(BALL_TARGET_CENTER_0P1MM);
+            Ball_Control_Enable(1);
+            ContestTaskContext.task3_phase = CONTEST_TASK3_PHASE_CENTER;
+            ContestTaskContext.phase_time_ms = 0;
+            ContestTaskContext.state = CONTEST_STATE_TRACK;
+            break;
+
+        case CONTEST_STATE_TRACK:
+            ContestTaskContext.phase_time_ms += period_ms;
+            Ball_Control_SetTarget(BALL_TARGET_CENTER_0P1MM);
+            break;
+
+        default:
+            break;
+    }
+}
+
 static void Contest_Task4_Update(uint16_t period_ms)
 {
     switch(ContestTaskContext.state)
@@ -384,7 +480,7 @@ void Contest_Task_Init(void)
 
 void Contest_Task_Select(uint8_t task_id)
 {
-    if(task_id > CONTEST_TASK_6)
+    if(task_id > CONTEST_TASK_SERVO_DEBUG)
     {
         task_id = CONTEST_TASK_NONE;
     }
@@ -423,7 +519,7 @@ void Contest_Task_KeyAction(uint8_t key_action)
         }
 
         next_task = ContestTaskContext.selected_task + 1;
-        if(next_task > CONTEST_TASK_6)
+        if(next_task > CONTEST_TASK_SERVO_DEBUG)
         {
             next_task = CONTEST_TASK_1;
         }
@@ -444,10 +540,15 @@ void Contest_Task_KeyAction(uint8_t key_action)
 void Contest_Task_Stop(void)
 {
     Track_Control_Stop(TRACK_STOP_BY_USER);
+    Ball_Control_Enable(0);
+    Ball_Control_Reset();
+    Ball_Control_StopSafe();
     Contest_Task_ClearMotion();
     ContestTaskContext.running_task = CONTEST_TASK_NONE;
     ContestTaskContext.state = CONTEST_STATE_IDLE;
     ContestTaskContext.state_time_ms = 0;
+    ContestTaskContext.phase_time_ms = 0;
+    ContestTaskContext.task3_phase = CONTEST_TASK3_PHASE_IDLE;
 }
 
 static void Contest_Task_Finish(void)
@@ -456,6 +557,8 @@ static void Contest_Task_Finish(void)
     ContestTaskContext.finished_time_ms = ContestTaskContext.state_time_ms;
     ContestTaskContext.state = CONTEST_STATE_FINISH;
     Track_Control_Stop(TRACK_STOP_BY_USER);
+    Ball_Control_Enable(0);
+    Ball_Control_StopSafe();
     Contest_Task_ClearMotion();
 }
 
@@ -481,6 +584,9 @@ void Contest_Task_Update(uint16_t period_ms)
         case CONTEST_TASK_2:
             Contest_Task2_Update(period_ms);
             break;
+        case CONTEST_TASK_3:
+            Contest_Task3_Update(period_ms);
+            break;
         case CONTEST_TASK_4:
             Contest_Task4_Update(period_ms);
             break;
@@ -489,6 +595,9 @@ void Contest_Task_Update(uint16_t period_ms)
             break;
         case CONTEST_TASK_6:
             Contest_Task6_Update(period_ms);
+            break;
+        case CONTEST_TASK_SERVO_DEBUG:
+            Contest_TaskServoDebug_Update(period_ms);
             break;
         default:
             break;
@@ -544,6 +653,64 @@ static void Contest_Task_OLEDShowSigned6(u8 x, u8 y, float value, uint16_t scale
     Contest_Task_OLEDShowNumber6(x + 6, y, (u32)show_value, len);
 }
 
+static void Contest_Task_OLEDShowBallDebug(uint32_t show_time)
+{
+    Contest_Task_OLEDShowText6(0, 0, (const u8 *)"BALL T3");
+    Contest_Task_OLEDShowText6(54, 0, (const u8 *)"TIME");
+    Contest_Task_OLEDShowNumber6(84, 0, show_time / 1000, 3);
+    Contest_Task_OLEDShowText6(108, 0, (const u8 *)"s");
+
+    Contest_Task_OLEDShowText6(0, 13, (const u8 *)"PH");
+    Contest_Task_OLEDShowNumber6(18, 13, ContestTaskContext.task3_phase, 1);
+    Contest_Task_OLEDShowText6(36, 13, (const u8 *)"TG");
+    Contest_Task_OLEDShowSigned6(54, 13, BallControlState.target_pos_0p1mm, 1, 4);
+
+    Contest_Task_OLEDShowText6(0, 26, (const u8 *)"POS");
+    Contest_Task_OLEDShowSigned6(24, 26, Ball_Control_GetFilteredPosition(), 1, 4);
+    Contest_Task_OLEDShowText6(78, 26, (const u8 *)"0.1mm");
+
+    Contest_Task_OLEDShowText6(0, 39, (const u8 *)"ERR");
+    Contest_Task_OLEDShowSigned6(24, 39, BallControlState.error_0p1mm, 1, 4);
+    Contest_Task_OLEDShowText6(78, 39, (const u8 *)"PWM");
+    Contest_Task_OLEDShowNumber6(102, 39, Ball_Control_GetServoPwm(), 4);
+
+    Contest_Task_OLEDShowText6(0, 52, (const u8 *)"S");
+    Contest_Task_OLEDShowNumber6(12, 52, Ball_Control_IsStable(), 1);
+    Contest_Task_OLEDShowText6(24, 52, (const u8 *)"L");
+    Contest_Task_OLEDShowNumber6(36, 52, Ball_Control_IsLost(), 1);
+    Contest_Task_OLEDShowText6(54, 52, (const u8 *)"L:STOP");
+    OLED_Refresh_Gram();
+}
+
+static void Contest_Task_OLEDShowServoDebug(uint32_t show_time)
+{
+    Contest_Task_OLEDShowText6(0, 0, (const u8 *)"SERVO DBG");
+    Contest_Task_OLEDShowText6(66, 0, (const u8 *)"T");
+    Contest_Task_OLEDShowNumber6(78, 0, show_time / 1000, 3);
+    Contest_Task_OLEDShowText6(102, 0, (const u8 *)"s");
+
+    Contest_Task_OLEDShowText6(0, 13, (const u8 *)"ANG");
+    Contest_Task_OLEDShowSigned6(24, 13, BallControlState.output_angle_deg, 10, 4);
+    Contest_Task_OLEDShowText6(78, 13, (const u8 *)"PWM");
+    Contest_Task_OLEDShowNumber6(102, 13, Ball_Control_GetServoPwm(), 4);
+
+    Contest_Task_OLEDShowText6(0, 26, (const u8 *)"ERR");
+    Contest_Task_OLEDShowSigned6(24, 26, BallControlState.error_0p1mm, 1, 4);
+    Contest_Task_OLEDShowText6(78, 26, (const u8 *)"0.1");
+
+    Contest_Task_OLEDShowText6(0, 39, (const u8 *)"POS");
+    Contest_Task_OLEDShowSigned6(24, 39, Ball_Control_GetFilteredPosition(), 1, 4);
+    Contest_Task_OLEDShowText6(78, 39, (const u8 *)"TG");
+    Contest_Task_OLEDShowSigned6(96, 39, BallControlState.target_pos_0p1mm, 1, 3);
+
+    Contest_Task_OLEDShowText6(0, 52, (const u8 *)"S");
+    Contest_Task_OLEDShowNumber6(12, 52, Ball_Control_IsStable(), 1);
+    Contest_Task_OLEDShowText6(24, 52, (const u8 *)"L");
+    Contest_Task_OLEDShowNumber6(36, 52, Ball_Control_IsLost(), 1);
+    Contest_Task_OLEDShowText6(54, 52, (const u8 *)"L:STOP");
+    OLED_Refresh_Gram();
+}
+
 static void Contest_Task_OLEDShowMotorDebug(uint8_t task_id, uint32_t show_time)
 {
     Contest_Task_OLEDShowText6(0, 0, (const u8 *)"MDBG T");
@@ -594,6 +761,18 @@ void Contest_Task_OLEDShow(void)
     if(task_id == CONTEST_TASK_1)
     {
         Contest_Task_OLEDShowMotorDebug(task_id, show_time);
+        return;
+    }
+
+    if(task_id == CONTEST_TASK_3)
+    {
+        Contest_Task_OLEDShowBallDebug(show_time);
+        return;
+    }
+
+    if(task_id == CONTEST_TASK_SERVO_DEBUG)
+    {
+        Contest_Task_OLEDShowServoDebug(show_time);
         return;
     }
 

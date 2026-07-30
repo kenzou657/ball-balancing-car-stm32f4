@@ -11,6 +11,24 @@
 
 #define POINT_PER_PACK 32
 
+#define CAMERA_BALL_FRAME_HEAD          0xAA
+#define CAMERA_BALL_FRAME_TAIL          0xBB
+#define CAMERA_BALL_CMD_POSITION        0x01
+#define CAMERA_BALL_CMD_LOST            0x02
+#define CAMERA_BALL_CMD_HEARTBEAT       0x03
+
+typedef struct
+{
+    uint8_t online;
+    uint8_t ball_lost;
+    uint8_t heartbeat;
+    uint8_t new_data;
+    uint8_t last_cmd;
+    int16_t pos_0p1mm;
+    uint16_t frame_count;
+    uint16_t error_count;
+} CameraBallState_t;
+
 typedef struct PointData
 {
 	uint8_t distance_h;
@@ -44,6 +62,7 @@ typedef struct PointDataProcess_
 extern PointDataProcessDef PointDataProcess[1200];//更新225个数据
 extern LiDARFrameTypeDef Pack_Data;
 extern PointDataProcessDef Dataprocess[1200];//用于小车避障、跟随、走直线、ELE雷达避障的雷达数据
+extern CameraBallState_t CameraBallState;
 
 extern float Distance_KP,Distance_KD,Distance_KI;		//距离调整PID参数
 extern float Follow_KP,Follow_KD,Follow_KI;  //转向PID
@@ -61,6 +80,11 @@ void CAN_SEND(void);
 void uart1_init(u32 bound);
 void uart2_init(u32 bound);
 void uart5_init(u32 bound);
+void Camera_Ball_Reset(void);
+CameraBallState_t Camera_Ball_GetState(void);
+int16_t Camera_Ball_GetPosition(void);
+uint8_t Camera_Ball_IsOnline(void);
+uint8_t Camera_Ball_IsLost(void);
 
 int USART1_IRQHandler(void);
 int USART2_IRQHandler(void);

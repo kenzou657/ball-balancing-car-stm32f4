@@ -10,8 +10,15 @@
 #define CONTEST_TASK_4                4
 #define CONTEST_TASK_5                5
 #define CONTEST_TASK_6                6
+#define CONTEST_TASK_SERVO_DEBUG      7
 
 #define CONTEST_TRACK_PERIOD_MS       10
+
+#define CONTEST_TASK3_PHASE_IDLE      0
+#define CONTEST_TASK3_PHASE_CENTER    1
+#define CONTEST_TASK3_PHASE_POS_5CM   2
+#define CONTEST_TASK3_PHASE_NEG_5CM   3
+#define CONTEST_TASK3_PHASE_FINISH    4
 
 typedef enum
 {
@@ -28,6 +35,7 @@ typedef struct
     uint8_t running_task;
     uint8_t state;
     uint8_t task2_phase;
+    uint8_t task3_phase;
     uint8_t finished_task;
     uint32_t state_time_ms;
     uint32_t phase_time_ms;
