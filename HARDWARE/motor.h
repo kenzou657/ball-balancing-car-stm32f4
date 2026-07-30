@@ -49,7 +49,7 @@
 #define EN     PDin(3)  
 
 #define Servo_PWM  TIM8->CCR4
-#define SERVO_INIT 1500  //Servo zero point //Â¶Ã¦Â»ÃºÃÃ£ÂµÃ£
+#define SERVO_INIT 1500  //Servo zero point //¶æ»úÁãµã
 
 void Enable_Pin(void);
 void Servo_PWM_Init(u16 arr,u16 psc);

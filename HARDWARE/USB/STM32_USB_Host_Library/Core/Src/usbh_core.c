@@ -1367,7 +1367,7 @@ static void USBH_Process_OS(void *argument)
 {
   int8_t status;
 	
-	//Ã‘Ã“Â³Ã™1ÃƒÃ«Ã”Ã™Ã†Ã´Â¶Â¯
+	//ÑÓ³Ù1ÃëÔÙÆô¶¯
 	vTaskDelay(1000);
 	
   for (;;)
