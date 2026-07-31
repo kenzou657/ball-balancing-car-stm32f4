@@ -6,13 +6,15 @@ ContestTaskContext_t ContestTaskContext;
 
 #define CONTEST_TASK1_MOTOR_DEBUG_SPEED        0.20f   /* OLED 任务1电机调试目标线速度，单位 m/s，左右轮同速前进。 */
 
-#define CONTEST_MERGED_BASE_SPEED              0.25f   /* OLED 任务5合并任务默认循迹基础速度，单位 m/s。 */
-#define CONTEST_MERGED_MIN_SPEED_SCALE         0.35f   /* OLED 任务5根据滚球误差动态降速时允许的最低速度比例。 */
-#define CONTEST_MERGED_SLOW_ERR_0P1MM          300.0f  /* OLED 任务5开始明显降速的滚球误差阈值，单位 0.1mm，300 表示 3cm。 */
-#define CONTEST_MERGED_AB_MIN_RUN_MS           2000u   /* OLED 任务5选择 AB 模式时，允许识别终点宽线前的最短运行时间，单位 ms。 */
-#define CONTEST_MERGED_AA_MIN_RUN_MS           3000u   /* OLED 任务5选择 AA 整圈模式时，允许识别回到 A 点前的最短运行时间，单位 ms。 */
-#define CONTEST_MERGED_AB_TIMEOUT_MS           30000u  /* OLED 任务5选择 AB 模式时的强制停车超时时间，单位 ms。 */
-#define CONTEST_MERGED_AA_TIMEOUT_MS           45000u  /* OLED 任务5选择 AA 整圈模式时的强制停车超时时间，单位 ms。 */
+#define CONTEST_MERGED_BASE_SPEED              0.25f   /* 任务4/5/6合并任务默认循迹基础速度，单位 m/s。 */
+#define CONTEST_MERGED_MIN_SPEED_SCALE         0.35f   /* 任务4/5/6根据滚球误差动态降速时允许的最低速度比例。 */
+#define CONTEST_MERGED_SLOW_ERR_0P1MM          300.0f  /* 任务4/5/6开始明显降速的滚球误差阈值，单位 0.1mm，300 表示 3cm。 */
+#define CONTEST_MERGED_PRE_BALANCE_HOLD_MS     3000u   /* 任务4/5/6起步前滚球稳定保持时间，达到后才开始循迹并开始运动计时。 */
+#define CONTEST_MERGED_PRE_BALANCE_TIMEOUT_MS  20000u  /* 任务4/5/6预平衡最长等待时间，超时立即停车保护。 */
+#define CONTEST_MERGED_AB_MIN_RUN_MS           2000u   /* 任务4选择 AB 模式时，允许识别终点宽线前的最短运行时间，单位 ms。 */
+#define CONTEST_MERGED_AA_MIN_RUN_MS           3000u   /* 任务5/6选择 AA 整圈模式时，允许识别回到 A 点前的最短运行时间，单位 ms。 */
+#define CONTEST_MERGED_AB_TIMEOUT_MS           30000u  /* 任务4 AB 模式运动阶段强制停车超时时间，单位 ms。 */
+#define CONTEST_MERGED_AA_TIMEOUT_MS           45000u  /* 任务5/6 AA 模式运动阶段强制停车超时时间，单位 ms。 */
 
 #define CONTEST_TASK3_PHASE_HOLD_MS            1500u   /* 滚球稳定每个目标位置至少保持的时间，单位 ms。 */
 #define CONTEST_TASK3_PHASE_TIMEOUT_MS         8000u   /* 滚球稳定单个目标位置的最长等待时间，超时后切换下一阶段，单位 ms。 */
@@ -46,6 +48,24 @@ ContestTaskContext_t ContestTaskContext;
 #define CONTEST_TASK2_CURVE1_FF_DIR            -1.0f   /* 赛题任务2第一个弯道前馈方向，方向反时改为 1.0f。 */
 #define CONTEST_TASK2_CURVE2_FF_DIR            -1.0f   /* 赛题任务2第二个弯道前馈方向，方向反时改为 1.0f。 */
 
+#define CONTEST_MERGED_AB_STRAIGHT1_DISTANCE_M 1.80f   /* 任务4 A->B 第一段直行目标里程，独立于任务5/6 A->A 调参。 */
+#define CONTEST_MERGED_AA_STRAIGHT1_DISTANCE_M 1.50f   /* 任务5/6 A->A 第一段直行目标里程，独立于任务4 A->B 调参。 */
+#define CONTEST_MERGED_CURVE1_DISTANCE_M       ((3.1416f * CONTEST_TASK2_CURVE_RADIUS_M) + 0.04f) /* 任务4/5/6第一个半圆弯道目标里程。 */
+#define CONTEST_MERGED_STRAIGHT2_DISTANCE_M    1.25f   /* 任务4/5/6第二段直行目标里程，独立于任务3调参。 */
+#define CONTEST_MERGED_CURVE2_DISTANCE_M       ((3.1416f * CONTEST_TASK2_CURVE_RADIUS_M) + 0.04f) /* 任务4/5/6第二个半圆弯道目标里程。 */
+#define CONTEST_MERGED_STOP_DISTANCE_M         5.72f   /* 任务4/5/6总里程停车位置，后续按任务4 AB/任务5 AA 分别微调。 */
+#define CONTEST_MERGED_STRAIGHT_SPEED          0.37f   /* 任务4/5/6直线段基础速度，单位 m/s。 */
+#define CONTEST_MERGED_CURVE_SPEED             0.25f   /* 任务4/5/6弯道循迹基础速度，单位 m/s。 */
+#define CONTEST_MERGED_ACCEL_LIMIT_MPS2        0.05f   /* 任务4/5/6慢启动加速度限制，单位 m/s^2；越小起步越柔和，0.08表示约2.75s升到0.22m/s。 */
+#define CONTEST_MERGED_STRAIGHT1_YAW_SCALE     0.35f   /* 任务4/5/6第一段直行 yaw/IMU 环输出比例。 */
+#define CONTEST_MERGED_STRAIGHT1_LINE_SCALE    0.65f   /* 任务4/5/6第一段直行红外循迹环输出比例。 */
+#define CONTEST_MERGED_STRAIGHT2_YAW_SCALE     0.70f   /* 任务4/5/6第二段直行 yaw/IMU 环输出比例。 */
+#define CONTEST_MERGED_STRAIGHT2_LINE_SCALE    0.30f   /* 任务4/5/6第二段直行红外循迹环输出比例。 */
+#define CONTEST_MERGED_CURVE_FF_DELTA          0.06f   /* 任务4/5/6弯道基础转向前馈差速，单位 m/s。 */
+#define CONTEST_MERGED_CURVE_FF_RAMP_M         0.40f   /* 任务4/5/6弯道前馈渐入里程，单位 m。 */
+#define CONTEST_MERGED_CURVE_FF_SCALE          0.60f   /* 任务4/5/6弯道前馈输出比例。 */
+#define CONTEST_MERGED_CURVE_LINE_SCALE        0.30f   /* 任务4/5/6弯道红外 PID 修正比例。 */
+
 #define CONTEST_TASK2_PHASE_IDLE               0       /* 赛题任务2状态机空闲阶段。 */
 #define CONTEST_TASK2_PHASE_STRAIGHT1          1       /* 赛题任务2第一段直行阶段。 */
 #define CONTEST_TASK2_PHASE_CURVE1             2       /* 赛题任务2第一个半圆弯道阶段。 */
@@ -53,7 +73,9 @@ ContestTaskContext_t ContestTaskContext;
 #define CONTEST_TASK2_PHASE_CURVE2             4       /* 赛题任务2第二个半圆弯道阶段，结束后停车。 */
 
 static void Contest_Task_Finish(void);
+static float Contest_Task_AbsFloat(float value);
 static float Contest_Task_LimitFloat(float value, float min_value, float max_value);
+static void Contest_Task2_PathStep(uint16_t period_ms);
 static void Contest_MergedTask_FailStop(void);
 static void Contest_MergedTask_Update(uint16_t period_ms);
 static void Contest_Task_DebugPrint(uint16_t period_ms);
@@ -79,6 +101,11 @@ static void Contest_Task_ResetRuntime(void)
     ContestTaskContext.phase_start_yaw_deg = 0.0f;
     ContestTaskContext.task2_phase = CONTEST_TASK2_PHASE_IDLE;
     ContestTaskContext.task3_phase = CONTEST_TASK3_PHASE_IDLE;
+    ContestTaskContext.merged_run_phase = CONTEST_MERGED_RUN_PRE_BALANCE;
+    ContestTaskContext.merged_pre_balance_ms = 0;
+    ContestTaskContext.merged_stable_hold_ms = 0;
+    ContestTaskContext.merged_motion_time_ms = 0;
+    ContestTaskContext.merged_motion_time_frozen_ms = 0;
     ContestTaskContext.merged_fail_stop = 0;
     Ball_Control_Enable(0);
     Ball_Control_Reset();
@@ -97,7 +124,9 @@ static uint8_t Contest_Task_IsExecutableTask(uint8_t task_id)
 
 static uint8_t Contest_Task_IsMergedTask(uint8_t task_id)
 {
-    return (task_id == CONTEST_TASK_5) ? 1 : 0;
+    return (task_id == CONTEST_TASK_5 ||
+            task_id == CONTEST_TASK_6 ||
+            task_id == CONTEST_TASK_7) ? 1 : 0;
 }
 
 static float Contest_Task_UpdateYaw(uint16_t period_ms)
@@ -105,10 +134,12 @@ static float Contest_Task_UpdateYaw(uint16_t period_ms)
     if(SysVal.HardWare_Ver == V1_0)
     {
         MPU6050_Get_Gyroscope();
+        MPU6050_Get_Accelscope();
     }
     else if(SysVal.HardWare_Ver == V1_1)
     {
         ICM20948_Get_Gyroscope();
+        ICM20948_Get_Accel();
     }
 
     ContestTaskContext.yaw_deg += ((float)imu.gyro.z / 65.5f) * ((float)period_ms / 1000.0f);
@@ -117,6 +148,28 @@ static float Contest_Task_UpdateYaw(uint16_t period_ms)
 
 static void Contest_Task_SetDiffTarget(float left, float right)
 {
+    float speed_ref;
+    float accel_limit_speed;
+    float start_scale;
+
+    if(Contest_Task_IsMergedTask(ContestTaskContext.running_task) &&
+       ContestTaskContext.merged_run_phase == CONTEST_MERGED_RUN_MOTION)
+    {
+        speed_ref = Contest_Task_AbsFloat(left);
+        if(Contest_Task_AbsFloat(right) > speed_ref)
+        {
+            speed_ref = Contest_Task_AbsFloat(right);
+        }
+
+        if(speed_ref > 0.001f)
+        {
+            accel_limit_speed = CONTEST_MERGED_ACCEL_LIMIT_MPS2 * ((float)ContestTaskContext.merged_motion_time_ms * 0.001f);
+            start_scale = Contest_Task_LimitFloat(accel_limit_speed / speed_ref, 0.0f, 1.0f);
+            left *= start_scale;
+            right *= start_scale;
+        }
+    }
+
     /* 赛题底盘固定为两轮差速：MotorD 左轮，MotorA 右轮。 */
     Move_X = (left + right) * 0.5f;
     Move_Y = 0.0f;
@@ -173,40 +226,53 @@ static float Contest_Task2_GetStraightDistance(void)
 {
     if(ContestTaskContext.task2_phase == CONTEST_TASK2_PHASE_STRAIGHT2)
     {
-        return CONTEST_TASK2_STRAIGHT2_DISTANCE_M;
+        return Contest_Task_IsMergedTask(ContestTaskContext.running_task) ?
+               CONTEST_MERGED_STRAIGHT2_DISTANCE_M : CONTEST_TASK2_STRAIGHT2_DISTANCE_M;
     }
 
-    return CONTEST_TASK2_STRAIGHT1_DISTANCE_M;
+    if(ContestTaskContext.running_task == CONTEST_TASK_5)
+    {
+        return CONTEST_MERGED_AB_STRAIGHT1_DISTANCE_M;
+    }
+
+    return Contest_Task_IsMergedTask(ContestTaskContext.running_task) ?
+           CONTEST_MERGED_AA_STRAIGHT1_DISTANCE_M : CONTEST_TASK2_STRAIGHT1_DISTANCE_M;
 }
 
 static float Contest_Task2_GetCurveDistance(void)
 {
     if(ContestTaskContext.task2_phase == CONTEST_TASK2_PHASE_CURVE2)
     {
-        return CONTEST_TASK2_CURVE2_DISTANCE_M;
+        return Contest_Task_IsMergedTask(ContestTaskContext.running_task) ?
+               CONTEST_MERGED_CURVE2_DISTANCE_M : CONTEST_TASK2_CURVE2_DISTANCE_M;
     }
 
-    return CONTEST_TASK2_CURVE1_DISTANCE_M;
+    return Contest_Task_IsMergedTask(ContestTaskContext.running_task) ?
+           CONTEST_MERGED_CURVE1_DISTANCE_M : CONTEST_TASK2_CURVE1_DISTANCE_M;
 }
 
 static float Contest_Task2_GetStraightYawScale(void)
 {
     if(ContestTaskContext.task2_phase == CONTEST_TASK2_PHASE_STRAIGHT2)
     {
-        return CONTEST_TASK2_STRAIGHT2_YAW_SCALE;
+        return Contest_Task_IsMergedTask(ContestTaskContext.running_task) ?
+               CONTEST_MERGED_STRAIGHT2_YAW_SCALE : CONTEST_TASK2_STRAIGHT2_YAW_SCALE;
     }
 
-    return CONTEST_TASK2_STRAIGHT1_YAW_SCALE;
+    return Contest_Task_IsMergedTask(ContestTaskContext.running_task) ?
+           CONTEST_MERGED_STRAIGHT1_YAW_SCALE : CONTEST_TASK2_STRAIGHT1_YAW_SCALE;
 }
 
 static float Contest_Task2_GetStraightLineScale(void)
 {
     if(ContestTaskContext.task2_phase == CONTEST_TASK2_PHASE_STRAIGHT2)
     {
-        return CONTEST_TASK2_STRAIGHT2_LINE_SCALE;
+        return Contest_Task_IsMergedTask(ContestTaskContext.running_task) ?
+               CONTEST_MERGED_STRAIGHT2_LINE_SCALE : CONTEST_TASK2_STRAIGHT2_LINE_SCALE;
     }
 
-    return CONTEST_TASK2_STRAIGHT1_LINE_SCALE;
+    return Contest_Task_IsMergedTask(ContestTaskContext.running_task) ?
+           CONTEST_MERGED_STRAIGHT1_LINE_SCALE : CONTEST_TASK2_STRAIGHT1_LINE_SCALE;
 }
 
 static float Contest_Task2_GetCurveFeedforwardDir(void)
@@ -222,20 +288,28 @@ static float Contest_Task2_GetCurveFeedforwardDir(void)
 static float Contest_Task2_GetCurveFeedforward(void)
 {
     float ramp_scale = 1.0f;
+    float ff_ramp_m = Contest_Task_IsMergedTask(ContestTaskContext.running_task) ?
+                      CONTEST_MERGED_CURVE_FF_RAMP_M : CONTEST_TASK2_CURVE_FF_RAMP_M;
+    float ff_delta = Contest_Task_IsMergedTask(ContestTaskContext.running_task) ?
+                     CONTEST_MERGED_CURVE_FF_DELTA : CONTEST_TASK2_CURVE_FF_DELTA;
 
-    if(CONTEST_TASK2_CURVE_FF_RAMP_M > 0.0f)
+    if(ff_ramp_m > 0.0f)
     {
-        ramp_scale = ContestTaskContext.phase_distance_m / CONTEST_TASK2_CURVE_FF_RAMP_M;
+        ramp_scale = ContestTaskContext.phase_distance_m / ff_ramp_m;
         ramp_scale = Contest_Task_LimitFloat(ramp_scale, 0.0f, 1.0f);
     }
 
-    return Contest_Task2_GetCurveFeedforwardDir() * CONTEST_TASK2_CURVE_FF_DELTA * ramp_scale;
+    return Contest_Task2_GetCurveFeedforwardDir() * ff_delta * ramp_scale;
 }
 
 static void Contest_Task_ApplyCurveTrackTarget(void)
 {
-    float line_pid_delta = TrackControlState.turn_delta_speed * CONTEST_TASK2_CURVE_LINE_SCALE;
-    float curve_ff_delta = Contest_Task2_GetCurveFeedforward() * CONTEST_TASK2_CURVE_FF_SCALE;
+    float curve_line_scale = Contest_Task_IsMergedTask(ContestTaskContext.running_task) ?
+                             CONTEST_MERGED_CURVE_LINE_SCALE : CONTEST_TASK2_CURVE_LINE_SCALE;
+    float curve_ff_scale = Contest_Task_IsMergedTask(ContestTaskContext.running_task) ?
+                           CONTEST_MERGED_CURVE_FF_SCALE : CONTEST_TASK2_CURVE_FF_SCALE;
+    float line_pid_delta = TrackControlState.turn_delta_speed * curve_line_scale;
+    float curve_ff_delta = Contest_Task2_GetCurveFeedforward() * curve_ff_scale;
     float mixed_delta = line_pid_delta + curve_ff_delta;
 
     TrackControlState.turn_delta_speed = mixed_delta;
@@ -276,9 +350,27 @@ static void Contest_Task_UpdatePhaseDistance(uint16_t period_ms)
     ContestTaskContext.total_distance_m += distance_delta_m;
 }
 
+static float Contest_Task2_GetStraightSpeed(void)
+{
+    return Contest_Task_IsMergedTask(ContestTaskContext.running_task) ?
+           CONTEST_MERGED_STRAIGHT_SPEED : CONTEST_TASK2_BASE_SPEED;
+}
+
+static float Contest_Task2_GetCurveSpeed(void)
+{
+    return Contest_Task_IsMergedTask(ContestTaskContext.running_task) ?
+           CONTEST_MERGED_CURVE_SPEED : CONTEST_TASK2_CURVE_SPEED;
+}
+
+static float Contest_Task2_GetStopDistance(void)
+{
+    return Contest_Task_IsMergedTask(ContestTaskContext.running_task) ?
+           CONTEST_MERGED_STOP_DISTANCE_M : CONTEST_TASK2_STOP_DISTANCE_M;
+}
+
 static uint8_t Contest_Task2_StopDistanceReached(void)
 {
-    return (ContestTaskContext.total_distance_m >= CONTEST_TASK2_STOP_DISTANCE_M) ? 1 : 0;
+    return (ContestTaskContext.total_distance_m >= Contest_Task2_GetStopDistance()) ? 1 : 0;
 }
 
 static void Contest_Task1_Update(uint16_t period_ms)
@@ -304,7 +396,7 @@ static void Contest_Task1_Update(uint16_t period_ms)
 static void Contest_Task2_StartCurve(uint8_t curve_phase)
 {
     Contest_Task_ResetPhase(curve_phase);
-    Track_Control_Start(TRACK_MODE_LAP_A, CONTEST_TASK2_CURVE_SPEED);
+    Track_Control_Start(TRACK_MODE_LAP_A, Contest_Task2_GetCurveSpeed());
     Track_Control_SetYawEnable(0); /* 任务3弯道调试：禁用公共 yaw 环，只保留红外线 PID。 */
     Track_Control_SetStopParam(0, 0, 0, TRACK_WIDE_STABLE_DEFAULT, TRACK_LOST_STOP_DEFAULT);
 }
@@ -340,8 +432,8 @@ static void Contest_Task2_UpdateStraight(uint16_t period_ms, uint8_t next_phase)
     TrackControlState.turn_delta_speed = line_delta * Contest_Task2_GetStraightLineScale();
     mixed_delta = TrackControlState.yaw_delta_speed + TrackControlState.turn_delta_speed;
 
-    Contest_Task_SetDiffTarget(CONTEST_TASK2_BASE_SPEED - mixed_delta,
-                                CONTEST_TASK2_BASE_SPEED + mixed_delta);
+    Contest_Task_SetDiffTarget(Contest_Task2_GetStraightSpeed() - mixed_delta,
+                                Contest_Task2_GetStraightSpeed() + mixed_delta);
 
     if(Contest_Task2_StopDistanceReached())
     {
@@ -351,6 +443,13 @@ static void Contest_Task2_UpdateStraight(uint16_t period_ms, uint8_t next_phase)
 
     if(ContestTaskContext.phase_distance_m >= Contest_Task2_GetStraightDistance())
     {
+        if(ContestTaskContext.running_task == CONTEST_TASK_5 &&
+           ContestTaskContext.task2_phase == CONTEST_TASK2_PHASE_STRAIGHT1)
+        {
+            Contest_Task_Finish();
+            return;
+        }
+
         Contest_Task2_StartCurve(next_phase);
     }
 }
@@ -374,7 +473,15 @@ static void Contest_Task2_UpdateCurve(uint16_t period_ms, uint8_t next_phase)
 
     if(Track_Control_IsStopRequested())
     {
-        Contest_Task_Finish();
+        if(Contest_Task_IsMergedTask(ContestTaskContext.running_task) &&
+           TrackControlState.stop_reason == TRACK_STOP_BY_TIMEOUT)
+        {
+            Contest_MergedTask_FailStop();
+        }
+        else
+        {
+            Contest_Task_Finish();
+        }
         return;
     }
 
@@ -404,7 +511,15 @@ static void Contest_Task2_UpdateFinalCurve(uint16_t period_ms)
 
     if(Track_Control_IsStopRequested())
     {
-        Contest_Task_Finish();
+        if(Contest_Task_IsMergedTask(ContestTaskContext.running_task) &&
+           TrackControlState.stop_reason == TRACK_STOP_BY_TIMEOUT)
+        {
+            Contest_MergedTask_FailStop();
+        }
+        else
+        {
+            Contest_Task_Finish();
+        }
         return;
     }
 
@@ -454,45 +569,89 @@ static void Contest_Task_UpdateTrack(uint16_t period_ms)
     }
 }
 
-static void Contest_MergedTask_StartTrack(void)
+static void Contest_MergedTask_LoadConfig(void)
 {
-    float target_0p1mm = (float)ContestTaskContext.merged_balance_cm * 100.0f;
+    if(ContestTaskContext.running_task == CONTEST_TASK_5)
+    {
+        ContestTaskContext.merged_track_mode = CONTEST_MERGED_TRACK_MODE_AB;
+        ContestTaskContext.merged_balance_cm = 0;
+    }
+    else if(ContestTaskContext.running_task == CONTEST_TASK_6)
+    {
+        ContestTaskContext.merged_track_mode = CONTEST_MERGED_TRACK_MODE_AA;
+        ContestTaskContext.merged_balance_cm = 0;
+    }
+    else
+    {
+        ContestTaskContext.merged_track_mode = CONTEST_MERGED_TRACK_MODE_AA;
+        ContestTaskContext.merged_balance_cm = ContestTaskContext.merged_task6_target_cm;
+    }
+}
+
+static uint32_t Contest_MergedTask_GetMotionTimeoutMs(void)
+{
+    return (ContestTaskContext.running_task == CONTEST_TASK_5) ?
+           CONTEST_MERGED_AB_TIMEOUT_MS : CONTEST_MERGED_AA_TIMEOUT_MS;
+}
+
+static void Contest_MergedTask_FreezeMotionTime(void)
+{
+    ContestTaskContext.merged_motion_time_frozen_ms = ContestTaskContext.merged_motion_time_ms;
+}
+
+static uint8_t Contest_MergedTask_IsTrackFailsafeStop(void)
+{
+    if(Track_Control_IsStopRequested() == 0)
+    {
+        return 0;
+    }
+
+    return (TrackControlState.stop_reason == TRACK_STOP_BY_TIMEOUT) ? 1 : 0;
+}
+
+static void Contest_MergedTask_StartPreBalance(void)
+{
+    float target_0p1mm;
+
+    Contest_MergedTask_LoadConfig();
+    target_0p1mm = (float)ContestTaskContext.merged_balance_cm * 100.0f;
 
     ContestTaskContext.phase_time_ms = 0;
     ContestTaskContext.phase_distance_m = 0.0f;
     ContestTaskContext.total_distance_m = 0.0f;
     ContestTaskContext.yaw_deg = 0.0f;
     ContestTaskContext.phase_start_yaw_deg = 0.0f;
+    ContestTaskContext.merged_run_phase = CONTEST_MERGED_RUN_PRE_BALANCE;
+    ContestTaskContext.merged_pre_balance_ms = 0;
+    ContestTaskContext.merged_stable_hold_ms = 0;
+    ContestTaskContext.merged_motion_time_ms = 0;
+    ContestTaskContext.merged_motion_time_frozen_ms = 0;
     ContestTaskContext.merged_fail_stop = 0;
 
+    Track_Control_Stop(TRACK_STOP_BY_USER);
     Ball_Control_Reset();
     Ball_Control_SetTarget(target_0p1mm);
     Ball_Control_Enable(1);
+    Contest_Task_ClearMotion();
+}
 
-    if(ContestTaskContext.merged_track_mode == CONTEST_MERGED_TRACK_MODE_AA)
-    {
-        Track_Control_Start(TRACK_MODE_LAP_A, CONTEST_MERGED_BASE_SPEED);
-        Track_Control_SetStopParam(CONTEST_MERGED_AA_MIN_RUN_MS,
-                                    CONTEST_MERGED_AA_TIMEOUT_MS,
-                                    CONTEST_MERGED_AA_TIMEOUT_MS,
-                                    TRACK_WIDE_STABLE_DEFAULT,
-                                    TRACK_LOST_STOP_DEFAULT);
-    }
-    else
-    {
-        Track_Control_Start(TRACK_MODE_AB, CONTEST_MERGED_BASE_SPEED);
-        Track_Control_SetStopParam(CONTEST_MERGED_AB_MIN_RUN_MS,
-                                    CONTEST_MERGED_AB_TIMEOUT_MS,
-                                    CONTEST_MERGED_AB_TIMEOUT_MS,
-                                    TRACK_WIDE_STABLE_DEFAULT,
-                                    TRACK_LOST_STOP_DEFAULT);
-    }
+static void Contest_MergedTask_StartMotion(void)
+{
+    Contest_Task_ResetPhase(CONTEST_TASK2_PHASE_STRAIGHT1);
+    ContestTaskContext.total_distance_m = 0.0f;
+    ContestTaskContext.yaw_deg = 0.0f;
+    ContestTaskContext.phase_start_yaw_deg = 0.0f;
+    ContestTaskContext.merged_motion_time_ms = 0;
+    ContestTaskContext.merged_motion_time_frozen_ms = 0;
+    ContestTaskContext.merged_run_phase = CONTEST_MERGED_RUN_MOTION;
 }
 
 static void Contest_MergedTask_FailStop(void)
 {
+    Contest_MergedTask_FreezeMotionTime();
     ContestTaskContext.finished_task = ContestTaskContext.running_task;
-    ContestTaskContext.finished_time_ms = ContestTaskContext.state_time_ms;
+    ContestTaskContext.finished_time_ms = ContestTaskContext.merged_motion_time_frozen_ms;
+    ContestTaskContext.merged_run_phase = CONTEST_MERGED_RUN_FAIL;
     ContestTaskContext.merged_fail_stop = 1;
     ContestTaskContext.merged_config_state = CONTEST_MERGED_CFG_FAIL_STOP;
     ContestTaskContext.state = CONTEST_STATE_IDLE;
@@ -506,37 +665,102 @@ static void Contest_MergedTask_FailStop(void)
 
 static void Contest_MergedTask_Update(uint16_t period_ms)
 {
-    float yaw_deg;
-    float abs_error;
-    float speed_scale;
-
     switch(ContestTaskContext.state)
     {
         case CONTEST_STATE_START:
-            Contest_MergedTask_StartTrack();
+            Contest_MergedTask_StartPreBalance();
             ContestTaskContext.state = CONTEST_STATE_TRACK;
             ContestTaskContext.merged_config_state = CONTEST_MERGED_CFG_RUNNING;
             break;
 
         case CONTEST_STATE_TRACK:
-            ContestTaskContext.phase_time_ms += period_ms;
-            yaw_deg = Contest_Task_UpdateYaw(period_ms);
-
-            Track_Control_Update(period_ms, yaw_deg);
-            Ball_Control_Update(period_ms);
-
-            if(Track_Control_IsStopRequested() || Ball_Control_IsLost())
+            if(ContestTaskContext.merged_run_phase == CONTEST_MERGED_RUN_PRE_BALANCE)
             {
-                Contest_MergedTask_FailStop();
-                return;
+                ContestTaskContext.phase_time_ms += period_ms;
+                ContestTaskContext.merged_pre_balance_ms += period_ms;
+                Ball_Control_Update(period_ms);
+                Contest_Task_ClearMotion();
+
+                if(Ball_Control_IsStable())
+                {
+                    ContestTaskContext.merged_stable_hold_ms += period_ms;
+                }
+                else
+                {
+                    ContestTaskContext.merged_stable_hold_ms = 0;
+                }
+
+                if(ContestTaskContext.merged_stable_hold_ms >= CONTEST_MERGED_PRE_BALANCE_HOLD_MS)
+                {
+                    Contest_MergedTask_StartMotion();
+                    break;
+                }
+
+                if(ContestTaskContext.merged_pre_balance_ms >= CONTEST_MERGED_PRE_BALANCE_TIMEOUT_MS)
+                {
+                    Contest_MergedTask_FailStop();
+                    return;
+                }
+                break;
             }
 
-            abs_error = Ball_Control_GetAbsError();
-            speed_scale = 1.0f - (abs_error / CONTEST_MERGED_SLOW_ERR_0P1MM);
-            Contest_Task_ApplyTrackTargetScale(speed_scale);
+            if(ContestTaskContext.merged_run_phase == CONTEST_MERGED_RUN_MOTION)
+            {
+                ContestTaskContext.merged_motion_time_ms += period_ms;
+                if(ContestTaskContext.merged_motion_time_ms >= Contest_MergedTask_GetMotionTimeoutMs())
+                {
+                    Contest_MergedTask_FailStop();
+                    return;
+                }
+
+                Contest_Task2_PathStep(period_ms);
+                if(ContestTaskContext.state != CONTEST_STATE_TRACK)
+                {
+                    return;
+                }
+
+                if(Contest_MergedTask_IsTrackFailsafeStop())
+                {
+                    Contest_MergedTask_FailStop();
+                    return;
+                }
+
+                Ball_Control_Update(period_ms);
+            }
             break;
 
         default:
+            break;
+    }
+}
+
+static void Contest_Task2_PathStart(void)
+{
+    Contest_Task_ResetPhase(CONTEST_TASK2_PHASE_STRAIGHT1);
+}
+
+static void Contest_Task2_PathStep(uint16_t period_ms)
+{
+    switch(ContestTaskContext.task2_phase)
+    {
+        case CONTEST_TASK2_PHASE_STRAIGHT1:
+            Contest_Task2_UpdateStraight(period_ms, CONTEST_TASK2_PHASE_CURVE1);
+            break;
+
+        case CONTEST_TASK2_PHASE_CURVE1:
+            Contest_Task2_UpdateCurve(period_ms, CONTEST_TASK2_PHASE_STRAIGHT2);
+            break;
+
+        case CONTEST_TASK2_PHASE_STRAIGHT2:
+            Contest_Task2_UpdateStraight(period_ms, CONTEST_TASK2_PHASE_CURVE2);
+            break;
+
+        case CONTEST_TASK2_PHASE_CURVE2:
+            Contest_Task2_UpdateFinalCurve(period_ms);
+            break;
+
+        default:
+            Contest_Task2_PathStart();
             break;
     }
 }
@@ -546,33 +770,12 @@ static void Contest_Task2_Update(uint16_t period_ms)
     switch(ContestTaskContext.state)
     {
         case CONTEST_STATE_START:
-            Contest_Task_ResetPhase(CONTEST_TASK2_PHASE_STRAIGHT1);
+            Contest_Task2_PathStart();
             ContestTaskContext.state = CONTEST_STATE_TRACK;
             break;
 
         case CONTEST_STATE_TRACK:
-            switch(ContestTaskContext.task2_phase)
-            {
-                case CONTEST_TASK2_PHASE_STRAIGHT1:
-                    Contest_Task2_UpdateStraight(period_ms, CONTEST_TASK2_PHASE_CURVE1);
-                    break;
-
-                case CONTEST_TASK2_PHASE_CURVE1:
-                    Contest_Task2_UpdateCurve(period_ms, CONTEST_TASK2_PHASE_STRAIGHT2);
-                    break;
-
-                case CONTEST_TASK2_PHASE_STRAIGHT2:
-                    Contest_Task2_UpdateStraight(period_ms, CONTEST_TASK2_PHASE_CURVE2);
-                    break;
-
-                case CONTEST_TASK2_PHASE_CURVE2:
-                    Contest_Task2_UpdateFinalCurve(period_ms);
-                    break;
-
-                default:
-                    Contest_Task_ResetPhase(CONTEST_TASK2_PHASE_STRAIGHT1);
-                    break;
-            }
+            Contest_Task2_PathStep(period_ms);
             break;
 
         default:
@@ -679,7 +882,9 @@ void Contest_Task_Init(void)
     ContestTaskContext.state = CONTEST_STATE_IDLE;
     ContestTaskContext.merged_config_state = CONTEST_MERGED_CFG_IDLE;
     ContestTaskContext.merged_track_mode = CONTEST_MERGED_TRACK_MODE_AB;
+    ContestTaskContext.merged_run_phase = CONTEST_MERGED_RUN_PRE_BALANCE;
     ContestTaskContext.merged_balance_cm = CONTEST_MERGED_BALANCE_DEFAULT_CM;
+    ContestTaskContext.merged_task6_target_cm = CONTEST_MERGED_BALANCE_DEFAULT_CM;
     ContestTaskContext.merged_fail_stop = 0;
     Contest_Task_ResetRuntime();
     OLED_Clear();
@@ -701,7 +906,24 @@ void Contest_Task_Select(uint8_t task_id)
     ContestTaskContext.finished_task = CONTEST_TASK_NONE;
     ContestTaskContext.finished_time_ms = 0;
     ContestTaskContext.merged_config_state = CONTEST_MERGED_CFG_IDLE;
+    ContestTaskContext.merged_run_phase = CONTEST_MERGED_RUN_PRE_BALANCE;
     ContestTaskContext.merged_fail_stop = 0;
+
+    if(task_id == CONTEST_TASK_5)
+    {
+        ContestTaskContext.merged_track_mode = CONTEST_MERGED_TRACK_MODE_AB;
+        ContestTaskContext.merged_balance_cm = 0;
+    }
+    else if(task_id == CONTEST_TASK_6)
+    {
+        ContestTaskContext.merged_track_mode = CONTEST_MERGED_TRACK_MODE_AA;
+        ContestTaskContext.merged_balance_cm = 0;
+    }
+    else if(task_id == CONTEST_TASK_7)
+    {
+        ContestTaskContext.merged_track_mode = CONTEST_MERGED_TRACK_MODE_AA;
+        ContestTaskContext.merged_balance_cm = ContestTaskContext.merged_task6_target_cm;
+    }
 }
 
 void Contest_Task_StartSelected(void)
@@ -731,23 +953,16 @@ void Contest_Task_KeyAction(uint8_t key_action)
             return;
         }
 
-        if(Contest_Task_IsMergedTask(ContestTaskContext.selected_task))
+        if(ContestTaskContext.selected_task == CONTEST_TASK_7 &&
+           ContestTaskContext.merged_config_state == CONTEST_MERGED_CFG_BALANCE_SELECT)
         {
-            if(ContestTaskContext.merged_config_state == CONTEST_MERGED_CFG_MODE_SELECT)
+            ContestTaskContext.merged_task6_target_cm += CONTEST_MERGED_BALANCE_STEP_CM;
+            if(ContestTaskContext.merged_task6_target_cm > CONTEST_MERGED_BALANCE_MAX_CM)
             {
-                ContestTaskContext.merged_track_mode = (ContestTaskContext.merged_track_mode == CONTEST_MERGED_TRACK_MODE_AB) ?
-                                                       CONTEST_MERGED_TRACK_MODE_AA : CONTEST_MERGED_TRACK_MODE_AB;
-                return;
+                ContestTaskContext.merged_task6_target_cm = CONTEST_MERGED_BALANCE_MIN_CM;
             }
-            if(ContestTaskContext.merged_config_state == CONTEST_MERGED_CFG_BALANCE_SELECT)
-            {
-                ContestTaskContext.merged_balance_cm += CONTEST_MERGED_BALANCE_STEP_CM;
-                if(ContestTaskContext.merged_balance_cm > CONTEST_MERGED_BALANCE_MAX_CM)
-                {
-                    ContestTaskContext.merged_balance_cm = CONTEST_MERGED_BALANCE_MIN_CM;
-                }
-                return;
-            }
+            ContestTaskContext.merged_balance_cm = ContestTaskContext.merged_task6_target_cm;
+            return;
         }
 
         next_task = ContestTaskContext.selected_task + 1;
@@ -765,18 +980,14 @@ void Contest_Task_KeyAction(uint8_t key_action)
             return;
         }
 
-        if(Contest_Task_IsMergedTask(ContestTaskContext.selected_task))
+        if(ContestTaskContext.selected_task == CONTEST_TASK_7)
         {
             if(ContestTaskContext.merged_config_state == CONTEST_MERGED_CFG_IDLE ||
                ContestTaskContext.merged_config_state == CONTEST_MERGED_CFG_FAIL_STOP)
             {
-                ContestTaskContext.merged_config_state = CONTEST_MERGED_CFG_MODE_SELECT;
-                ContestTaskContext.merged_fail_stop = 0;
-                return;
-            }
-            if(ContestTaskContext.merged_config_state == CONTEST_MERGED_CFG_MODE_SELECT)
-            {
                 ContestTaskContext.merged_config_state = CONTEST_MERGED_CFG_BALANCE_SELECT;
+                ContestTaskContext.merged_balance_cm = ContestTaskContext.merged_task6_target_cm;
+                ContestTaskContext.merged_fail_stop = 0;
                 return;
             }
             if(ContestTaskContext.merged_config_state == CONTEST_MERGED_CFG_BALANCE_SELECT ||
@@ -805,6 +1016,8 @@ void Contest_Task_Stop(void)
     ContestTaskContext.task3_phase = CONTEST_TASK3_PHASE_IDLE;
     if(ContestTaskContext.merged_config_state == CONTEST_MERGED_CFG_RUNNING)
     {
+        Contest_MergedTask_FreezeMotionTime();
+        ContestTaskContext.merged_run_phase = CONTEST_MERGED_RUN_FINISH;
         ContestTaskContext.merged_config_state = CONTEST_MERGED_CFG_READY;
     }
 }
@@ -816,6 +1029,9 @@ static void Contest_Task_Finish(void)
     ContestTaskContext.state = CONTEST_STATE_FINISH;
     if(Contest_Task_IsMergedTask(ContestTaskContext.running_task))
     {
+        Contest_MergedTask_FreezeMotionTime();
+        ContestTaskContext.finished_time_ms = ContestTaskContext.merged_motion_time_frozen_ms;
+        ContestTaskContext.merged_run_phase = CONTEST_MERGED_RUN_FINISH;
         ContestTaskContext.merged_config_state = CONTEST_MERGED_CFG_READY;
     }
     Track_Control_Stop(TRACK_STOP_BY_USER);
@@ -836,8 +1052,11 @@ static void Contest_Task_DebugPrint(uint16_t period_ms)
     }
     debug_time_ms = 0;
 
-    printf("%.2f,%c%c%c%c%c%c%c%c%c\n",
+    printf("%.2f,%d,%d,%d,%c%c%c%c%c%c%c%c%c\n",
            ContestTaskContext.yaw_deg,
+           imu.accel.x,
+           imu.accel.y,
+           imu.accel.z,
            (mask & (1u << 8)) ? '1' : '0',
            (mask & (1u << 7)) ? '1' : '0',
            (mask & (1u << 6)) ? '1' : '0',
@@ -878,6 +1097,8 @@ void Contest_Task_Update(uint16_t period_ms)
             Contest_Task3_Update(period_ms);
             break;
         case CONTEST_TASK_5:
+        case CONTEST_TASK_6:
+        case CONTEST_TASK_7:
             Contest_Task5_Update(period_ms);
             break;
         default:
@@ -938,7 +1159,7 @@ static void Contest_Task_OLEDShowSigned6(u8 x, u8 y, float value, uint16_t scale
 
 static void Contest_Task_OLEDShowBallDebug(uint32_t show_time)
 {
-    Contest_Task_OLEDShowText6(0, 0, (const u8 *)"BALL T4");
+    Contest_Task_OLEDShowText6(0, 0, (const u8 *)"BALL 0+5-5");
     Contest_Task_OLEDShowText6(54, 0, (const u8 *)"TIME");
     Contest_Task_OLEDShowNumber6(84, 0, show_time / 1000, 3);
     Contest_Task_OLEDShowText6(108, 0, (const u8 *)"s");
@@ -1008,19 +1229,29 @@ static void Contest_Task_OLEDShowMergedMode(u8 x, u8 y)
 
 static void Contest_Task_OLEDShowMergedCfg(void)
 {
-    Contest_Task_OLEDShowText6(0, 0, (const u8 *)"MERGED CFG");
+    if(ContestTaskContext.selected_task == CONTEST_TASK_5)
+    {
+        Contest_Task_OLEDShowText6(0, 0, (const u8 *)"T4 AB BAL0");
+    }
+    else if(ContestTaskContext.selected_task == CONTEST_TASK_6)
+    {
+        Contest_Task_OLEDShowText6(0, 0, (const u8 *)"T5 AA BAL0");
+    }
+    else
+    {
+        Contest_Task_OLEDShowText6(0, 0, (const u8 *)"T6 AA BAL");
+    }
     Contest_Task_OLEDShowText6(72, 0, (const u8 *)"T");
     Contest_Task_OLEDShowNumber6(84, 0, ContestTaskContext.selected_task, 1);
 
-    Contest_Task_OLEDShowText6(0, 13, (const u8 *)"MODE");
+    Contest_Task_OLEDShowText6(0, 13, (const u8 *)"PATH");
     Contest_Task_OLEDShowMergedMode(36, 13);
-    if(ContestTaskContext.merged_config_state == CONTEST_MERGED_CFG_MODE_SELECT)
-    {
-        Contest_Task_OLEDShowText6(60, 13, (const u8 *)"<SEL");
-    }
+    Contest_Task_OLEDShowText6(60, 13, (const u8 *)"BAL");
+    Contest_Task_OLEDShowSigned6(84, 13, (float)ContestTaskContext.merged_balance_cm, 1, 2);
+    Contest_Task_OLEDShowText6(108, 13, (const u8 *)"cm");
 
-    Contest_Task_OLEDShowText6(0, 26, (const u8 *)"BAL");
-    Contest_Task_OLEDShowSigned6(30, 26, (float)ContestTaskContext.merged_balance_cm, 1, 2);
+    Contest_Task_OLEDShowText6(0, 26, (const u8 *)"SEL");
+    Contest_Task_OLEDShowSigned6(30, 26, (float)ContestTaskContext.merged_task6_target_cm, 1, 2);
     Contest_Task_OLEDShowText6(54, 26, (const u8 *)"cm");
     if(ContestTaskContext.merged_config_state == CONTEST_MERGED_CFG_BALANCE_SELECT)
     {
@@ -1032,21 +1263,17 @@ static void Contest_Task_OLEDShowMergedCfg(void)
     Contest_Task_OLEDShowText6(42, 39, (const u8 *)"FAIL");
     Contest_Task_OLEDShowNumber6(72, 39, ContestTaskContext.merged_fail_stop, 1);
 
-    if(ContestTaskContext.merged_config_state == CONTEST_MERGED_CFG_IDLE)
-    {
-        Contest_Task_OLEDShowText6(0, 52, (const u8 *)"L:CFG S:TASK");
-    }
-    else if(ContestTaskContext.merged_config_state == CONTEST_MERGED_CFG_MODE_SELECT)
-    {
-        Contest_Task_OLEDShowText6(0, 52, (const u8 *)"S:MODE L:OK");
-    }
-    else if(ContestTaskContext.merged_config_state == CONTEST_MERGED_CFG_BALANCE_SELECT)
+    if(ContestTaskContext.merged_config_state == CONTEST_MERGED_CFG_BALANCE_SELECT)
     {
         Contest_Task_OLEDShowText6(0, 52, (const u8 *)"S:BAL  L:RUN");
     }
+    else if(ContestTaskContext.selected_task == CONTEST_TASK_7)
+    {
+        Contest_Task_OLEDShowText6(0, 52, (const u8 *)"L:BAL S:TASK");
+    }
     else
     {
-        Contest_Task_OLEDShowText6(0, 52, (const u8 *)"L:RUN  S:TASK");
+        Contest_Task_OLEDShowText6(0, 52, (const u8 *)"L:RUN S:TASK");
     }
     OLED_Refresh_Gram();
 }
@@ -1075,13 +1302,21 @@ static void Contest_Task_OLEDShowMergedRun(uint32_t show_time)
     Contest_Task_OLEDShowText6(90, 39, (const u8 *)"F");
     Contest_Task_OLEDShowNumber6(102, 39, ContestTaskContext.merged_fail_stop, 1);
 
-    Contest_Task_OLEDShowText6(0, 52, (const u8 *)"L:STOP FAILSAFE");
+    if((ContestTaskContext.finished_time_ms != 0) &&
+       (ContestTaskContext.merged_run_phase == CONTEST_MERGED_RUN_FINISH))
+    {
+        Contest_Task_OLEDShowText6(0, 52, (const u8 *)"FINISH TIME SAVED");
+    }
+    else
+    {
+        Contest_Task_OLEDShowText6(0, 52, (const u8 *)"L:STOP FAILSAFE");
+    }
     OLED_Refresh_Gram();
 }
 
 static void Contest_Task_OLEDShowTask3Run(uint32_t show_time)
 {
-    Contest_Task_OLEDShowText6(0, 0, (const u8 *)"T3 T");
+    Contest_Task_OLEDShowText6(0, 0, (const u8 *)"TRACK T2");
     Contest_Task_OLEDShowNumber6(24, 0, show_time / 1000, 3);
     Contest_Task_OLEDShowText6(42, 0, (const u8 *)".");
     Contest_Task_OLEDShowNumber6(48, 0, (show_time % 1000) / 100, 1);
@@ -1145,7 +1380,7 @@ void Contest_Task_OLEDShow(void)
     if(Contest_Task_IsRunning())
     {
         task_id = ContestTaskContext.running_task;
-        show_time = ContestTaskContext.state_time_ms;
+        show_time = Contest_Task_IsMergedTask(task_id) ? ContestTaskContext.merged_motion_time_ms : ContestTaskContext.state_time_ms;
     }
     else if(ContestTaskContext.finished_time_ms != 0)
     {
@@ -1185,6 +1420,7 @@ void Contest_Task_OLEDShow(void)
     if(Contest_Task_IsMergedTask(task_id))
     {
         if(Contest_Task_IsRunning() ||
+           ContestTaskContext.finished_time_ms != 0 ||
            ContestTaskContext.merged_config_state == CONTEST_MERGED_CFG_RUNNING ||
            ContestTaskContext.merged_config_state == CONTEST_MERGED_CFG_FAIL_STOP)
         {

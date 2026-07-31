@@ -209,12 +209,6 @@ static void Track_Control_UpdateStopJudge(void)
         return;
     }
 
-    if(TrackIrState.lost_count >= TrackControlState.stop_param.lost_stop_count)
-    {
-        Track_Control_Stop(TRACK_STOP_BY_LOST_LINE);
-        return;
-    }
-
     wide_line_stable = Track_IR_IsWideLine(&TrackIrState, TrackControlState.stop_param.wide_stable_count);
 
     if((TrackControlState.stop_param.window_end_ms > TrackControlState.stop_param.window_start_ms) &&

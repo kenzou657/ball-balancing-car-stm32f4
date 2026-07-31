@@ -7,7 +7,7 @@
 #define BALL_TARGET_POSITIVE_5CM_0P1MM        500.0f
 #define BALL_TARGET_NEGATIVE_5CM_0P1MM       (-500.0f)
 
-#define BALL_SERVO_DEFAULT_MID_US             1350.0f
+#define BALL_SERVO_DEFAULT_MID_US             1500.0f
 #define BALL_SERVO_DEFAULT_MIN_US             1000.0f
 #define BALL_SERVO_DEFAULT_MAX_US             2000.0f
 #define BALL_SERVO_DEFAULT_US_PER_DEG         11.11f

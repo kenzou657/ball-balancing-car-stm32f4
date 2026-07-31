@@ -53,9 +53,7 @@ static int16_t Ball_Control_GetImuAccelByAxis(uint8_t axis)
 
 static void Ball_Control_UpdateStableJudge(void)
 {
-    if(Ball_Control_AbsFloat(BallControlState.error_0p1mm) <= (float)BallControlParam.stable_error_0p1mm &&
-       Ball_Control_AbsFloat(BallControlState.position_speed_0p1mm_per_s) <= (float)BallControlParam.stable_speed_0p1mm_per_s &&
-       BallControlState.ball_lost == 0)
+    if(Ball_Control_AbsFloat(BallControlState.error_0p1mm) <= (float)BallControlParam.stable_error_0p1mm)
     {
         if(BallControlState.stable_count < BallControlParam.stable_count_required)
         {
@@ -74,7 +72,7 @@ void Ball_Control_Init(void)
     BallControlParam.kp = 0.025f;
     BallControlParam.ki = 0.010f;
     BallControlParam.kd = 0.010f;
-    BallControlParam.kf = 0.000f;
+    BallControlParam.kf = 6.700f;
     BallControlParam.integral_limit = 3000.0f;
     BallControlParam.angle_limit_deg = 25.0f;
     BallControlParam.deadband_deg = 1.0f;
@@ -85,7 +83,7 @@ void Ball_Control_Init(void)
     BallControlParam.us_per_degree = BALL_SERVO_DEFAULT_US_PER_DEG;
     BallControlParam.servo_dir = BALL_SERVO_DEFAULT_DIR;
     BallControlParam.vision_timeout_ms = 200;
-    BallControlParam.stable_error_0p1mm = 100;
+    BallControlParam.stable_error_0p1mm = 120;
     BallControlParam.stable_speed_0p1mm_per_s = 300;
     BallControlParam.stable_count_required = 50;
 
@@ -145,8 +143,6 @@ void Ball_Control_SetVisionPosition(int16_t pos_0p1mm)
 void Ball_Control_SetVisionLost(void)
 {
     BallControlState.online = 1;
-    BallControlState.ball_lost = 1;
-    BallControlState.stable_count = 0;
 }
 
 void Ball_Control_SetVisionHeartbeat(void)
@@ -179,26 +175,8 @@ void Ball_Control_Update(uint16_t period_ms)
         return;
     }
 
-    if(BallControlState.online == 0 || BallControlState.ball_lost != 0)
-    {
-        if(BallControlState.lost_count < 60000)
-        {
-            BallControlState.lost_count += period_ms;
-        }
-    }
-    else
-    {
-        BallControlState.lost_count = 0;
-    }
-
-    if(BallControlState.lost_count >= BallControlParam.vision_timeout_ms)
-    {
-        BallControlState.ball_lost = 1;
-        BallControlState.stable_count = 0;
-        Ball_Control_StopSafe();
-        return;
-    }
-
+    BallControlState.ball_lost = 0;
+    BallControlState.lost_count = 0;
     BallControlState.safe_mode = 0;
     raw_pos = (float)BallControlState.raw_pos_0p1mm;
     last_filtered_pos = BallControlState.filtered_pos_0p1mm;
@@ -277,7 +255,7 @@ uint8_t Ball_Control_IsStable(void)
 
 uint8_t Ball_Control_IsLost(void)
 {
-    return (BallControlState.ball_lost != 0) ? 1 : 0;
+    return 0;
 }
 
 float Ball_Control_GetAbsError(void)
