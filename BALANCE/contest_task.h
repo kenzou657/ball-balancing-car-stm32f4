@@ -4,13 +4,12 @@
 #include "sys.h"
 
 #define CONTEST_TASK_NONE             0
-#define CONTEST_TASK_1                1
-#define CONTEST_TASK_2                2
-#define CONTEST_TASK_3                3
-#define CONTEST_TASK_4                4
-#define CONTEST_TASK_5                5
-#define CONTEST_TASK_6                6
-#define CONTEST_TASK_SERVO_DEBUG      7
+#define CONTEST_TASK_1                1   /* 电机调试 */
+#define CONTEST_TASK_2                2   /* 舵机调试 */
+#define CONTEST_TASK_3                3   /* 赛题任务2：整圈循迹 */
+#define CONTEST_TASK_4                4   /* 赛题任务3：-5/+5 稳定切换 */
+#define CONTEST_TASK_5                5   /* 赛题任务4/5/6：循迹 + 滚球合并任务 */
+#define CONTEST_TASK_MAX              CONTEST_TASK_5
 
 #define CONTEST_TRACK_PERIOD_MS       10
 

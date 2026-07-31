@@ -71,20 +71,12 @@ static void Contest_Task_ResetRuntime(void)
 
 static uint8_t Contest_Task_IsExecutableTask(uint8_t task_id)
 {
-    return (task_id == CONTEST_TASK_1 ||
-            task_id == CONTEST_TASK_2 ||
-            task_id == CONTEST_TASK_3 ||
-            task_id == CONTEST_TASK_4 ||
-            task_id == CONTEST_TASK_5 ||
-            task_id == CONTEST_TASK_6 ||
-            task_id == CONTEST_TASK_SERVO_DEBUG) ? 1 : 0;
+    return (task_id >= CONTEST_TASK_1 && task_id <= CONTEST_TASK_MAX) ? 1 : 0;
 }
 
 static uint8_t Contest_Task_IsMergedTask(uint8_t task_id)
 {
-    return (task_id == CONTEST_TASK_4 ||
-            task_id == CONTEST_TASK_5 ||
-            task_id == CONTEST_TASK_6) ? 1 : 0;
+    return (task_id == CONTEST_TASK_5) ? 1 : 0;
 }
 
 static float Contest_Task_UpdateYaw(uint16_t period_ms)
@@ -282,24 +274,14 @@ static void Contest_Task_StartTrack(uint8_t task_id)
 {
     switch(task_id)
     {
-        case CONTEST_TASK_2:
+        case CONTEST_TASK_3:
             Track_Control_Start(TRACK_MODE_LAP_A, 0.30f);
             Track_Control_SetStopParam(3000, 25000, 30000, TRACK_WIDE_STABLE_DEFAULT, TRACK_LOST_STOP_DEFAULT);
-            break;
-
-        case CONTEST_TASK_4:
-            Track_Control_Start(TRACK_MODE_AB, 0.32f);
-            Track_Control_SetStopParam(2000, 20000, 25000, TRACK_WIDE_STABLE_DEFAULT, TRACK_LOST_STOP_DEFAULT);
             break;
 
         case CONTEST_TASK_5:
             Track_Control_Start(TRACK_MODE_AB, 0.28f);
             Track_Control_SetStopParam(2000, 25000, 30000, TRACK_WIDE_STABLE_DEFAULT, TRACK_LOST_STOP_DEFAULT);
-            break;
-
-        case CONTEST_TASK_6:
-            Track_Control_Start(TRACK_MODE_AB, 0.25f);
-            Track_Control_SetStopParam(2000, 30000, 35000, TRACK_WIDE_STABLE_DEFAULT, TRACK_LOST_STOP_DEFAULT);
             break;
 
         default:
@@ -535,17 +517,7 @@ static void Contest_TaskServoDebug_Update(uint16_t period_ms)
     }
 }
 
-static void Contest_Task4_Update(uint16_t period_ms)
-{
-    Contest_MergedTask_Update(period_ms);
-}
-
 static void Contest_Task5_Update(uint16_t period_ms)
-{
-    Contest_MergedTask_Update(period_ms);
-}
-
-static void Contest_Task6_Update(uint16_t period_ms)
 {
     Contest_MergedTask_Update(period_ms);
 }
@@ -565,7 +537,7 @@ void Contest_Task_Init(void)
 
 void Contest_Task_Select(uint8_t task_id)
 {
-    if(task_id > CONTEST_TASK_SERVO_DEBUG)
+    if(task_id > CONTEST_TASK_MAX)
     {
         task_id = CONTEST_TASK_NONE;
     }
@@ -629,7 +601,7 @@ void Contest_Task_KeyAction(uint8_t key_action)
         }
 
         next_task = ContestTaskContext.selected_task + 1;
-        if(next_task > CONTEST_TASK_SERVO_DEBUG)
+        if(next_task > CONTEST_TASK_MAX)
         {
             next_task = CONTEST_TASK_1;
         }
@@ -722,22 +694,16 @@ void Contest_Task_Update(uint16_t period_ms)
             Contest_Task1_Update(period_ms);
             break;
         case CONTEST_TASK_2:
-            Contest_Task2_Update(period_ms);
+            Contest_TaskServoDebug_Update(period_ms);
             break;
         case CONTEST_TASK_3:
-            Contest_Task3_Update(period_ms);
+            Contest_Task2_Update(period_ms);
             break;
         case CONTEST_TASK_4:
-            Contest_Task4_Update(period_ms);
+            Contest_Task3_Update(period_ms);
             break;
         case CONTEST_TASK_5:
             Contest_Task5_Update(period_ms);
-            break;
-        case CONTEST_TASK_6:
-            Contest_Task6_Update(period_ms);
-            break;
-        case CONTEST_TASK_SERVO_DEBUG:
-            Contest_TaskServoDebug_Update(period_ms);
             break;
         default:
             break;
@@ -795,7 +761,7 @@ static void Contest_Task_OLEDShowSigned6(u8 x, u8 y, float value, uint16_t scale
 
 static void Contest_Task_OLEDShowBallDebug(uint32_t show_time)
 {
-    Contest_Task_OLEDShowText6(0, 0, (const u8 *)"BALL T3");
+    Contest_Task_OLEDShowText6(0, 0, (const u8 *)"BALL T4");
     Contest_Task_OLEDShowText6(54, 0, (const u8 *)"TIME");
     Contest_Task_OLEDShowNumber6(84, 0, show_time / 1000, 3);
     Contest_Task_OLEDShowText6(108, 0, (const u8 *)"s");
@@ -989,15 +955,15 @@ void Contest_Task_OLEDShow(void)
         return;
     }
 
-    if(task_id == CONTEST_TASK_3)
+    if(task_id == CONTEST_TASK_2)
     {
-        Contest_Task_OLEDShowBallDebug(show_time);
+        Contest_Task_OLEDShowServoDebug(show_time);
         return;
     }
 
-    if(task_id == CONTEST_TASK_SERVO_DEBUG)
+    if(task_id == CONTEST_TASK_4)
     {
-        Contest_Task_OLEDShowServoDebug(show_time);
+        Contest_Task_OLEDShowBallDebug(show_time);
         return;
     }
 
