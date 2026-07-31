@@ -71,9 +71,9 @@ static void Ball_Control_UpdateStableJudge(void)
 void Ball_Control_Init(void)
 {
     BallControlParam.alpha = 0.25f;
-    BallControlParam.kp = 0.010f;
+    BallControlParam.kp = 0.025f;
     BallControlParam.ki = 0.010f;
-    BallControlParam.kd = 0.020f;
+    BallControlParam.kd = 0.010f;
     BallControlParam.kf = 0.000f;
     BallControlParam.integral_limit = 3000.0f;
     BallControlParam.angle_limit_deg = 25.0f;
@@ -218,7 +218,7 @@ void Ball_Control_Update(uint16_t period_ms)
     }
 
     BallControlState.last_error_0p1mm = BallControlState.error_0p1mm;
-    BallControlState.error_0p1mm = - (BallControlState.target_pos_0p1mm - BallControlState.filtered_pos_0p1mm);
+    BallControlState.error_0p1mm = (BallControlState.target_pos_0p1mm - BallControlState.filtered_pos_0p1mm);
 
     BallControlState.integral += BallControlState.error_0p1mm * dt_s;
     BallControlState.integral = Ball_Control_LimitFloat(BallControlState.integral,
