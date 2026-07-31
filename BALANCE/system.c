@@ -142,9 +142,9 @@ void systemInit(void)
 	SYS_VAL_t_Init(&SysVal);
 	
 	//Serial port 1 initialization, communication baud rate 115200,
-    //can be used to communicate with ROS terminal
-    //串口1初始化，通信波特率115200，可用于与ROS端通信
-    uart1_init(115200);
+	   //used as the debug TX port to PC/VOFA+; printf is redirected to USART1
+	   //串口1初始化，通信波特率115200，作为上位机/VOFA+调试发送口，printf 已重定向到 USART1
+	   uart1_init(115200);
 
     //Serial port 2 initialization, communication baud rate 9600,
     //used to receive camera ball position frames on PA2/PA3
@@ -179,6 +179,7 @@ void systemInit(void)
 		//Initialize the hardware interface connected to the LED lamp
 		//初始化与LED灯连接的硬件接口
 		V1_1_LED_Init();
+        invMSInit(); //ICM20948初始化
 	}
 	else //无法识别的陀螺仪,复位系统
 	{

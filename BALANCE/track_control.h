@@ -9,7 +9,7 @@
 #define TRACK_MODE_AB                  2
 
 #define TRACK_TURN_DIR                 1.0f
-#define TRACK_YAW_DIR                  1.0f
+#define TRACK_YAW_DIR                  -1.0f
 
 #define TRACK_DEFAULT_BASE_SPEED       0.35f
 #define TRACK_DEFAULT_TURN_LIMIT       0.35f
@@ -56,6 +56,7 @@ typedef struct
 {
     uint8_t enable;
     uint8_t mode;
+    uint8_t yaw_enable;              /* 是否允许公共循迹 yaw 环参与输出，任务3弯道调试时关闭。 */
     uint8_t straight_yaw_enable;
     uint8_t stop_request;
     uint8_t stop_reason;
@@ -93,6 +94,7 @@ void Track_Control_SetStopParam(uint32_t window_start_ms, uint32_t window_end_ms
 void Track_Control_SetLinePid(float kp, float ki, float kd, float output_limit);
 void Track_Control_SetYawPid(float kp, float ki, float kd, float output_limit);
 void Track_Control_SetBaseSpeed(float base_speed);
+void Track_Control_SetYawEnable(uint8_t enable);
 void Track_Control_Update(uint16_t period_ms, float current_yaw_deg);
 uint8_t Track_Control_IsStraightSegment(void);
 uint8_t Track_Control_IsStopRequested(void);

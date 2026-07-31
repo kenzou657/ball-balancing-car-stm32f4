@@ -82,10 +82,11 @@ void Track_Control_Init(void)
 {
     Track_Control_Reset();
 
-    Track_PID_Init(&TrackControlState.line_pid, 0.10f, 0.0f, 0.04f,
-                   TRACK_DEFAULT_INTEGRAL_LIMIT, TRACK_DEFAULT_TURN_LIMIT);
-    Track_PID_Init(&TrackControlState.yaw_pid, 0.015f, 0.0f, 0.004f,
-                   TRACK_DEFAULT_INTEGRAL_LIMIT, TRACK_DEFAULT_YAW_LIMIT);
+    Track_PID_Init(&TrackControlState.line_pid, 0.18f, 0.0f, 0.05f,
+                TRACK_DEFAULT_INTEGRAL_LIMIT, 0.16f);
+    Track_PID_Init(&TrackControlState.yaw_pid, 0.0f, 0.0f, 0.0f,
+                TRACK_DEFAULT_INTEGRAL_LIMIT, 0.0f);
+
 
     Track_Control_SetStopParam(0, 0, 0, TRACK_WIDE_STABLE_DEFAULT, TRACK_LOST_STOP_DEFAULT);
 }
@@ -94,6 +95,7 @@ void Track_Control_Reset(void)
 {
     TrackControlState.enable = 0;
     TrackControlState.mode = TRACK_MODE_STOP;
+    TrackControlState.yaw_enable = 1;
     TrackControlState.straight_yaw_enable = 0;
     TrackControlState.stop_request = 0;
     TrackControlState.stop_reason = TRACK_STOP_NONE;
@@ -160,6 +162,19 @@ void Track_Control_SetBaseSpeed(float base_speed)
     TrackControlState.base_speed = base_speed;
 }
 
+void Track_Control_SetYawEnable(uint8_t enable)
+{
+    TrackControlState.yaw_enable = enable ? 1 : 0;
+    if(TrackControlState.yaw_enable == 0)
+    {
+        TrackControlState.straight_yaw_enable = 0;
+        TrackControlState.yaw_ref_valid = 0;
+        TrackControlState.yaw_error = 0.0f;
+        TrackControlState.yaw_delta_speed = 0.0f;
+        Track_PID_Reset(&TrackControlState.yaw_pid);
+    }
+}
+
 uint8_t Track_Control_IsStraightSegment(void)
 {
     if(TrackIrState.line_valid == 0)
@@ -220,6 +235,16 @@ static void Track_Control_UpdateStopJudge(void)
 
 static void Track_Control_UpdateYaw(float current_yaw_deg)
 {
+    if(TrackControlState.yaw_enable == 0)
+    {
+        TrackControlState.straight_yaw_enable = 0;
+        TrackControlState.yaw_ref_valid = 0;
+        TrackControlState.yaw_error = 0.0f;
+        TrackControlState.yaw_delta_speed = 0.0f;
+        Track_PID_Reset(&TrackControlState.yaw_pid);
+        return;
+    }
+
     if(Track_Control_IsStraightSegment())
     {
         TrackControlState.straight_yaw_enable = 1;

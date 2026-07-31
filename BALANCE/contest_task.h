@@ -59,6 +59,7 @@ typedef struct
     uint32_t phase_time_ms;
     uint32_t finished_time_ms;
     float phase_distance_m;
+    float total_distance_m;
     float yaw_deg;
     float phase_start_yaw_deg;
 } ContestTaskContext_t;

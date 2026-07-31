@@ -22,21 +22,14 @@ void _sys_exit(int x)
 { 
 	x = x; 
 } 
-//重定义fputc函数 
+//重定义fputc函数，printf 默认从 USART1(TX: PA9) 输出到上位机调试串口
+//VOFA+ FireWater 每帧必须由调用者在格式串末尾携带 \n / \r\n / \n\r
 int fputc(int ch, FILE *f)
-{ 	
-	while((USART2->SR&0X40)==0);//循环发送,直到发送完毕   
-	USART2->DR = (u8) ch;      
+{
+	(void)f;
+	while((USART1->SR&0X40)==0);//循环发送,直到发送完毕
+	USART1->DR = (u8) ch;
 	return ch;
-	
-//	while((USART1->SR&0X40)==0);//循环发送,直到发送完毕   
-//	USART1->DR = (u8) ch;      
-//	return ch;
-
-//	while((USART3->SR&0X40)==0);//循环发送,直到发送完毕   
-//	USART3->DR = (u8) ch;      
-//	return ch;
-	
 }
 
 //任意串口printf

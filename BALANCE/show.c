@@ -369,33 +369,63 @@ void oled_show(void)
 														OLED_ShowNumber(75,10, MOTOR_A.Encoder*1000,5,12);
 		 }
 		 
-		 else if(Car_Mode==Akm_Car||Car_Mode==Diff_Car||Car_Mode==Tank_Car)
+		 else if(Car_Mode==Diff_Car)
 		 {
-			 //阿克曼、差速、履带车显示电机A的目标速度和当前实际速度//
-			 OLED_ShowString(0,10,"L:");
-			 if( MOTOR_A.Target<0)	OLED_ShowString(15,10,"-"),
-															OLED_ShowNumber(20,10,-MOTOR_A.Target*1000,5,12);
-			 else                 	OLED_ShowString(15,10,"+"),
-															OLED_ShowNumber(20,10, MOTOR_A.Target*1000,5,12);  
-			 if( MOTOR_A.Encoder<0)	OLED_ShowString(60,10,"-"),
-															OLED_ShowNumber(75,10,-MOTOR_A.Encoder*1000,5,12);
-			 else                 	OLED_ShowString(60,10,"+"),
-															OLED_ShowNumber(75,10, MOTOR_A.Encoder*1000,5,12);
+		  //差速车显示左轮 MotorD 的目标速度和当前实际速度//
+		  OLED_ShowString(0,10,"LD:");
+		  if( MOTOR_D.Target<0)	OLED_ShowString(18,10,"-"),
+		 										OLED_ShowNumber(24,10,-MOTOR_D.Target*1000,5,12);
+		  else                 	OLED_ShowString(18,10,"+"),
+		 										OLED_ShowNumber(24,10, MOTOR_D.Target*1000,5,12);
+		  if( MOTOR_D.Encoder<0)	OLED_ShowString(60,10,"-"),
+		 										OLED_ShowNumber(75,10,-MOTOR_D.Encoder*1000,5,12);
+		  else                 	OLED_ShowString(60,10,"+"),
+		 										OLED_ShowNumber(75,10, MOTOR_D.Encoder*1000,5,12);
+		 }
+		 else if(Car_Mode==Akm_Car||Car_Mode==Tank_Car)
+		 {
+		  //阿克曼、履带车显示电机A的目标速度和当前实际速度//
+		  OLED_ShowString(0,10,"L:");
+		  if( MOTOR_A.Target<0)	OLED_ShowString(15,10,"-"),
+		 										OLED_ShowNumber(20,10,-MOTOR_A.Target*1000,5,12);
+		  else                 	OLED_ShowString(15,10,"+"),
+		 										OLED_ShowNumber(20,10, MOTOR_A.Target*1000,5,12);
+		  if( MOTOR_A.Encoder<0)	OLED_ShowString(60,10,"-"),
+		 										OLED_ShowNumber(75,10,-MOTOR_A.Encoder*1000,5,12);
+		  else                 	OLED_ShowString(60,10,"+"),
+		 										OLED_ShowNumber(75,10, MOTOR_A.Encoder*1000,5,12);
 		 }
 		 
-				//The third line of the display shows the content // 
-			 //显示屏第3行显示内容//
-			 //阿克曼、差速、履带车显示电机B的目标速度和当前实际速度//
-			 OLED_ShowString(0,20,"R:");
-			 if( MOTOR_B.Target<0)	OLED_ShowString(15,20,"-"),
-															OLED_ShowNumber(20,20,-MOTOR_B.Target*1000,5,12);
-			 else                 	OLED_ShowString(15,20,"+"),
-															OLED_ShowNumber(20,20,  MOTOR_B.Target*1000,5,12);  
-				
-			 if( MOTOR_B.Encoder<0)	OLED_ShowString(60,20,"-"),
-															OLED_ShowNumber(75,20,-MOTOR_B.Encoder*1000,5,12);
-			 else                 	OLED_ShowString(60,20,"+"),
-															OLED_ShowNumber(75,20, MOTOR_B.Encoder*1000,5,12);
+		 	//The third line of the display shows the content //
+		  //显示屏第3行显示内容//
+		 if(Car_Mode==Diff_Car)
+		 {
+		  //差速车显示右轮 MotorA 的目标速度和当前实际速度//
+		  OLED_ShowString(0,20,"RA:");
+		  if( MOTOR_A.Target<0)	OLED_ShowString(18,20,"-"),
+		 										OLED_ShowNumber(24,20,-MOTOR_A.Target*1000,5,12);
+		  else                 	OLED_ShowString(18,20,"+"),
+		 										OLED_ShowNumber(24,20,  MOTOR_A.Target*1000,5,12);
+		 	
+		  if( MOTOR_A.Encoder<0)	OLED_ShowString(60,20,"-"),
+		 										OLED_ShowNumber(75,20,-MOTOR_A.Encoder*1000,5,12);
+		  else                 	OLED_ShowString(60,20,"+"),
+		 										OLED_ShowNumber(75,20, MOTOR_A.Encoder*1000,5,12);
+		 }
+		 else
+		 {
+		  //阿克曼、履带车显示电机B的目标速度和当前实际速度//
+		  OLED_ShowString(0,20,"R:");
+		  if( MOTOR_B.Target<0)	OLED_ShowString(15,20,"-"),
+		 										OLED_ShowNumber(20,20,-MOTOR_B.Target*1000,5,12);
+		  else                 	OLED_ShowString(15,20,"+"),
+		 										OLED_ShowNumber(20,20,  MOTOR_B.Target*1000,5,12);
+		 	
+		  if( MOTOR_B.Encoder<0)	OLED_ShowString(60,20,"-"),
+		 										OLED_ShowNumber(75,20,-MOTOR_B.Encoder*1000,5,12);
+		  else                 	OLED_ShowString(60,20,"+"),
+		 										OLED_ShowNumber(75,20, MOTOR_B.Encoder*1000,5,12);
+		 }
 		 
 
 			if(Car_Mode==Mec_Car||Car_Mode==Omni_Car||Car_Mode==FourWheel_Car)
@@ -438,15 +468,24 @@ void oled_show(void)
 				else                 	OLED_ShowString(60,30,"+"),
 															OLED_ShowNumber(80,30, Servo,4,12); 
 		 }
-		 	 else if(Car_Mode==Diff_Car||Car_Mode==Tank_Car)
+		 	 else if(Car_Mode==Diff_Car)
 		 {
-			 //差速小车、履带车显示左电机的PWM的数值//
-															 OLED_ShowString(00,30,"MA");
-			 if( MOTOR_A.Motor_Pwm<0)OLED_ShowString(40,30,"-"),
-															 OLED_ShowNumber(50,30,-MOTOR_A.Motor_Pwm,4,12);
-			 else                 	 OLED_ShowString(40,30,"+"),
-															 OLED_ShowNumber(50,30, MOTOR_A.Motor_Pwm,4,12); 
-		 }	
+		 	//差速小车显示左轮 MotorD 的PWM数值//
+		 	 								 OLED_ShowString(00,30,"MD");
+		 	if( MOTOR_D.Motor_Pwm<0)OLED_ShowString(40,30,"-"),
+		 	 								 OLED_ShowNumber(50,30,-MOTOR_D.Motor_Pwm,4,12);
+		 	else                 	 OLED_ShowString(40,30,"+"),
+		 	 								 OLED_ShowNumber(50,30, MOTOR_D.Motor_Pwm,4,12);
+		 }
+		 	 else if(Car_Mode==Tank_Car)
+		 {
+		 	//履带车显示左电机的PWM数值//
+		 	 								 OLED_ShowString(00,30,"MA");
+		 	if( MOTOR_A.Motor_Pwm<0)OLED_ShowString(40,30,"-"),
+		 	 								 OLED_ShowNumber(50,30,-MOTOR_A.Motor_Pwm,4,12);
+		 	else                 	 OLED_ShowString(40,30,"+"),
+		 	 								 OLED_ShowNumber(50,30, MOTOR_A.Motor_Pwm,4,12);
+		 }
 		 
 		 //The 5th line of the display shows the content // 
 		 //显示屏第5行显示内容//
@@ -464,15 +503,24 @@ void oled_show(void)
 															OLED_ShowNumber(75,40, MOTOR_D.Encoder*1000,5,12);
 		 }
 
-		 else if(Car_Mode==Diff_Car||Car_Mode==Tank_Car)
+		 else if(Car_Mode==Diff_Car)
 		 {
-			 //差速小车、履带车显示右电机的PWM的数值//
-															 OLED_ShowString(00,40,"MB");
-			 if(MOTOR_B.Motor_Pwm<0) OLED_ShowString(40,40,"-"),
-															 OLED_ShowNumber(50,40,-MOTOR_B.Motor_Pwm,4,12);
-			 else                 	 OLED_ShowString(40,40,"+"),
-															 OLED_ShowNumber(50,40, MOTOR_B.Motor_Pwm,4,12);
-		 }			 
+		  //差速小车显示右轮 MotorA 的PWM数值//
+		 										 OLED_ShowString(00,40,"MA");
+		  if(MOTOR_A.Motor_Pwm<0) OLED_ShowString(40,40,"-"),
+		 										 OLED_ShowNumber(50,40,-MOTOR_A.Motor_Pwm,4,12);
+		  else                 	 OLED_ShowString(40,40,"+"),
+		 										 OLED_ShowNumber(50,40, MOTOR_A.Motor_Pwm,4,12);
+		 }
+		 else if(Car_Mode==Tank_Car)
+		 {
+		  //履带车显示右电机的PWM数值//
+		 										 OLED_ShowString(00,40,"MB");
+		  if(MOTOR_B.Motor_Pwm<0) OLED_ShowString(40,40,"-"),
+		 										 OLED_ShowNumber(50,40,-MOTOR_B.Motor_Pwm,4,12);
+		  else                 	 OLED_ShowString(40,40,"+"),
+		 										 OLED_ShowNumber(50,40, MOTOR_B.Motor_Pwm,4,12);
+		 }
 	}
 
 	
@@ -520,8 +568,16 @@ void APP_Show(void)
 	 if(Voltage_Show>100)Voltage_Show=100; 
 	 //Wheel speed unit is converted to 0.01m/s for easy display in APP
 	 //车轮速度单位转换为0.01m/s，方便在APP显示
-	 Left_Figure=MOTOR_A.Encoder*100;  if(Left_Figure<0)Left_Figure=-Left_Figure;	
-	 Right_Figure=MOTOR_B.Encoder*100; if(Right_Figure<0)Right_Figure=-Right_Figure;
+	 if(Car_Mode == Diff_Car)
+	 {
+	 	 Left_Figure=MOTOR_D.Encoder*100;  if(Left_Figure<0)Left_Figure=-Left_Figure;
+	 	 Right_Figure=MOTOR_A.Encoder*100; if(Right_Figure<0)Right_Figure=-Right_Figure;
+	 }
+	 else
+	 {
+	 	 Left_Figure=MOTOR_A.Encoder*100;  if(Left_Figure<0)Left_Figure=-Left_Figure;
+	 	 Right_Figure=MOTOR_B.Encoder*100; if(Right_Figure<0)Right_Figure=-Right_Figure;
+	 }
 	 //Used to alternately print APP data and display waveform
 	 //用于交替打印APP数据和显示波形
 	 flag_show=!flag_show;

@@ -52,7 +52,7 @@ Balance_task 100Hz
 
 红外权重：IR0 到 IR8 对应 `-4, -3, -2, -1, 0, +1, +2, +3, +4`。
 
-直行段可叠加 ICM20948 yaw 角度环，弯道、宽线、丢线时主要由红外外环和状态机处理。停车采用“时间窗口 + 宽线多路触发 + 强制停车时间”策略，避免刚启动误判 A 点。
+OLED 任务 3 的直行段叠加 ICM20948 yaw 角度环做纠偏，阶段切换和最终停车改为“编码器里程为主 + 阶段超时保护”：直线按 1.5m 切换，半圆按编码器积分弧长切换/停车，不再依赖宽线或多路传感器同时触发作为任务 3 停车条件。红外仍负责循迹外环和丢线保护。
 
 ### 2.3 滚球稳定
 
@@ -91,16 +91,17 @@ OLED 任务 5 复用一个通用框架，对应赛题任务 4/5/6：
 | IR0~IR8 引脚顺序 | `HARDWARE/track_ir.h` | 传感器左右顺序 | 手压黑线看 bit 顺序，必须左到右正确 |
 | `TRACK_TURN_DIR` | `BALANCE/track_control.h` | 转向方向 | 车越修越偏时先反这个 |
 | `line_pid.kp/kd/ki` | `BALANCE/track_control.c` 或接口设置 | 循迹外环 | 初期只用 PD，`ki=0` |
-| `TRACK_WIDE_COUNT_TH` | `HARDWARE/track_ir.h` | 宽线/A/B 点候选 | 按赛道横线宽度调 |
-| 停车时间窗口 | `BALANCE/contest_task.c` / `BALANCE/track_control.c` | A/B 点停车 | 先记录典型到达时间，再设窗口和强停 |
+| `TRACK_WIDE_COUNT_TH` | `HARDWARE/track_ir.h` | 宽线/A/B 点候选 | 主要供合并任务等特征停车使用，OLED 任务 3 不靠它停车 |
+| 直线/弯道里程阈值 | `BALANCE/contest_task.c` | OLED 任务 3 阶段切换和停车 | 直线调 `CONTEST_TASK2_STRAIGHT_DISTANCE_M`，半圆调 `CONTEST_TASK2_CURVE_DISTANCE_M` |
+| 阶段保护超时 | `BALANCE/contest_task.c` | 编码器异常或卡阶段保护 | 调 `CONTEST_TASK2_STRAIGHT_TIMEOUT_MS` / `CONTEST_TASK2_CURVE_TIMEOUT_MS`，超时直接切阶段或停车 |
 | `TRACK_LOST_STOP_DEFAULT` | `BALANCE/track_control.h` | 丢线保护周期数 | 100Hz 下 30 约 0.3s |
 
 ### 3.2 电机速度内环
 
 | 参数 | 位置 | 作用 | 调试建议 |
 |---|---|---|---|
-| `Velocity_KP` / `Velocity_KI` | `BALANCE/system.c` 等全局参数 | 左右轮速度 PI | 先用任务 1 固定速度调通 |
-| 编码器方向 | `HARDWARE/encoder.c` / 电机接线 | 速度反馈符号 | 目标正速度时反馈也应为正 |
+| `Velocity_KP` / `Velocity_KI` | `BALANCE/system.c` 等全局参数 | 左右轮速度 PI | 当前差速底盘左轮为 MotorD、右轮为 MotorA，先用任务 1 固定速度调通 |
+| 编码器方向 | `HARDWARE/encoder.c` / 电机接线 | 速度反馈符号 | 目标正速度时 MotorD/MotorA 反馈也应为正 |
 | 电机 PWM 方向 | `BALANCE/balance.c` / `HARDWARE/motor.*` | 前进方向 | 左右轮方向不一致先修方向，不急着调 PID |
 | 机械参数 | `BALANCE/robot_select_init.c` | 速度换算 | 当前差速底盘按 13 线、28 减速比、65mm 轮径 |
 
@@ -122,11 +123,11 @@ OLED 任务 5 复用一个通用框架，对应赛题任务 4/5/6：
 
 ## 4. 建议调试顺序
 
-1. OLED 任务 1：固定左右轮目标速度，确认电机方向、编码器方向、速度 PI。
+1. OLED 任务 1：固定左轮 MotorD、右轮 MotorA 目标速度，确认电机方向、编码器方向、速度 PI。
 2. OLED 任务 2：舵机单独调试，确认 PC9 输出、机械中位、方向和安全限幅。
 3. 红外输入：显示 `line_mask`、`active_count`、`line_error`，确认黑线电平和 IR 顺序。
-4. OLED 任务 3：低速整圈循迹，先只调循迹 PD，不开复杂停车；方向错先改 `TRACK_TURN_DIR`。
-5. 停车判定：记录 A/B 到达时间，调宽线阈值、停车窗口和强制停车时间。
+4. OLED 任务 3：低速整圈循迹，先只调循迹 PD；阶段切换和停车看编码器累计里程，方向错先改 `TRACK_TURN_DIR`。
+5. OLED 任务 3 停车判定：按实测一圈误差微调直线/弯道里程阈值，并设置阶段超时作为辅助验证，不再调宽线停车窗口。
 6. 摄像头协议：确认心跳、位置正负、丢球和超时保护。
 7. OLED 任务 4：静态滚球，中心 -> +5cm -> -5cm；先 P，再 D，最后小 I，前馈 `kf` 保持 0。
 8. OLED 任务 5：先 AB + 0cm，低速联调，优先保球不追速度。

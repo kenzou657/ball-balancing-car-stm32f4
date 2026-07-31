@@ -4,39 +4,59 @@
 
 ContestTaskContext_t ContestTaskContext;
 
-#define CONTEST_TASK1_MOTOR_DEBUG_SPEED        0.20f
+#define CONTEST_TASK1_MOTOR_DEBUG_SPEED        0.20f   /* OLED 任务1电机调试目标线速度，单位 m/s，左右轮同速前进。 */
 
-#define CONTEST_MERGED_BASE_SPEED              0.25f
-#define CONTEST_MERGED_MIN_SPEED_SCALE         0.35f
-#define CONTEST_MERGED_SLOW_ERR_0P1MM          300.0f
-#define CONTEST_MERGED_AB_MIN_RUN_MS           2000u
-#define CONTEST_MERGED_AA_MIN_RUN_MS           3000u
-#define CONTEST_MERGED_AB_TIMEOUT_MS           30000u
-#define CONTEST_MERGED_AA_TIMEOUT_MS           45000u
+#define CONTEST_MERGED_BASE_SPEED              0.25f   /* OLED 任务5合并任务默认循迹基础速度，单位 m/s。 */
+#define CONTEST_MERGED_MIN_SPEED_SCALE         0.35f   /* OLED 任务5根据滚球误差动态降速时允许的最低速度比例。 */
+#define CONTEST_MERGED_SLOW_ERR_0P1MM          300.0f  /* OLED 任务5开始明显降速的滚球误差阈值，单位 0.1mm，300 表示 3cm。 */
+#define CONTEST_MERGED_AB_MIN_RUN_MS           2000u   /* OLED 任务5选择 AB 模式时，允许识别终点宽线前的最短运行时间，单位 ms。 */
+#define CONTEST_MERGED_AA_MIN_RUN_MS           3000u   /* OLED 任务5选择 AA 整圈模式时，允许识别回到 A 点前的最短运行时间，单位 ms。 */
+#define CONTEST_MERGED_AB_TIMEOUT_MS           30000u  /* OLED 任务5选择 AB 模式时的强制停车超时时间，单位 ms。 */
+#define CONTEST_MERGED_AA_TIMEOUT_MS           45000u  /* OLED 任务5选择 AA 整圈模式时的强制停车超时时间，单位 ms。 */
 
-#define CONTEST_TASK3_PHASE_HOLD_MS            1500u
-#define CONTEST_TASK3_PHASE_TIMEOUT_MS         8000u
+#define CONTEST_TASK3_PHASE_HOLD_MS            1500u   /* 滚球稳定每个目标位置至少保持的时间，单位 ms。 */
+#define CONTEST_TASK3_PHASE_TIMEOUT_MS         8000u   /* 滚球稳定单个目标位置的最长等待时间，超时后切换下一阶段，单位 ms。 */
 
-#define CONTEST_TASK2_STRAIGHT_DISTANCE_M      1.50f
-#define CONTEST_TASK2_CURVE_RADIUS_M           0.50f
-#define CONTEST_TASK2_CURVE_DISTANCE_M         (3.1416f * CONTEST_TASK2_CURVE_RADIUS_M)
-#define CONTEST_TASK2_BASE_SPEED               0.28f
-#define CONTEST_TASK2_YAW_KP                   0.010f
-#define CONTEST_TASK2_YAW_LIMIT                0.08f
-#define CONTEST_TASK2_CURVE_YAW_DEG            170.0f
-#define CONTEST_TASK2_CURVE_TIMEOUT_MS         12000u
-#define CONTEST_TASK2_MARKER_STABLE_COUNT      3u
+#define CONTEST_TASK2_CURVE_RADIUS_M           0.50f   /* 赛题任务2半圆弯道半径参考值，单位 m，用于给弯道阶段里程提供初始估算。 */
 
-#define CONTEST_TASK2_PHASE_IDLE               0
-#define CONTEST_TASK2_PHASE_STRAIGHT1          1
-#define CONTEST_TASK2_PHASE_CURVE1             2
-#define CONTEST_TASK2_PHASE_STRAIGHT2          3
-#define CONTEST_TASK2_PHASE_CURVE2             4
+#define CONTEST_TASK2_STRAIGHT1_DISTANCE_M     1.44f   /* 赛题任务2第一段直行目标里程，单位 m，由左右轮编码器平均速度积分得到。 */
+#define CONTEST_TASK2_CURVE1_DISTANCE_M        ((3.1416f * CONTEST_TASK2_CURVE_RADIUS_M) + 0.04f) /* 赛题任务2第一个半圆弯道目标里程，单位 m。 */
+#define CONTEST_TASK2_STRAIGHT2_DISTANCE_M     1.25f   /* 赛题任务2第二段直行目标里程，单位 m，可独立补偿第二段直行误差。 */
+#define CONTEST_TASK2_CURVE2_DISTANCE_M        ((3.1416f * CONTEST_TASK2_CURVE_RADIUS_M) + 0.04f) /* 赛题任务2第二个半圆弯道参考里程，单位 m；最终停车仍优先由总里程停车宏决定。 */
+
+#define CONTEST_TASK2_STOP_DISTANCE_M          5.72f   /* 赛题任务2总里程停车位置，单位 m，到达该总里程立即停车，不再由各阶段里程相加决定终点。 */
+#define CONTEST_TASK2_BASE_SPEED               0.38f   /* 赛题任务2直线段基础速度，单位 m/s。 */
+#define CONTEST_TASK2_CURVE_SPEED              0.28f   /* 赛题任务2弯道循迹基础速度，单位 m/s，独立于直线速度便于弯道降速调试。 */
+#define CONTEST_TASK2_STRAIGHT1_YAW_DEG        0.0f    /* 赛题任务2第一段直行 yaw 目标角，单位 deg。 */
+#define CONTEST_TASK2_STRAIGHT2_YAW_DEG        -180.0f  /* 赛题任务2第二段直行 yaw 目标角，单位 deg。 */
+#define CONTEST_TASK2_YAW_DIR                  1.0f    /* 赛题任务2直行 yaw 环输出方向，角度环极性不对时优先改这里为 -1.0f。 */
+#define CONTEST_TASK2_YAW_KP                   0.008f  /* 赛题任务2直线段 yaw 位置环 P 系数。 */
+#define CONTEST_TASK2_YAW_KI                   0.000f  /* 赛题任务2直线段 yaw 位置环 I 系数，先保持 0，确认无稳态偏差后再小量增加。 */
+#define CONTEST_TASK2_YAW_KD                   0.010f   /* 赛题任务2直线段 yaw 位置环 D 系数，用于抑制直线摆动。 */
+#define CONTEST_TASK2_YAW_INTEGRAL_LIMIT       30.0f   /* 赛题任务2直线段 yaw 积分限幅，单位 deg 累加量。 */
+#define CONTEST_TASK2_YAW_LIMIT                0.08f   /* 赛题任务2直线段 yaw PID 输出限幅，单位 m/s。 */
+#define CONTEST_TASK2_STRAIGHT1_YAW_SCALE      0.30f   /* 赛题任务2第一段直行 yaw/IMU 环输出比例，1.00 表示完整使用 yaw PID 输出。 */
+#define CONTEST_TASK2_STRAIGHT1_LINE_SCALE     0.70f   /* 赛题任务2第一段直行红外循迹环输出比例，调小可降低直线贴线修正力度。 */
+#define CONTEST_TASK2_STRAIGHT2_YAW_SCALE      0.70f   /* 赛题任务2第二段直行 yaw/IMU 环输出比例，可与第一段独立调节。 */
+#define CONTEST_TASK2_STRAIGHT2_LINE_SCALE     0.30f   /* 赛题任务2第二段直行红外循迹环输出比例，可与第一段独立调节。 */
+#define CONTEST_TASK2_CURVE_FF_DELTA           0.08f   /* 赛题任务2弯道基础转向前馈差速，单位 m/s，红外 PID 只负责修正残差。 */
+#define CONTEST_TASK2_CURVE_FF_RAMP_M          0.40f   /* 赛题任务2弯道前馈渐入里程，单位 m，避免入弯瞬间阶跃打舵。 */
+#define CONTEST_TASK2_CURVE_FF_SCALE           0.70f   /* 赛题任务2弯道前馈输出比例，调小可降低固定转弯量。 */
+#define CONTEST_TASK2_CURVE_LINE_SCALE         0.30f   /* 赛题任务2弯道红外 PID 输出比例，调小可降低循迹反馈修正力度。 */
+#define CONTEST_TASK2_CURVE1_FF_DIR            -1.0f   /* 赛题任务2第一个弯道前馈方向，方向反时改为 1.0f。 */
+#define CONTEST_TASK2_CURVE2_FF_DIR            -1.0f   /* 赛题任务2第二个弯道前馈方向，方向反时改为 1.0f。 */
+
+#define CONTEST_TASK2_PHASE_IDLE               0       /* 赛题任务2状态机空闲阶段。 */
+#define CONTEST_TASK2_PHASE_STRAIGHT1          1       /* 赛题任务2第一段直行阶段。 */
+#define CONTEST_TASK2_PHASE_CURVE1             2       /* 赛题任务2第一个半圆弯道阶段。 */
+#define CONTEST_TASK2_PHASE_STRAIGHT2          3       /* 赛题任务2第二段直行阶段。 */
+#define CONTEST_TASK2_PHASE_CURVE2             4       /* 赛题任务2第二个半圆弯道阶段，结束后停车。 */
 
 static void Contest_Task_Finish(void);
 static float Contest_Task_LimitFloat(float value, float min_value, float max_value);
 static void Contest_MergedTask_FailStop(void);
 static void Contest_MergedTask_Update(uint16_t period_ms);
+static void Contest_Task_DebugPrint(uint16_t period_ms);
 
 static void Contest_Task_ClearMotion(void)
 {
@@ -54,6 +74,7 @@ static void Contest_Task_ResetRuntime(void)
     ContestTaskContext.state_time_ms = 0;
     ContestTaskContext.phase_time_ms = 0;
     ContestTaskContext.phase_distance_m = 0.0f;
+    ContestTaskContext.total_distance_m = 0.0f;
     ContestTaskContext.yaw_deg = 0.0f;
     ContestTaskContext.phase_start_yaw_deg = 0.0f;
     ContestTaskContext.task2_phase = CONTEST_TASK2_PHASE_IDLE;
@@ -81,22 +102,29 @@ static uint8_t Contest_Task_IsMergedTask(uint8_t task_id)
 
 static float Contest_Task_UpdateYaw(uint16_t period_ms)
 {
-    /* ICM20948 陀螺仪配置为 +-500dps，灵敏度约 65.5 LSB/(deg/s)。 */
-    ICM20948_Get_Gyroscope();
+    if(SysVal.HardWare_Ver == V1_0)
+    {
+        MPU6050_Get_Gyroscope();
+    }
+    else if(SysVal.HardWare_Ver == V1_1)
+    {
+        ICM20948_Get_Gyroscope();
+    }
+
     ContestTaskContext.yaw_deg += ((float)imu.gyro.z / 65.5f) * ((float)period_ms / 1000.0f);
     return ContestTaskContext.yaw_deg;
 }
 
 static void Contest_Task_SetDiffTarget(float left, float right)
 {
-    /* 赛题底盘固定为两轮差速：MotorA 左轮，MotorB 右轮。 */
+    /* 赛题底盘固定为两轮差速：MotorD 左轮，MotorA 右轮。 */
     Move_X = (left + right) * 0.5f;
     Move_Y = 0.0f;
     Move_Z = 0.0f;
-    MOTOR_A.Target = left;
-    MOTOR_B.Target = right;
+    MOTOR_A.Target = right;
+    MOTOR_B.Target = 0.0f;
     MOTOR_C.Target = 0.0f;
-    MOTOR_D.Target = 0.0f;
+    MOTOR_D.Target = left;
 }
 
 static void Contest_Task_ApplyTrackTarget(void)
@@ -131,6 +159,96 @@ static float Contest_Task_LimitFloat(float value, float min_value, float max_val
     return value;
 }
 
+static float Contest_Task2_GetStraightYawTarget(void)
+{
+    if(ContestTaskContext.task2_phase == CONTEST_TASK2_PHASE_STRAIGHT2)
+    {
+        return CONTEST_TASK2_STRAIGHT2_YAW_DEG;
+    }
+
+    return CONTEST_TASK2_STRAIGHT1_YAW_DEG;
+}
+
+static float Contest_Task2_GetStraightDistance(void)
+{
+    if(ContestTaskContext.task2_phase == CONTEST_TASK2_PHASE_STRAIGHT2)
+    {
+        return CONTEST_TASK2_STRAIGHT2_DISTANCE_M;
+    }
+
+    return CONTEST_TASK2_STRAIGHT1_DISTANCE_M;
+}
+
+static float Contest_Task2_GetCurveDistance(void)
+{
+    if(ContestTaskContext.task2_phase == CONTEST_TASK2_PHASE_CURVE2)
+    {
+        return CONTEST_TASK2_CURVE2_DISTANCE_M;
+    }
+
+    return CONTEST_TASK2_CURVE1_DISTANCE_M;
+}
+
+static float Contest_Task2_GetStraightYawScale(void)
+{
+    if(ContestTaskContext.task2_phase == CONTEST_TASK2_PHASE_STRAIGHT2)
+    {
+        return CONTEST_TASK2_STRAIGHT2_YAW_SCALE;
+    }
+
+    return CONTEST_TASK2_STRAIGHT1_YAW_SCALE;
+}
+
+static float Contest_Task2_GetStraightLineScale(void)
+{
+    if(ContestTaskContext.task2_phase == CONTEST_TASK2_PHASE_STRAIGHT2)
+    {
+        return CONTEST_TASK2_STRAIGHT2_LINE_SCALE;
+    }
+
+    return CONTEST_TASK2_STRAIGHT1_LINE_SCALE;
+}
+
+static float Contest_Task2_GetCurveFeedforwardDir(void)
+{
+    if(ContestTaskContext.task2_phase == CONTEST_TASK2_PHASE_CURVE2)
+    {
+        return CONTEST_TASK2_CURVE2_FF_DIR;
+    }
+
+    return CONTEST_TASK2_CURVE1_FF_DIR;
+}
+
+static float Contest_Task2_GetCurveFeedforward(void)
+{
+    float ramp_scale = 1.0f;
+
+    if(CONTEST_TASK2_CURVE_FF_RAMP_M > 0.0f)
+    {
+        ramp_scale = ContestTaskContext.phase_distance_m / CONTEST_TASK2_CURVE_FF_RAMP_M;
+        ramp_scale = Contest_Task_LimitFloat(ramp_scale, 0.0f, 1.0f);
+    }
+
+    return Contest_Task2_GetCurveFeedforwardDir() * CONTEST_TASK2_CURVE_FF_DELTA * ramp_scale;
+}
+
+static void Contest_Task_ApplyCurveTrackTarget(void)
+{
+    float line_pid_delta = TrackControlState.turn_delta_speed * CONTEST_TASK2_CURVE_LINE_SCALE;
+    float curve_ff_delta = Contest_Task2_GetCurveFeedforward() * CONTEST_TASK2_CURVE_FF_SCALE;
+    float mixed_delta = line_pid_delta + curve_ff_delta;
+
+    TrackControlState.turn_delta_speed = mixed_delta;
+    TrackControlState.left_target_speed = Contest_Task_LimitFloat(TrackControlState.base_speed - mixed_delta,
+                                                                  -TRACK_DEFAULT_OUTPUT_LIMIT,
+                                                                  TRACK_DEFAULT_OUTPUT_LIMIT);
+    TrackControlState.right_target_speed = Contest_Task_LimitFloat(TrackControlState.base_speed + mixed_delta,
+                                                                   -TRACK_DEFAULT_OUTPUT_LIMIT,
+                                                                   TRACK_DEFAULT_OUTPUT_LIMIT);
+
+    Contest_Task_ApplyTrackTarget();
+}
+
 static void Contest_Task_ResetPhase(uint8_t phase)
 {
     ContestTaskContext.task2_phase = phase;
@@ -139,16 +257,28 @@ static void Contest_Task_ResetPhase(uint8_t phase)
     ContestTaskContext.phase_start_yaw_deg = ContestTaskContext.yaw_deg;
     Track_IR_Reset(&TrackIrState);
     Track_PID_Reset(&TrackControlState.line_pid);
-    Track_PID_Reset(&TrackControlState.yaw_pid);
+    Track_PID_Init(&TrackControlState.yaw_pid,
+                   CONTEST_TASK2_YAW_KP,
+                   CONTEST_TASK2_YAW_KI,
+                   CONTEST_TASK2_YAW_KD,
+                   CONTEST_TASK2_YAW_INTEGRAL_LIMIT,
+                   CONTEST_TASK2_YAW_LIMIT);
 }
 
 static void Contest_Task_UpdatePhaseDistance(uint16_t period_ms)
 {
-    float left_speed = Contest_Task_AbsFloat(MOTOR_A.Encoder);
-    float right_speed = Contest_Task_AbsFloat(MOTOR_B.Encoder);
+    float left_speed = Contest_Task_AbsFloat(MOTOR_D.Encoder);
+    float right_speed = Contest_Task_AbsFloat(MOTOR_A.Encoder);
+    float distance_delta_m = ((left_speed + right_speed) * 0.5f) * ((float)period_ms / 1000.0f);
 
     ContestTaskContext.phase_time_ms += period_ms;
-    ContestTaskContext.phase_distance_m += ((left_speed + right_speed) * 0.5f) * ((float)period_ms / 1000.0f);
+    ContestTaskContext.phase_distance_m += distance_delta_m;
+    ContestTaskContext.total_distance_m += distance_delta_m;
+}
+
+static uint8_t Contest_Task2_StopDistanceReached(void)
+{
+    return (ContestTaskContext.total_distance_m >= CONTEST_TASK2_STOP_DISTANCE_M) ? 1 : 0;
 }
 
 static void Contest_Task1_Update(uint16_t period_ms)
@@ -162,8 +292,6 @@ static void Contest_Task1_Update(uint16_t period_ms)
             break;
 
         case CONTEST_STATE_TRACK:
-        
-            // Set_Pwm(-16000,  16000,  0, 0, 0    );
             Contest_Task_SetDiffTarget(CONTEST_TASK1_MOTOR_DEBUG_SPEED,
                                        CONTEST_TASK1_MOTOR_DEBUG_SPEED);
             break;
@@ -176,7 +304,8 @@ static void Contest_Task1_Update(uint16_t period_ms)
 static void Contest_Task2_StartCurve(uint8_t curve_phase)
 {
     Contest_Task_ResetPhase(curve_phase);
-    Track_Control_Start(TRACK_MODE_LAP_A, CONTEST_TASK2_BASE_SPEED);
+    Track_Control_Start(TRACK_MODE_LAP_A, CONTEST_TASK2_CURVE_SPEED);
+    Track_Control_SetYawEnable(0); /* 任务3弯道调试：禁用公共 yaw 环，只保留红外线 PID。 */
     Track_Control_SetStopParam(0, 0, 0, TRACK_WIDE_STABLE_DEFAULT, TRACK_LOST_STOP_DEFAULT);
 }
 
@@ -184,44 +313,56 @@ static void Contest_Task2_UpdateStraight(uint16_t period_ms, uint8_t next_phase)
 {
     float yaw_deg = Contest_Task_UpdateYaw(period_ms);
     float yaw_error;
+    float line_error;
     float yaw_delta;
+    float line_delta;
+    float mixed_delta;
 
     Contest_Task_UpdatePhaseDistance(period_ms);
+    Track_IR_Update(&TrackIrState);
 
-    yaw_error = ContestTaskContext.phase_start_yaw_deg - yaw_deg;
-    yaw_delta = Contest_Task_LimitFloat(yaw_error * CONTEST_TASK2_YAW_KP,
-                                        -CONTEST_TASK2_YAW_LIMIT,
-                                        CONTEST_TASK2_YAW_LIMIT);
+    yaw_error = Contest_Task2_GetStraightYawTarget() - yaw_deg;
+    yaw_delta = CONTEST_TASK2_YAW_DIR * Track_PID_UpdateError(&TrackControlState.yaw_pid, yaw_error);
 
-    Contest_Task_SetDiffTarget(CONTEST_TASK2_BASE_SPEED - yaw_delta,
-                                CONTEST_TASK2_BASE_SPEED + yaw_delta);
+    if(TrackIrState.line_valid)
+    {
+        line_error = 0.0f - TrackIrState.line_error;
+        line_delta = TRACK_TURN_DIR * Track_PID_UpdateError(&TrackControlState.line_pid, line_error);
+    }
+    else
+    {
+        Track_PID_Reset(&TrackControlState.line_pid);
+        line_delta = 0.0f;
+    }
 
-    if(ContestTaskContext.phase_distance_m >= CONTEST_TASK2_STRAIGHT_DISTANCE_M)
+    TrackControlState.yaw_error = yaw_error;
+    TrackControlState.yaw_delta_speed = yaw_delta * Contest_Task2_GetStraightYawScale();
+    TrackControlState.turn_delta_speed = line_delta * Contest_Task2_GetStraightLineScale();
+    mixed_delta = TrackControlState.yaw_delta_speed + TrackControlState.turn_delta_speed;
+
+    Contest_Task_SetDiffTarget(CONTEST_TASK2_BASE_SPEED - mixed_delta,
+                                CONTEST_TASK2_BASE_SPEED + mixed_delta);
+
+    if(Contest_Task2_StopDistanceReached())
+    {
+        Contest_Task_Finish();
+        return;
+    }
+
+    if(ContestTaskContext.phase_distance_m >= Contest_Task2_GetStraightDistance())
     {
         Contest_Task2_StartCurve(next_phase);
     }
 }
 
+static uint8_t Contest_Task2_PhaseDistanceReached(float target_distance_m)
+{
+    return (ContestTaskContext.phase_distance_m >= target_distance_m) ? 1 : 0;
+}
+
 static uint8_t Contest_Task2_CurveComplete(void)
 {
-    float yaw_delta = Contest_Task_AbsFloat(ContestTaskContext.yaw_deg - ContestTaskContext.phase_start_yaw_deg);
-
-    if(yaw_delta >= CONTEST_TASK2_CURVE_YAW_DEG)
-    {
-        return 1;
-    }
-
-    if(ContestTaskContext.phase_distance_m >= CONTEST_TASK2_CURVE_DISTANCE_M)
-    {
-        return 1;
-    }
-
-    if(ContestTaskContext.phase_time_ms >= CONTEST_TASK2_CURVE_TIMEOUT_MS)
-    {
-        return 1;
-    }
-
-    return 0;
+    return Contest_Task2_PhaseDistanceReached(Contest_Task2_GetCurveDistance());
 }
 
 static void Contest_Task2_UpdateCurve(uint16_t period_ms, uint8_t next_phase)
@@ -237,11 +378,19 @@ static void Contest_Task2_UpdateCurve(uint16_t period_ms, uint8_t next_phase)
         return;
     }
 
-    Contest_Task_ApplyTrackTarget();
+    Contest_Task_ApplyCurveTrackTarget();
+
+    if(Contest_Task2_StopDistanceReached())
+    {
+        Track_Control_SetYawEnable(1);
+        Contest_Task_Finish();
+        return;
+    }
 
     if(Contest_Task2_CurveComplete())
     {
         Track_Control_Stop(TRACK_STOP_BY_USER);
+        Track_Control_SetYawEnable(1);
         Contest_Task_ResetPhase(next_phase);
     }
 }
@@ -249,7 +398,6 @@ static void Contest_Task2_UpdateCurve(uint16_t period_ms, uint8_t next_phase)
 static void Contest_Task2_UpdateFinalCurve(uint16_t period_ms)
 {
     float yaw_deg = Contest_Task_UpdateYaw(period_ms);
-    uint8_t marker_detected;
 
     Contest_Task_UpdatePhaseDistance(period_ms);
     Track_Control_Update(period_ms, yaw_deg);
@@ -260,12 +408,11 @@ static void Contest_Task2_UpdateFinalCurve(uint16_t period_ms)
         return;
     }
 
-    Contest_Task_ApplyTrackTarget();
+    Contest_Task_ApplyCurveTrackTarget();
 
-    marker_detected = Track_IR_IsWideLine(&TrackIrState, CONTEST_TASK2_MARKER_STABLE_COUNT);
-    if((Contest_Task2_CurveComplete() && marker_detected) ||
-       (ContestTaskContext.phase_time_ms >= CONTEST_TASK2_CURVE_TIMEOUT_MS))
+    if(Contest_Task2_StopDistanceReached())
     {
+        Track_Control_SetYawEnable(1);
         Contest_Task_Finish();
     }
 }
@@ -275,12 +422,14 @@ static void Contest_Task_StartTrack(uint8_t task_id)
     switch(task_id)
     {
         case CONTEST_TASK_3:
-            Track_Control_Start(TRACK_MODE_LAP_A, 0.30f);
-            Track_Control_SetStopParam(3000, 25000, 30000, TRACK_WIDE_STABLE_DEFAULT, TRACK_LOST_STOP_DEFAULT);
+            Track_Control_Start(TRACK_MODE_LAP_A, CONTEST_TASK2_CURVE_SPEED);
+            Track_Control_SetYawEnable(0); /* 任务3只在弯道使用公共循迹模块，先禁用 yaw 环隔离极性问题。 */
+            Track_Control_SetStopParam(0, 0, 0, TRACK_WIDE_STABLE_DEFAULT, TRACK_LOST_STOP_DEFAULT);
             break;
 
         case CONTEST_TASK_5:
             Track_Control_Start(TRACK_MODE_AB, 0.28f);
+            Track_Control_SetYawEnable(1);
             Track_Control_SetStopParam(2000, 25000, 30000, TRACK_WIDE_STABLE_DEFAULT, TRACK_LOST_STOP_DEFAULT);
             break;
 
@@ -311,6 +460,7 @@ static void Contest_MergedTask_StartTrack(void)
 
     ContestTaskContext.phase_time_ms = 0;
     ContestTaskContext.phase_distance_m = 0.0f;
+    ContestTaskContext.total_distance_m = 0.0f;
     ContestTaskContext.yaw_deg = 0.0f;
     ContestTaskContext.phase_start_yaw_deg = 0.0f;
     ContestTaskContext.merged_fail_stop = 0;
@@ -674,6 +824,31 @@ static void Contest_Task_Finish(void)
     Contest_Task_ClearMotion();
 }
 
+static void Contest_Task_DebugPrint(uint16_t period_ms)
+{
+    static uint16_t debug_time_ms = 0;
+    uint16_t mask = TrackIrState.line_mask & 0x01FFu;
+
+    debug_time_ms += period_ms;
+    if(debug_time_ms < 100u)
+    {
+        return;
+    }
+    debug_time_ms = 0;
+
+    printf("%.2f,%c%c%c%c%c%c%c%c%c\n",
+           ContestTaskContext.yaw_deg,
+           (mask & (1u << 8)) ? '1' : '0',
+           (mask & (1u << 7)) ? '1' : '0',
+           (mask & (1u << 6)) ? '1' : '0',
+           (mask & (1u << 5)) ? '1' : '0',
+           (mask & (1u << 4)) ? '1' : '0',
+           (mask & (1u << 3)) ? '1' : '0',
+           (mask & (1u << 2)) ? '1' : '0',
+           (mask & (1u << 1)) ? '1' : '0',
+           (mask & (1u << 0)) ? '1' : '0');
+}
+
 void Contest_Task_Update(uint16_t period_ms)
 {
     if(ContestTaskContext.state == CONTEST_STATE_IDLE)
@@ -708,6 +883,8 @@ void Contest_Task_Update(uint16_t period_ms)
         default:
             break;
     }
+
+    Contest_Task_DebugPrint(period_ms);
 
     if(ContestTaskContext.state == CONTEST_STATE_FINISH)
     {
@@ -902,6 +1079,38 @@ static void Contest_Task_OLEDShowMergedRun(uint32_t show_time)
     OLED_Refresh_Gram();
 }
 
+static void Contest_Task_OLEDShowTask3Run(uint32_t show_time)
+{
+    Contest_Task_OLEDShowText6(0, 0, (const u8 *)"T3 T");
+    Contest_Task_OLEDShowNumber6(24, 0, show_time / 1000, 3);
+    Contest_Task_OLEDShowText6(42, 0, (const u8 *)".");
+    Contest_Task_OLEDShowNumber6(48, 0, (show_time % 1000) / 100, 1);
+    Contest_Task_OLEDShowText6(60, 0, (const u8 *)"PH");
+    Contest_Task_OLEDShowNumber6(78, 0, ContestTaskContext.task2_phase, 1);
+
+    Contest_Task_OLEDShowText6(0, 13, (const u8 *)"DIS");
+    Contest_Task_OLEDShowNumber6(24, 13, (u32)(ContestTaskContext.total_distance_m * 1000.0f), 4);
+    Contest_Task_OLEDShowText6(54, 13, (const u8 *)"mm");
+
+    Contest_Task_OLEDShowText6(0, 26, (const u8 *)"YAW");
+    Contest_Task_OLEDShowSigned6(24, 26, ContestTaskContext.yaw_deg, 1, 4);
+    Contest_Task_OLEDShowText6(60, 26, (const u8 *)"deg");
+
+
+    Contest_Task_OLEDShowText6(0, 39, (const u8 *)"LD");
+    Contest_Task_OLEDShowSigned6(18, 39, MOTOR_D.Encoder, 1000, 4);
+    Contest_Task_OLEDShowText6(60, 39, (const u8 *)"RA");
+    Contest_Task_OLEDShowSigned6(78, 39, MOTOR_A.Encoder, 1000, 4);
+
+    // Contest_Task_OLEDShowText6(0, 39, (const u8 *)"MASK");
+    // Contest_Task_OLEDShowNumber6(30, 39, TrackIrState.line_mask & 0x01FFu, 3);
+    // Contest_Task_OLEDShowText6(60, 39, (const u8 *)"RAW");
+    // Contest_Task_OLEDShowNumber6(84, 39, TrackIrState.raw_mask & 0x01FFu, 3);
+
+    Contest_Task_OLEDShowText6(0, 52, (const u8 *)"L:STOP  S:SEL");
+    OLED_Refresh_Gram();
+}
+
 static void Contest_Task_OLEDShowMotorDebug(uint8_t task_id, uint32_t show_time)
 {
     Contest_Task_OLEDShowText6(0, 0, (const u8 *)"MDBG T");
@@ -910,10 +1119,10 @@ static void Contest_Task_OLEDShowMotorDebug(uint8_t task_id, uint32_t show_time)
     Contest_Task_OLEDShowNumber6(84, 0, show_time / 1000, 3);
     Contest_Task_OLEDShowText6(108, 0, (const u8 *)"s");
 
-    Contest_Task_OLEDShowText6(0, 13, (const u8 *)"A");
-    Contest_Task_OLEDShowSigned6(12, 13, MOTOR_A.Encoder, 1000, 4);
-    Contest_Task_OLEDShowText6(60, 13, (const u8 *)"B");
-    Contest_Task_OLEDShowSigned6(72, 13, MOTOR_B.Encoder, 1000, 4);
+    Contest_Task_OLEDShowText6(0, 13, (const u8 *)"LD");
+    Contest_Task_OLEDShowSigned6(18, 13, MOTOR_D.Encoder, 1000, 4);
+    Contest_Task_OLEDShowText6(60, 13, (const u8 *)"RA");
+    Contest_Task_OLEDShowSigned6(78, 13, MOTOR_A.Encoder, 1000, 4);
 
     Contest_Task_OLEDShowText6(0, 26, (const u8 *)"TAR");
     Contest_Task_OLEDShowSigned6(24, 26, CONTEST_TASK1_MOTOR_DEBUG_SPEED, 1000, 4);
@@ -958,6 +1167,12 @@ void Contest_Task_OLEDShow(void)
     if(task_id == CONTEST_TASK_2)
     {
         Contest_Task_OLEDShowServoDebug(show_time);
+        return;
+    }
+
+    if(task_id == CONTEST_TASK_3)
+    {
+        Contest_Task_OLEDShowTask3Run(show_time);
         return;
     }
 

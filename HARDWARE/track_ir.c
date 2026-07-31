@@ -4,6 +4,25 @@ TrackIrState_t TrackIrState;
 
 static const int8_t track_ir_weight[TRACK_IR_NUM] = {-4, -3, -2, -1, 0, 1, 2, 3, 4};
 
+static uint16_t Track_IR_RemapLineMask(uint16_t line_mask)
+{
+    uint16_t remap_mask = 0;
+
+    line_mask &= 0x01FFu;
+
+    if(line_mask & (1u << 3)) remap_mask |= (1u << 0);
+    if(line_mask & (1u << 7)) remap_mask |= (1u << 1);
+    if(line_mask & (1u << 6)) remap_mask |= (1u << 2);
+    if(line_mask & (1u << 5)) remap_mask |= (1u << 3);
+    if(line_mask & (1u << 4)) remap_mask |= (1u << 4);
+    if(line_mask & (1u << 8)) remap_mask |= (1u << 5);
+    if(line_mask & (1u << 2)) remap_mask |= (1u << 6);
+    if(line_mask & (1u << 1)) remap_mask |= (1u << 7);
+    if(line_mask & (1u << 0)) remap_mask |= (1u << 8);
+
+    return remap_mask;
+}
+
 static void Track_IR_GPIO_Config(GPIO_TypeDef *port, uint16_t pin)
 {
     GPIO_InitTypeDef GPIO_InitStructure;
@@ -74,12 +93,15 @@ uint16_t Track_IR_ReadRawMask(void)
 uint16_t Track_IR_ReadLineMask(void)
 {
     uint16_t raw_mask = Track_IR_ReadRawMask();
+    uint16_t line_mask;
 
 #if TRACK_BLACK_LEVEL
-    return raw_mask & 0x01FFu;
+    line_mask = raw_mask & 0x01FFu;
 #else
-    return (~raw_mask) & 0x01FFu;
+    line_mask = (~raw_mask) & 0x01FFu;
 #endif
+
+    return Track_IR_RemapLineMask(line_mask);
 }
 
 float Track_IR_CalcLineError(uint16_t line_mask, uint8_t *active_count)
@@ -127,6 +149,7 @@ void Track_IR_Update(TrackIrState_t *state)
 #else
     state->line_mask = (~state->raw_mask) & 0x01FFu;
 #endif
+    state->line_mask = Track_IR_RemapLineMask(state->line_mask);
 
     state->line_error = Track_IR_CalcLineError(state->line_mask, &active_count);
     state->active_count = active_count;
