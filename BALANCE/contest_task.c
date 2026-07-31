@@ -6,6 +6,14 @@ ContestTaskContext_t ContestTaskContext;
 
 #define CONTEST_TASK1_MOTOR_DEBUG_SPEED        0.20f
 
+#define CONTEST_MERGED_BASE_SPEED              0.25f
+#define CONTEST_MERGED_MIN_SPEED_SCALE         0.35f
+#define CONTEST_MERGED_SLOW_ERR_0P1MM          300.0f
+#define CONTEST_MERGED_AB_MIN_RUN_MS           2000u
+#define CONTEST_MERGED_AA_MIN_RUN_MS           3000u
+#define CONTEST_MERGED_AB_TIMEOUT_MS           30000u
+#define CONTEST_MERGED_AA_TIMEOUT_MS           45000u
+
 #define CONTEST_TASK3_PHASE_HOLD_MS            1500u
 #define CONTEST_TASK3_PHASE_TIMEOUT_MS         8000u
 
@@ -26,6 +34,9 @@ ContestTaskContext_t ContestTaskContext;
 #define CONTEST_TASK2_PHASE_CURVE2             4
 
 static void Contest_Task_Finish(void);
+static float Contest_Task_LimitFloat(float value, float min_value, float max_value);
+static void Contest_MergedTask_FailStop(void);
+static void Contest_MergedTask_Update(uint16_t period_ms);
 
 static void Contest_Task_ClearMotion(void)
 {
@@ -47,6 +58,7 @@ static void Contest_Task_ResetRuntime(void)
     ContestTaskContext.phase_start_yaw_deg = 0.0f;
     ContestTaskContext.task2_phase = CONTEST_TASK2_PHASE_IDLE;
     ContestTaskContext.task3_phase = CONTEST_TASK3_PHASE_IDLE;
+    ContestTaskContext.merged_fail_stop = 0;
     Ball_Control_Enable(0);
     Ball_Control_Reset();
     Ball_Control_StopSafe();
@@ -66,6 +78,13 @@ static uint8_t Contest_Task_IsExecutableTask(uint8_t task_id)
             task_id == CONTEST_TASK_5 ||
             task_id == CONTEST_TASK_6 ||
             task_id == CONTEST_TASK_SERVO_DEBUG) ? 1 : 0;
+}
+
+static uint8_t Contest_Task_IsMergedTask(uint8_t task_id)
+{
+    return (task_id == CONTEST_TASK_4 ||
+            task_id == CONTEST_TASK_5 ||
+            task_id == CONTEST_TASK_6) ? 1 : 0;
 }
 
 static float Contest_Task_UpdateYaw(uint16_t period_ms)
@@ -91,6 +110,15 @@ static void Contest_Task_SetDiffTarget(float left, float right)
 static void Contest_Task_ApplyTrackTarget(void)
 {
     Contest_Task_SetDiffTarget(TrackControlState.left_target_speed, TrackControlState.right_target_speed);
+}
+
+static void Contest_Task_ApplyTrackTargetScale(float speed_scale)
+{
+    speed_scale = Contest_Task_LimitFloat(speed_scale,
+                                          CONTEST_MERGED_MIN_SPEED_SCALE,
+                                          1.0f);
+    Contest_Task_SetDiffTarget(TrackControlState.left_target_speed * speed_scale,
+                                TrackControlState.right_target_speed * speed_scale);
 }
 
 static float Contest_Task_AbsFloat(float value)
@@ -295,6 +323,92 @@ static void Contest_Task_UpdateTrack(uint16_t period_ms)
     }
 }
 
+static void Contest_MergedTask_StartTrack(void)
+{
+    float target_0p1mm = (float)ContestTaskContext.merged_balance_cm * 100.0f;
+
+    ContestTaskContext.phase_time_ms = 0;
+    ContestTaskContext.phase_distance_m = 0.0f;
+    ContestTaskContext.yaw_deg = 0.0f;
+    ContestTaskContext.phase_start_yaw_deg = 0.0f;
+    ContestTaskContext.merged_fail_stop = 0;
+
+    Ball_Control_Reset();
+    Ball_Control_SetTarget(target_0p1mm);
+    Ball_Control_Enable(1);
+
+    if(ContestTaskContext.merged_track_mode == CONTEST_MERGED_TRACK_MODE_AA)
+    {
+        Track_Control_Start(TRACK_MODE_LAP_A, CONTEST_MERGED_BASE_SPEED);
+        Track_Control_SetStopParam(CONTEST_MERGED_AA_MIN_RUN_MS,
+                                    CONTEST_MERGED_AA_TIMEOUT_MS,
+                                    CONTEST_MERGED_AA_TIMEOUT_MS,
+                                    TRACK_WIDE_STABLE_DEFAULT,
+                                    TRACK_LOST_STOP_DEFAULT);
+    }
+    else
+    {
+        Track_Control_Start(TRACK_MODE_AB, CONTEST_MERGED_BASE_SPEED);
+        Track_Control_SetStopParam(CONTEST_MERGED_AB_MIN_RUN_MS,
+                                    CONTEST_MERGED_AB_TIMEOUT_MS,
+                                    CONTEST_MERGED_AB_TIMEOUT_MS,
+                                    TRACK_WIDE_STABLE_DEFAULT,
+                                    TRACK_LOST_STOP_DEFAULT);
+    }
+}
+
+static void Contest_MergedTask_FailStop(void)
+{
+    ContestTaskContext.finished_task = ContestTaskContext.running_task;
+    ContestTaskContext.finished_time_ms = ContestTaskContext.state_time_ms;
+    ContestTaskContext.merged_fail_stop = 1;
+    ContestTaskContext.merged_config_state = CONTEST_MERGED_CFG_FAIL_STOP;
+    ContestTaskContext.state = CONTEST_STATE_IDLE;
+    ContestTaskContext.running_task = CONTEST_TASK_NONE;
+
+    Track_Control_Stop(TRACK_STOP_BY_USER);
+    Ball_Control_Enable(0);
+    Ball_Control_StopSafe();
+    Contest_Task_ClearMotion();
+}
+
+static void Contest_MergedTask_Update(uint16_t period_ms)
+{
+    float yaw_deg;
+    float abs_error;
+    float speed_scale;
+
+    switch(ContestTaskContext.state)
+    {
+        case CONTEST_STATE_START:
+            Contest_MergedTask_StartTrack();
+            ContestTaskContext.state = CONTEST_STATE_TRACK;
+            ContestTaskContext.merged_config_state = CONTEST_MERGED_CFG_RUNNING;
+            break;
+
+        case CONTEST_STATE_TRACK:
+            ContestTaskContext.phase_time_ms += period_ms;
+            yaw_deg = Contest_Task_UpdateYaw(period_ms);
+
+            Track_Control_Update(period_ms, yaw_deg);
+            Ball_Control_Update(period_ms);
+
+            if(Track_Control_IsStopRequested() || Ball_Control_IsLost())
+            {
+                Contest_MergedTask_FailStop();
+                return;
+            }
+
+            abs_error = Ball_Control_GetAbsError();
+            speed_scale = 1.0f - (abs_error / CONTEST_MERGED_SLOW_ERR_0P1MM);
+            Contest_Task_ApplyTrackTargetScale(speed_scale);
+            break;
+
+        default:
+            break;
+    }
+}
+
 static void Contest_Task2_Update(uint16_t period_ms)
 {
     switch(ContestTaskContext.state)
@@ -423,50 +537,17 @@ static void Contest_TaskServoDebug_Update(uint16_t period_ms)
 
 static void Contest_Task4_Update(uint16_t period_ms)
 {
-    switch(ContestTaskContext.state)
-    {
-        case CONTEST_STATE_START:
-            Contest_Task_StartTrack(CONTEST_TASK_4);
-            ContestTaskContext.state = CONTEST_STATE_TRACK;
-            break;
-        case CONTEST_STATE_TRACK:
-            Contest_Task_UpdateTrack(period_ms);
-            break;
-        default:
-            break;
-    }
+    Contest_MergedTask_Update(period_ms);
 }
 
 static void Contest_Task5_Update(uint16_t period_ms)
 {
-    switch(ContestTaskContext.state)
-    {
-        case CONTEST_STATE_START:
-            Contest_Task_StartTrack(CONTEST_TASK_5);
-            ContestTaskContext.state = CONTEST_STATE_TRACK;
-            break;
-        case CONTEST_STATE_TRACK:
-            Contest_Task_UpdateTrack(period_ms);
-            break;
-        default:
-            break;
-    }
+    Contest_MergedTask_Update(period_ms);
 }
 
 static void Contest_Task6_Update(uint16_t period_ms)
 {
-    switch(ContestTaskContext.state)
-    {
-        case CONTEST_STATE_START:
-            Contest_Task_StartTrack(CONTEST_TASK_6);
-            ContestTaskContext.state = CONTEST_STATE_TRACK;
-            break;
-        case CONTEST_STATE_TRACK:
-            Contest_Task_UpdateTrack(period_ms);
-            break;
-        default:
-            break;
-    }
+    Contest_MergedTask_Update(period_ms);
 }
 
 void Contest_Task_Init(void)
@@ -474,6 +555,10 @@ void Contest_Task_Init(void)
     ContestTaskContext.selected_task = CONTEST_TASK_1;
     ContestTaskContext.running_task = CONTEST_TASK_NONE;
     ContestTaskContext.state = CONTEST_STATE_IDLE;
+    ContestTaskContext.merged_config_state = CONTEST_MERGED_CFG_IDLE;
+    ContestTaskContext.merged_track_mode = CONTEST_MERGED_TRACK_MODE_AB;
+    ContestTaskContext.merged_balance_cm = CONTEST_MERGED_BALANCE_DEFAULT_CM;
+    ContestTaskContext.merged_fail_stop = 0;
     Contest_Task_ResetRuntime();
     OLED_Clear();
 }
@@ -493,6 +578,8 @@ void Contest_Task_Select(uint8_t task_id)
     ContestTaskContext.selected_task = task_id;
     ContestTaskContext.finished_task = CONTEST_TASK_NONE;
     ContestTaskContext.finished_time_ms = 0;
+    ContestTaskContext.merged_config_state = CONTEST_MERGED_CFG_IDLE;
+    ContestTaskContext.merged_fail_stop = 0;
 }
 
 void Contest_Task_StartSelected(void)
@@ -505,6 +592,10 @@ void Contest_Task_StartSelected(void)
     Contest_Task_ResetRuntime();
     ContestTaskContext.running_task = ContestTaskContext.selected_task;
     ContestTaskContext.state = CONTEST_STATE_START;
+    if(Contest_Task_IsMergedTask(ContestTaskContext.running_task))
+    {
+        ContestTaskContext.merged_config_state = CONTEST_MERGED_CFG_RUNNING;
+    }
 }
 
 void Contest_Task_KeyAction(uint8_t key_action)
@@ -516,6 +607,25 @@ void Contest_Task_KeyAction(uint8_t key_action)
         if(Contest_Task_IsRunning())
         {
             return;
+        }
+
+        if(Contest_Task_IsMergedTask(ContestTaskContext.selected_task))
+        {
+            if(ContestTaskContext.merged_config_state == CONTEST_MERGED_CFG_MODE_SELECT)
+            {
+                ContestTaskContext.merged_track_mode = (ContestTaskContext.merged_track_mode == CONTEST_MERGED_TRACK_MODE_AB) ?
+                                                       CONTEST_MERGED_TRACK_MODE_AA : CONTEST_MERGED_TRACK_MODE_AB;
+                return;
+            }
+            if(ContestTaskContext.merged_config_state == CONTEST_MERGED_CFG_BALANCE_SELECT)
+            {
+                ContestTaskContext.merged_balance_cm += CONTEST_MERGED_BALANCE_STEP_CM;
+                if(ContestTaskContext.merged_balance_cm > CONTEST_MERGED_BALANCE_MAX_CM)
+                {
+                    ContestTaskContext.merged_balance_cm = CONTEST_MERGED_BALANCE_MIN_CM;
+                }
+                return;
+            }
         }
 
         next_task = ContestTaskContext.selected_task + 1;
@@ -531,6 +641,28 @@ void Contest_Task_KeyAction(uint8_t key_action)
         {
             Contest_Task_Stop();
             return;
+        }
+
+        if(Contest_Task_IsMergedTask(ContestTaskContext.selected_task))
+        {
+            if(ContestTaskContext.merged_config_state == CONTEST_MERGED_CFG_IDLE ||
+               ContestTaskContext.merged_config_state == CONTEST_MERGED_CFG_FAIL_STOP)
+            {
+                ContestTaskContext.merged_config_state = CONTEST_MERGED_CFG_MODE_SELECT;
+                ContestTaskContext.merged_fail_stop = 0;
+                return;
+            }
+            if(ContestTaskContext.merged_config_state == CONTEST_MERGED_CFG_MODE_SELECT)
+            {
+                ContestTaskContext.merged_config_state = CONTEST_MERGED_CFG_BALANCE_SELECT;
+                return;
+            }
+            if(ContestTaskContext.merged_config_state == CONTEST_MERGED_CFG_BALANCE_SELECT ||
+               ContestTaskContext.merged_config_state == CONTEST_MERGED_CFG_READY)
+            {
+                Contest_Task_StartSelected();
+                return;
+            }
         }
 
         Contest_Task_StartSelected();
@@ -549,6 +681,10 @@ void Contest_Task_Stop(void)
     ContestTaskContext.state_time_ms = 0;
     ContestTaskContext.phase_time_ms = 0;
     ContestTaskContext.task3_phase = CONTEST_TASK3_PHASE_IDLE;
+    if(ContestTaskContext.merged_config_state == CONTEST_MERGED_CFG_RUNNING)
+    {
+        ContestTaskContext.merged_config_state = CONTEST_MERGED_CFG_READY;
+    }
 }
 
 static void Contest_Task_Finish(void)
@@ -556,6 +692,10 @@ static void Contest_Task_Finish(void)
     ContestTaskContext.finished_task = ContestTaskContext.running_task;
     ContestTaskContext.finished_time_ms = ContestTaskContext.state_time_ms;
     ContestTaskContext.state = CONTEST_STATE_FINISH;
+    if(Contest_Task_IsMergedTask(ContestTaskContext.running_task))
+    {
+        ContestTaskContext.merged_config_state = CONTEST_MERGED_CFG_READY;
+    }
     Track_Control_Stop(TRACK_STOP_BY_USER);
     Ball_Control_Enable(0);
     Ball_Control_StopSafe();
@@ -711,6 +851,91 @@ static void Contest_Task_OLEDShowServoDebug(uint32_t show_time)
     OLED_Refresh_Gram();
 }
 
+static void Contest_Task_OLEDShowMergedMode(u8 x, u8 y)
+{
+    if(ContestTaskContext.merged_track_mode == CONTEST_MERGED_TRACK_MODE_AA)
+    {
+        Contest_Task_OLEDShowText6(x, y, (const u8 *)"AA");
+    }
+    else
+    {
+        Contest_Task_OLEDShowText6(x, y, (const u8 *)"AB");
+    }
+}
+
+static void Contest_Task_OLEDShowMergedCfg(void)
+{
+    Contest_Task_OLEDShowText6(0, 0, (const u8 *)"MERGED CFG");
+    Contest_Task_OLEDShowText6(72, 0, (const u8 *)"T");
+    Contest_Task_OLEDShowNumber6(84, 0, ContestTaskContext.selected_task, 1);
+
+    Contest_Task_OLEDShowText6(0, 13, (const u8 *)"MODE");
+    Contest_Task_OLEDShowMergedMode(36, 13);
+    if(ContestTaskContext.merged_config_state == CONTEST_MERGED_CFG_MODE_SELECT)
+    {
+        Contest_Task_OLEDShowText6(60, 13, (const u8 *)"<SEL");
+    }
+
+    Contest_Task_OLEDShowText6(0, 26, (const u8 *)"BAL");
+    Contest_Task_OLEDShowSigned6(30, 26, (float)ContestTaskContext.merged_balance_cm, 1, 2);
+    Contest_Task_OLEDShowText6(54, 26, (const u8 *)"cm");
+    if(ContestTaskContext.merged_config_state == CONTEST_MERGED_CFG_BALANCE_SELECT)
+    {
+        Contest_Task_OLEDShowText6(78, 26, (const u8 *)"<SEL");
+    }
+
+    Contest_Task_OLEDShowText6(0, 39, (const u8 *)"CFG");
+    Contest_Task_OLEDShowNumber6(24, 39, ContestTaskContext.merged_config_state, 1);
+    Contest_Task_OLEDShowText6(42, 39, (const u8 *)"FAIL");
+    Contest_Task_OLEDShowNumber6(72, 39, ContestTaskContext.merged_fail_stop, 1);
+
+    if(ContestTaskContext.merged_config_state == CONTEST_MERGED_CFG_IDLE)
+    {
+        Contest_Task_OLEDShowText6(0, 52, (const u8 *)"L:CFG S:TASK");
+    }
+    else if(ContestTaskContext.merged_config_state == CONTEST_MERGED_CFG_MODE_SELECT)
+    {
+        Contest_Task_OLEDShowText6(0, 52, (const u8 *)"S:MODE L:OK");
+    }
+    else if(ContestTaskContext.merged_config_state == CONTEST_MERGED_CFG_BALANCE_SELECT)
+    {
+        Contest_Task_OLEDShowText6(0, 52, (const u8 *)"S:BAL  L:RUN");
+    }
+    else
+    {
+        Contest_Task_OLEDShowText6(0, 52, (const u8 *)"L:RUN  S:TASK");
+    }
+    OLED_Refresh_Gram();
+}
+
+static void Contest_Task_OLEDShowMergedRun(uint32_t show_time)
+{
+    Contest_Task_OLEDShowText6(0, 0, (const u8 *)"MERGED RUN");
+    Contest_Task_OLEDShowText6(72, 0, (const u8 *)"T");
+    Contest_Task_OLEDShowNumber6(84, 0, show_time / 1000, 3);
+    Contest_Task_OLEDShowText6(108, 0, (const u8 *)"s");
+
+    Contest_Task_OLEDShowText6(0, 13, (const u8 *)"MODE");
+    Contest_Task_OLEDShowMergedMode(36, 13);
+    Contest_Task_OLEDShowText6(60, 13, (const u8 *)"BAL");
+    Contest_Task_OLEDShowSigned6(84, 13, (float)ContestTaskContext.merged_balance_cm, 1, 2);
+    Contest_Task_OLEDShowText6(108, 13, (const u8 *)"cm");
+
+    Contest_Task_OLEDShowText6(0, 26, (const u8 *)"ERR");
+    Contest_Task_OLEDShowSigned6(24, 26, BallControlState.error_0p1mm, 1, 4);
+    Contest_Task_OLEDShowText6(78, 26, (const u8 *)"0.1mm");
+
+    Contest_Task_OLEDShowText6(0, 39, (const u8 *)"STP");
+    Contest_Task_OLEDShowNumber6(24, 39, TrackControlState.stop_request, 1);
+    Contest_Task_OLEDShowText6(42, 39, (const u8 *)"LOST");
+    Contest_Task_OLEDShowNumber6(72, 39, Ball_Control_IsLost(), 1);
+    Contest_Task_OLEDShowText6(90, 39, (const u8 *)"F");
+    Contest_Task_OLEDShowNumber6(102, 39, ContestTaskContext.merged_fail_stop, 1);
+
+    Contest_Task_OLEDShowText6(0, 52, (const u8 *)"L:STOP FAILSAFE");
+    OLED_Refresh_Gram();
+}
+
 static void Contest_Task_OLEDShowMotorDebug(uint8_t task_id, uint32_t show_time)
 {
     Contest_Task_OLEDShowText6(0, 0, (const u8 *)"MDBG T");
@@ -773,6 +998,21 @@ void Contest_Task_OLEDShow(void)
     if(task_id == CONTEST_TASK_SERVO_DEBUG)
     {
         Contest_Task_OLEDShowServoDebug(show_time);
+        return;
+    }
+
+    if(Contest_Task_IsMergedTask(task_id))
+    {
+        if(Contest_Task_IsRunning() ||
+           ContestTaskContext.merged_config_state == CONTEST_MERGED_CFG_RUNNING ||
+           ContestTaskContext.merged_config_state == CONTEST_MERGED_CFG_FAIL_STOP)
+        {
+            Contest_Task_OLEDShowMergedRun(show_time);
+        }
+        else
+        {
+            Contest_Task_OLEDShowMergedCfg();
+        }
         return;
     }
 

@@ -14,6 +14,21 @@
 
 #define CONTEST_TRACK_PERIOD_MS       10
 
+#define CONTEST_MERGED_TRACK_MODE_AB  0
+#define CONTEST_MERGED_TRACK_MODE_AA  1
+
+#define CONTEST_MERGED_BALANCE_MIN_CM      (-12)
+#define CONTEST_MERGED_BALANCE_MAX_CM      12
+#define CONTEST_MERGED_BALANCE_DEFAULT_CM  0
+#define CONTEST_MERGED_BALANCE_STEP_CM     1
+
+#define CONTEST_MERGED_CFG_IDLE            0
+#define CONTEST_MERGED_CFG_MODE_SELECT     1
+#define CONTEST_MERGED_CFG_BALANCE_SELECT  2
+#define CONTEST_MERGED_CFG_READY           3
+#define CONTEST_MERGED_CFG_RUNNING         4
+#define CONTEST_MERGED_CFG_FAIL_STOP       5
+
 #define CONTEST_TASK3_PHASE_IDLE      0
 #define CONTEST_TASK3_PHASE_CENTER    1
 #define CONTEST_TASK3_PHASE_POS_5CM   2
@@ -36,6 +51,10 @@ typedef struct
     uint8_t state;
     uint8_t task2_phase;
     uint8_t task3_phase;
+    uint8_t merged_config_state;
+    uint8_t merged_track_mode;
+    uint8_t merged_fail_stop;
+    int8_t merged_balance_cm;
     uint8_t finished_task;
     uint32_t state_time_ms;
     uint32_t phase_time_ms;
