@@ -49,14 +49,16 @@ ContestTaskContext_t ContestTaskContext;
 #define CONTEST_TASK2_CURVE2_FF_DIR            -1.0f   /* 赛题任务2第二个弯道前馈方向，方向反时改为 1.0f。 */
 
 #define CONTEST_MERGED_AB_STRAIGHT1_DISTANCE_M 1.80f   /* 任务4 A->B 第一段直行目标里程，独立于任务5/6 A->A 调参。 */
-#define CONTEST_MERGED_AA_STRAIGHT1_DISTANCE_M 1.50f   /* 任务5/6 A->A 第一段直行目标里程，独立于任务4 A->B 调参。 */
+#define CONTEST_MERGED_AA_STRAIGHT1_DISTANCE_M 1.44f   /* 任务5/6 A->A 第一段直行目标里程，独立于任务4 A->B 调参。 */
 #define CONTEST_MERGED_CURVE1_DISTANCE_M       ((3.1416f * CONTEST_TASK2_CURVE_RADIUS_M) + 0.04f) /* 任务4/5/6第一个半圆弯道目标里程。 */
 #define CONTEST_MERGED_STRAIGHT2_DISTANCE_M    1.25f   /* 任务4/5/6第二段直行目标里程，独立于任务3调参。 */
 #define CONTEST_MERGED_CURVE2_DISTANCE_M       ((3.1416f * CONTEST_TASK2_CURVE_RADIUS_M) + 0.04f) /* 任务4/5/6第二个半圆弯道目标里程。 */
-#define CONTEST_MERGED_STOP_DISTANCE_M         5.72f   /* 任务4/5/6总里程停车位置，后续按任务4 AB/任务5 AA 分别微调。 */
-#define CONTEST_MERGED_STRAIGHT_SPEED          0.37f   /* 任务4/5/6直线段基础速度，单位 m/s。 */
-#define CONTEST_MERGED_CURVE_SPEED             0.25f   /* 任务4/5/6弯道循迹基础速度，单位 m/s。 */
-#define CONTEST_MERGED_ACCEL_LIMIT_MPS2        0.05f   /* 任务4/5/6慢启动加速度限制，单位 m/s^2；越小起步越柔和，0.08表示约2.75s升到0.22m/s。 */
+#define CONTEST_MERGED_STOP_DISTANCE_M         6.10f   /* 任务4/5/6总里程停车位置，后续按任务4 AB/任务5 AA 分别微调。 */
+#define CONTEST_MERGED_AB_STRAIGHT_SPEED       0.37f   /* 任务4 A->B 直线段基础速度，单位 m/s，独立于任务5/6 A->A 调参。 */
+#define CONTEST_MERGED_AB_CURVE_SPEED          0.25f   /* 任务4 A->B 弯道循迹基础速度，单位 m/s，独立于任务5/6 A->A 调参。 */
+#define CONTEST_MERGED_AA_STRAIGHT_SPEED       0.23f   /* 任务5/6 A->A 直线段基础速度，单位 m/s，独立于任务4 A->B 调参。 */
+#define CONTEST_MERGED_AA_CURVE_SPEED          0.23f   /* 任务5/6 A->A 弯道循迹基础速度，单位 m/s，独立于任务4 A->B 调参。 */
+#define CONTEST_MERGED_ACCEL_LIMIT_MPS2        0.05f   /* 任务4/5/6慢启动加速度限制，单位 m/s^2；越小起步越柔和，0.05表示约7.4s升到0.37m/s。 */
 #define CONTEST_MERGED_STRAIGHT1_YAW_SCALE     0.35f   /* 任务4/5/6第一段直行 yaw/IMU 环输出比例。 */
 #define CONTEST_MERGED_STRAIGHT1_LINE_SCALE    0.65f   /* 任务4/5/6第一段直行红外循迹环输出比例。 */
 #define CONTEST_MERGED_STRAIGHT2_YAW_SCALE     0.70f   /* 任务4/5/6第二段直行 yaw/IMU 环输出比例。 */
@@ -352,14 +354,24 @@ static void Contest_Task_UpdatePhaseDistance(uint16_t period_ms)
 
 static float Contest_Task2_GetStraightSpeed(void)
 {
+    if(ContestTaskContext.running_task == CONTEST_TASK_5)
+    {
+        return CONTEST_MERGED_AB_STRAIGHT_SPEED;
+    }
+
     return Contest_Task_IsMergedTask(ContestTaskContext.running_task) ?
-           CONTEST_MERGED_STRAIGHT_SPEED : CONTEST_TASK2_BASE_SPEED;
+           CONTEST_MERGED_AA_STRAIGHT_SPEED : CONTEST_TASK2_BASE_SPEED;
 }
 
 static float Contest_Task2_GetCurveSpeed(void)
 {
+    if(ContestTaskContext.running_task == CONTEST_TASK_5)
+    {
+        return CONTEST_MERGED_AB_CURVE_SPEED;
+    }
+
     return Contest_Task_IsMergedTask(ContestTaskContext.running_task) ?
-           CONTEST_MERGED_CURVE_SPEED : CONTEST_TASK2_CURVE_SPEED;
+           CONTEST_MERGED_AA_CURVE_SPEED : CONTEST_TASK2_CURVE_SPEED;
 }
 
 static float Contest_Task2_GetStopDistance(void)
