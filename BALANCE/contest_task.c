@@ -16,7 +16,7 @@ ContestTaskContext_t ContestTaskContext;
 #define CONTEST_MERGED_AB_TIMEOUT_MS           30000u  /* 任务4 AB 模式运动阶段强制停车超时时间，单位 ms。 */
 #define CONTEST_MERGED_AA_TIMEOUT_MS           45000u  /* 任务5/6 AA 模式运动阶段强制停车超时时间，单位 ms。 */
 
-#define CONTEST_TASK3_PHASE_HOLD_MS            1500u   /* 滚球稳定每个目标位置至少保持的时间，单位 ms。 */
+#define CONTEST_TASK3_PHASE_HOLD_MS            1000u   /* 滚球稳定每个目标位置至少保持的时间，单位 ms。 */
 #define CONTEST_TASK3_PHASE_TIMEOUT_MS         8000u   /* 滚球稳定单个目标位置的最长等待时间，超时后切换下一阶段，单位 ms。 */
 
 #define CONTEST_TASK2_CURVE_RADIUS_M           0.50f   /* 赛题任务2半圆弯道半径参考值，单位 m，用于给弯道阶段里程提供初始估算。 */
@@ -813,7 +813,7 @@ static void Contest_Task3_Update(uint16_t period_ms)
     {
         case CONTEST_STATE_START:
             Ball_Control_Reset();
-            Contest_Task3_SetPhase(CONTEST_TASK3_PHASE_CENTER, BALL_TARGET_CENTER_0P1MM);
+            Contest_Task3_SetPhase(CONTEST_TASK3_PHASE_POS_5CM, BALL_TARGET_POSITIVE_5CM_0P1MM);
             ContestTaskContext.state = CONTEST_STATE_TRACK;
             break;
 
@@ -841,12 +841,20 @@ static void Contest_Task3_Update(uint16_t period_ms)
                        ContestTaskContext.phase_time_ms >= CONTEST_TASK3_PHASE_TIMEOUT_MS)
                     {
                         ContestTaskContext.task3_phase = CONTEST_TASK3_PHASE_FINISH;
-                        Contest_Task_Finish();
+                        ContestTaskContext.finished_task = ContestTaskContext.running_task;
+                        ContestTaskContext.finished_time_ms = ContestTaskContext.state_time_ms;
+                        Ball_Control_SetTarget(BALL_TARGET_NEGATIVE_5CM_0P1MM);
+                        Ball_Control_Enable(1);
                     }
                     break;
 
+                case CONTEST_TASK3_PHASE_FINISH:
+                    Ball_Control_SetTarget(BALL_TARGET_NEGATIVE_5CM_0P1MM);
+                    Ball_Control_Enable(1);
+                    break;
+
                 default:
-                    Contest_Task3_SetPhase(CONTEST_TASK3_PHASE_CENTER, BALL_TARGET_CENTER_0P1MM);
+                    Contest_Task3_SetPhase(CONTEST_TASK3_PHASE_POS_5CM, BALL_TARGET_POSITIVE_5CM_0P1MM);
                     break;
             }
             break;
@@ -1392,7 +1400,16 @@ void Contest_Task_OLEDShow(void)
     if(Contest_Task_IsRunning())
     {
         task_id = ContestTaskContext.running_task;
-        show_time = Contest_Task_IsMergedTask(task_id) ? ContestTaskContext.merged_motion_time_ms : ContestTaskContext.state_time_ms;
+        if((task_id == CONTEST_TASK_4) &&
+           (ContestTaskContext.task3_phase == CONTEST_TASK3_PHASE_FINISH) &&
+           (ContestTaskContext.finished_time_ms != 0))
+        {
+            show_time = ContestTaskContext.finished_time_ms;
+        }
+        else
+        {
+            show_time = Contest_Task_IsMergedTask(task_id) ? ContestTaskContext.merged_motion_time_ms : ContestTaskContext.state_time_ms;
+        }
     }
     else if(ContestTaskContext.finished_time_ms != 0)
     {

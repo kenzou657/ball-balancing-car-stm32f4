@@ -69,12 +69,12 @@ static void Ball_Control_UpdateStableJudge(void)
 void Ball_Control_Init(void)
 {
     BallControlParam.alpha = 0.25f;
-    BallControlParam.kp = 0.025f;
-    BallControlParam.ki = 0.010f;
+    BallControlParam.kp = 0.024f;
+    BallControlParam.ki = 0.012f;
     BallControlParam.kd = 0.010f;
     BallControlParam.kf = 6.700f;
     BallControlParam.integral_limit = 3000.0f;
-    BallControlParam.angle_limit_deg = 25.0f;
+    BallControlParam.angle_limit_deg = 40.0f;
     BallControlParam.deadband_deg = 1.0f;
     BallControlParam.rate_limit_deg = 2.0f;
     BallControlParam.servo_mid_us = BALL_SERVO_DEFAULT_MID_US;
