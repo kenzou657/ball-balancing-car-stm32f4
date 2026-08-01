@@ -37,6 +37,7 @@ ContestTaskContext_t ContestTaskContext;
 #define CONTEST_TASK2_YAW_KD                   0.010f   /* 赛题任务2直线段 yaw 位置环 D 系数，用于抑制直线摆动。 */
 #define CONTEST_TASK2_YAW_INTEGRAL_LIMIT       30.0f   /* 赛题任务2直线段 yaw 积分限幅，单位 deg 累加量。 */
 #define CONTEST_TASK2_YAW_LIMIT                0.08f   /* 赛题任务2直线段 yaw PID 输出限幅，单位 m/s。 */
+#define CONTEST_TASK2_YAW0_TURN_SPEED_SCALE    1.50f   /* 赛题任务2 yaw0 原地转弯速度系数；最终左右轮差速 = yaw PID 输出 * 该系数。 */
 #define CONTEST_TASK2_STRAIGHT1_YAW_SCALE      0.30f   /* 赛题任务2第一段直行 yaw/IMU 环输出比例，1.00 表示完整使用 yaw PID 输出。 */
 #define CONTEST_TASK2_STRAIGHT1_LINE_SCALE     0.70f   /* 赛题任务2第一段直行红外循迹环输出比例，调小可降低直线贴线修正力度。 */
 #define CONTEST_TASK2_STRAIGHT2_YAW_SCALE      0.70f   /* 赛题任务2第二段直行 yaw/IMU 环输出比例，可与第一段独立调节。 */
@@ -47,20 +48,21 @@ ContestTaskContext_t ContestTaskContext;
 #define CONTEST_TASK2_CURVE_LINE_SCALE         0.30f   /* 赛题任务2弯道红外 PID 输出比例，调小可降低循迹反馈修正力度。 */
 #define CONTEST_TASK2_CURVE1_FF_DIR            -1.0f   /* 赛题任务2第一个弯道前馈方向，方向反时改为 1.0f。 */
 #define CONTEST_TASK2_CURVE2_FF_DIR            -1.0f   /* 赛题任务2第二个弯道前馈方向，方向反时改为 1.0f。 */
+#define CONTEST_TASK2_YAW0_TURN_MS             500u   /* 赛题任务2到达总里程后，沿 yaw0 方向原地转弯保持时间，不计入比赛计时。 */
 
 #define CONTEST_MERGED_AB_STRAIGHT1_DISTANCE_M 1.80f   /* 任务4 A->B 第一段直行目标里程，独立于任务5/6 A->A 调参。 */
-#define CONTEST_MERGED_AA_STRAIGHT1_DISTANCE_M 1.44f   /* 任务5/6 A->A 第一段直行目标里程，独立于任务4 A->B 调参。 */
-#define CONTEST_MERGED_CURVE1_DISTANCE_M       ((3.1416f * CONTEST_TASK2_CURVE_RADIUS_M) + 0.04f) /* 任务4/5/6第一个半圆弯道目标里程。 */
-#define CONTEST_MERGED_STRAIGHT2_DISTANCE_M    1.25f   /* 任务4/5/6第二段直行目标里程，独立于任务3调参。 */
-#define CONTEST_MERGED_CURVE2_DISTANCE_M       ((3.1416f * CONTEST_TASK2_CURVE_RADIUS_M) + 0.04f) /* 任务4/5/6第二个半圆弯道目标里程。 */
+#define CONTEST_MERGED_AA_STRAIGHT1_DISTANCE_M 1.40f   /* 任务5/6 A->A 第一段直行目标里程，独立于任务4 A->B 调参。 */
+#define CONTEST_MERGED_CURVE1_DISTANCE_M       ((3.1416f * CONTEST_TASK2_CURVE_RADIUS_M) + 0.10f) /* 任务4/5/6第一个半圆弯道目标里程。 */
+#define CONTEST_MERGED_STRAIGHT2_DISTANCE_M    1.20f   /* 任务4/5/6第二段直行目标里程，独立于任务3调参。 */
+#define CONTEST_MERGED_CURVE2_DISTANCE_M       ((3.1416f * CONTEST_TASK2_CURVE_RADIUS_M) + 0.20f) /* 任务4/5/6第二个半圆弯道目标里程。 */
 #define CONTEST_MERGED_STOP_DISTANCE_M         6.10f   /* 任务4/5/6总里程停车位置，后续按任务4 AB/任务5 AA 分别微调。 */
 #define CONTEST_MERGED_AB_STRAIGHT_SPEED       0.37f   /* 任务4 A->B 直线段基础速度，单位 m/s，独立于任务5/6 A->A 调参。 */
 #define CONTEST_MERGED_AB_CURVE_SPEED          0.25f   /* 任务4 A->B 弯道循迹基础速度，单位 m/s，独立于任务5/6 A->A 调参。 */
 #define CONTEST_MERGED_AA_STRAIGHT_SPEED       0.23f   /* 任务5/6 A->A 直线段基础速度，单位 m/s，独立于任务4 A->B 调参。 */
 #define CONTEST_MERGED_AA_CURVE_SPEED          0.23f   /* 任务5/6 A->A 弯道循迹基础速度，单位 m/s，独立于任务4 A->B 调参。 */
 #define CONTEST_MERGED_ACCEL_LIMIT_MPS2        0.05f   /* 任务4/5/6慢启动加速度限制，单位 m/s^2；越小起步越柔和，0.05表示约7.4s升到0.37m/s。 */
-#define CONTEST_MERGED_STRAIGHT1_YAW_SCALE     0.35f   /* 任务4/5/6第一段直行 yaw/IMU 环输出比例。 */
-#define CONTEST_MERGED_STRAIGHT1_LINE_SCALE    0.65f   /* 任务4/5/6第一段直行红外循迹环输出比例。 */
+#define CONTEST_MERGED_STRAIGHT1_YAW_SCALE     0.60f   /* 任务4/5/6第一段直行 yaw/IMU 环输出比例。 */
+#define CONTEST_MERGED_STRAIGHT1_LINE_SCALE    0.40f   /* 任务4/5/6第一段直行红外循迹环输出比例。 */
 #define CONTEST_MERGED_STRAIGHT2_YAW_SCALE     0.70f   /* 任务4/5/6第二段直行 yaw/IMU 环输出比例。 */
 #define CONTEST_MERGED_STRAIGHT2_LINE_SCALE    0.30f   /* 任务4/5/6第二段直行红外循迹环输出比例。 */
 #define CONTEST_MERGED_CURVE_FF_DELTA          0.06f   /* 任务4/5/6弯道基础转向前馈差速，单位 m/s。 */
@@ -72,12 +74,15 @@ ContestTaskContext_t ContestTaskContext;
 #define CONTEST_TASK2_PHASE_STRAIGHT1          1       /* 赛题任务2第一段直行阶段。 */
 #define CONTEST_TASK2_PHASE_CURVE1             2       /* 赛题任务2第一个半圆弯道阶段。 */
 #define CONTEST_TASK2_PHASE_STRAIGHT2          3       /* 赛题任务2第二段直行阶段。 */
-#define CONTEST_TASK2_PHASE_CURVE2             4       /* 赛题任务2第二个半圆弯道阶段，结束后停车。 */
+#define CONTEST_TASK2_PHASE_CURVE2             4       /* 赛题任务2第二个半圆弯道阶段。 */
+#define CONTEST_TASK2_PHASE_YAW0_TURN          5       /* 赛题任务2总里程到达后的 yaw0 原地转弯阶段，不参与计时。 */
 
 static void Contest_Task_Finish(void);
 static float Contest_Task_AbsFloat(float value);
 static float Contest_Task_LimitFloat(float value, float min_value, float max_value);
 static void Contest_Task2_PathStep(uint16_t period_ms);
+static void Contest_Task2_StartYaw0Turn(void);
+static void Contest_Task2_UpdateYaw0Turn(uint16_t period_ms);
 static void Contest_MergedTask_FailStop(void);
 static void Contest_MergedTask_Update(uint16_t period_ms);
 static void Contest_Task_DebugPrint(uint16_t period_ms);
@@ -385,6 +390,46 @@ static uint8_t Contest_Task2_StopDistanceReached(void)
     return (ContestTaskContext.total_distance_m >= Contest_Task2_GetStopDistance()) ? 1 : 0;
 }
 
+static void Contest_Task2_StartYaw0Turn(void)
+{
+    ContestTaskContext.task2_phase = CONTEST_TASK2_PHASE_YAW0_TURN;
+    ContestTaskContext.phase_time_ms = 0;
+    ContestTaskContext.phase_distance_m = 0.0f;
+    ContestTaskContext.phase_start_yaw_deg = 360.0f; /* yaw0 转弯阶段不使用 yaw 目标角，避免 PID 输出干扰。 */
+    ContestTaskContext.finished_task = ContestTaskContext.running_task;
+    ContestTaskContext.finished_time_ms = ContestTaskContext.state_time_ms;
+    Track_Control_Stop(TRACK_STOP_BY_USER);
+    Track_PID_Reset(&TrackControlState.line_pid);
+    Track_PID_Init(&TrackControlState.yaw_pid,
+                   CONTEST_TASK2_YAW_KP,
+                   CONTEST_TASK2_YAW_KI,
+                   CONTEST_TASK2_YAW_KD,
+                   CONTEST_TASK2_YAW_INTEGRAL_LIMIT,
+                   CONTEST_TASK2_YAW_LIMIT);
+}
+
+static void Contest_Task2_UpdateYaw0Turn(uint16_t period_ms)
+{
+    uint32_t frozen_time_ms = ContestTaskContext.finished_time_ms;
+    float yaw_deg = Contest_Task_UpdateYaw(period_ms);
+    float yaw_error = -(CONTEST_TASK2_STRAIGHT1_YAW_DEG - yaw_deg);
+    float yaw_delta = CONTEST_TASK2_YAW_DIR *
+                      Track_PID_UpdateError(&TrackControlState.yaw_pid, yaw_error) *
+                      CONTEST_TASK2_YAW0_TURN_SPEED_SCALE;
+
+    ContestTaskContext.phase_time_ms += period_ms;
+    TrackControlState.yaw_error = yaw_error;
+    TrackControlState.yaw_delta_speed = yaw_delta;
+    TrackControlState.turn_delta_speed = 0.0f;
+    Contest_Task_SetDiffTarget(-yaw_delta, yaw_delta);
+
+    if(ContestTaskContext.phase_time_ms >= CONTEST_TASK2_YAW0_TURN_MS)
+    {
+        Contest_Task_Finish();
+        ContestTaskContext.finished_time_ms = frozen_time_ms;
+    }
+}
+
 static void Contest_Task1_Update(uint16_t period_ms)
 {
     (void)period_ms;
@@ -449,7 +494,14 @@ static void Contest_Task2_UpdateStraight(uint16_t period_ms, uint8_t next_phase)
 
     if(Contest_Task2_StopDistanceReached())
     {
-        Contest_Task_Finish();
+        if(ContestTaskContext.running_task == CONTEST_TASK_3)
+        {
+            Contest_Task2_StartYaw0Turn();
+        }
+        else
+        {
+            Contest_Task_Finish();
+        }
         return;
     }
 
@@ -502,7 +554,14 @@ static void Contest_Task2_UpdateCurve(uint16_t period_ms, uint8_t next_phase)
     if(Contest_Task2_StopDistanceReached())
     {
         Track_Control_SetYawEnable(1);
-        Contest_Task_Finish();
+        if(ContestTaskContext.running_task == CONTEST_TASK_3)
+        {
+            Contest_Task2_StartYaw0Turn();
+        }
+        else
+        {
+            Contest_Task_Finish();
+        }
         return;
     }
 
@@ -540,7 +599,14 @@ static void Contest_Task2_UpdateFinalCurve(uint16_t period_ms)
     if(Contest_Task2_StopDistanceReached())
     {
         Track_Control_SetYawEnable(1);
-        Contest_Task_Finish();
+        if(ContestTaskContext.running_task == CONTEST_TASK_3)
+        {
+            Contest_Task2_StartYaw0Turn();
+        }
+        else
+        {
+            Contest_Task_Finish();
+        }
     }
 }
 
@@ -769,6 +835,10 @@ static void Contest_Task2_PathStep(uint16_t period_ms)
 
         case CONTEST_TASK2_PHASE_CURVE2:
             Contest_Task2_UpdateFinalCurve(period_ms);
+            break;
+
+        case CONTEST_TASK2_PHASE_YAW0_TURN:
+            Contest_Task2_UpdateYaw0Turn(period_ms);
             break;
 
         default:
@@ -1400,9 +1470,15 @@ void Contest_Task_OLEDShow(void)
     if(Contest_Task_IsRunning())
     {
         task_id = ContestTaskContext.running_task;
-        if((task_id == CONTEST_TASK_4) &&
-           (ContestTaskContext.task3_phase == CONTEST_TASK3_PHASE_FINISH) &&
+        if((task_id == CONTEST_TASK_3) &&
+           (ContestTaskContext.task2_phase == CONTEST_TASK2_PHASE_YAW0_TURN) &&
            (ContestTaskContext.finished_time_ms != 0))
+        {
+            show_time = ContestTaskContext.finished_time_ms;
+        }
+        else if((task_id == CONTEST_TASK_4) &&
+                (ContestTaskContext.task3_phase == CONTEST_TASK3_PHASE_FINISH) &&
+                (ContestTaskContext.finished_time_ms != 0))
         {
             show_time = ContestTaskContext.finished_time_ms;
         }

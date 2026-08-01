@@ -81,7 +81,7 @@ void Ball_Control_Init(void)
     BallControlParam.servo_min_us = BALL_SERVO_DEFAULT_MIN_US;
     BallControlParam.servo_max_us = BALL_SERVO_DEFAULT_MAX_US;
     BallControlParam.us_per_degree = BALL_SERVO_DEFAULT_US_PER_DEG;
-    BallControlParam.servo_dir = BALL_SERVO_DEFAULT_DIR;
+    BallControlParam.servo_dir = - BALL_SERVO_DEFAULT_DIR;
     BallControlParam.vision_timeout_ms = 200;
     BallControlParam.stable_error_0p1mm = 120;
     BallControlParam.stable_speed_0p1mm_per_s = 300;
@@ -196,7 +196,7 @@ void Ball_Control_Update(uint16_t period_ms)
     }
 
     BallControlState.last_error_0p1mm = BallControlState.error_0p1mm;
-    BallControlState.error_0p1mm = (BallControlState.target_pos_0p1mm - BallControlState.filtered_pos_0p1mm);
+    BallControlState.error_0p1mm = - (BallControlState.target_pos_0p1mm - BallControlState.filtered_pos_0p1mm);
 
     BallControlState.integral += BallControlState.error_0p1mm * dt_s;
     BallControlState.integral = Ball_Control_LimitFloat(BallControlState.integral,
